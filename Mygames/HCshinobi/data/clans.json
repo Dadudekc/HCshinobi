@@ -1,0 +1,393 @@
+[
+  {
+    "name": "Inuzuka",
+    "rarity": "Common",
+    "lore": "Known for their ninja dogs.",
+    "suggested_personalities": [
+      "Loyal",
+      "Energetic"
+    ],
+    "base_weight": 9.0,
+    "ninjutsu_bonus": 0,
+    "taijutsu_bonus": 2,
+    "genjutsu_bonus": 0,
+    "intelligence_bonus": 1,
+    "strength_bonus": 2,
+    "speed_bonus": 3,
+    "stamina_bonus": 2,
+    "chakra_control_bonus": 0,
+    "perception_bonus": 3,
+    "willpower_bonus": 1
+  },
+  {
+    "name": "Akimichi",
+    "rarity": "Common",
+    "lore": "Known for body expansion jutsu.",
+    "suggested_personalities": [
+      "Kind",
+      "Generous"
+    ],
+    "base_weight": 9.0,
+    "ninjutsu_bonus": 1,
+    "taijutsu_bonus": 3,
+    "genjutsu_bonus": 0,
+    "intelligence_bonus": 1,
+    "strength_bonus": 3,
+    "speed_bonus": 0,
+    "stamina_bonus": 3,
+    "chakra_control_bonus": 2,
+    "perception_bonus": 0,
+    "willpower_bonus": 2
+  },
+  {
+    "name": "Nara",
+    "rarity": "Common",
+    "lore": "Known for shadow manipulation.",
+    "suggested_personalities": [
+      "Intelligent",
+      "Strategic"
+    ],
+    "base_weight": 9.0,
+    "ninjutsu_bonus": 2,
+    "taijutsu_bonus": 0,
+    "genjutsu_bonus": 1,
+    "intelligence_bonus": 3,
+    "strength_bonus": 0,
+    "speed_bonus": 1,
+    "stamina_bonus": 1,
+    "chakra_control_bonus": 2,
+    "perception_bonus": 2,
+    "willpower_bonus": 1
+  },
+  {
+    "name": "Yamanaka",
+    "rarity": "Common",
+    "lore": "Known for mind-related techniques.",
+    "suggested_personalities": [
+      "Sociable",
+      "Intuitive"
+    ],
+    "base_weight": 9.0,
+    "ninjutsu_bonus": 1,
+    "taijutsu_bonus": 0,
+    "genjutsu_bonus": 2,
+    "intelligence_bonus": 2,
+    "strength_bonus": 0,
+    "speed_bonus": 1,
+    "stamina_bonus": 1,
+    "chakra_control_bonus": 2,
+    "perception_bonus": 2,
+    "willpower_bonus": 2
+  },
+  {
+    "name": "Sarutobi",
+    "rarity": "Common",
+    "lore": "Known for strong chakra and fire affinity.",
+    "suggested_personalities": [
+      "Wise",
+      "Honorable"
+    ],
+    "base_weight": 9.0,
+    "ninjutsu_bonus": 2,
+    "taijutsu_bonus": 1,
+    "genjutsu_bonus": 1,
+    "intelligence_bonus": 2,
+    "strength_bonus": 1,
+    "speed_bonus": 1,
+    "stamina_bonus": 1,
+    "chakra_control_bonus": 2,
+    "perception_bonus": 1,
+    "willpower_bonus": 1
+  },
+  {
+    "name": "Aburame",
+    "rarity": "Uncommon",
+    "lore": "Known for using kikaichū bugs.",
+    "suggested_personalities": [
+      "Logical",
+      "Quiet"
+    ],
+    "base_weight": 6.0,
+    "ninjutsu_bonus": 2,
+    "taijutsu_bonus": 0,
+    "genjutsu_bonus": 0,
+    "intelligence_bonus": 2,
+    "strength_bonus": 0,
+    "speed_bonus": 1,
+    "stamina_bonus": 2,
+    "chakra_control_bonus": 2,
+    "perception_bonus": 2,
+    "willpower_bonus": 2
+  },
+  {
+    "name": "Hatake",
+    "rarity": "Uncommon",
+    "lore": "Small but elite clan.",
+    "suggested_personalities": [
+      "Skilled",
+      "Independent"
+    ],
+    "base_weight": 6.0,
+    "ninjutsu_bonus": 2,
+    "taijutsu_bonus": 2,
+    "genjutsu_bonus": 1,
+    "intelligence_bonus": 2,
+    "strength_bonus": 2,
+    "speed_bonus": 2,
+    "stamina_bonus": 2,
+    "chakra_control_bonus": 2,
+    "perception_bonus": 2,
+    "willpower_bonus": 2
+  },
+  {
+    "name": "Hōzuki",
+    "rarity": "Uncommon",
+    "lore": "Known for liquefaction ability.",
+    "kekkei_genkai": "Hydrification Technique",
+    "suggested_personalities": [
+      "Adaptable",
+      "Elusive"
+    ],
+    "base_weight": 6.0,
+    "ninjutsu_bonus": 2,
+    "taijutsu_bonus": 1,
+    "genjutsu_bonus": 0,
+    "intelligence_bonus": 1,
+    "strength_bonus": 1,
+    "speed_bonus": 2,
+    "stamina_bonus": 2,
+    "chakra_control_bonus": 2,
+    "perception_bonus": 1,
+    "willpower_bonus": 1
+  },
+  {
+    "name": "Kurama",
+    "rarity": "Uncommon",
+    "lore": "Known for powerful genjutsu.",
+    "kekkei_genkai": "Kurama Clan's Genjutsu",
+    "suggested_personalities": [
+      "Creative",
+      "Mysterious"
+    ],
+    "base_weight": 6.0,
+    "ninjutsu_bonus": 1,
+    "taijutsu_bonus": 0,
+    "genjutsu_bonus": 3,
+    "intelligence_bonus": 2,
+    "strength_bonus": 0,
+    "speed_bonus": 1,
+    "stamina_bonus": 1,
+    "chakra_control_bonus": 2,
+    "perception_bonus": 2,
+    "willpower_bonus": 2
+  },
+  {
+    "name": "Kamizuru",
+    "rarity": "Uncommon",
+    "lore": "Known for bee-related techniques.",
+    "suggested_personalities": [
+      "Proud",
+      "Resourceful"
+    ],
+    "base_weight": 6.0,
+    "ninjutsu_bonus": 2,
+    "taijutsu_bonus": 1,
+    "genjutsu_bonus": 0,
+    "intelligence_bonus": 1,
+    "strength_bonus": 1,
+    "speed_bonus": 2,
+    "stamina_bonus": 2,
+    "chakra_control_bonus": 2,
+    "perception_bonus": 2,
+    "willpower_bonus": 1
+  },
+  {
+    "name": "Hyūga",
+    "rarity": "Rare",
+    "lore": "Known for Byakugan and Gentle Fist.",
+    "kekkei_genkai": "Byakugan",
+    "suggested_personalities": [
+      "Disciplined",
+      "Honorable"
+    ],
+    "base_weight": 3.75,
+    "ninjutsu_bonus": 2,
+    "taijutsu_bonus": 3,
+    "genjutsu_bonus": 1,
+    "intelligence_bonus": 2,
+    "strength_bonus": 2,
+    "speed_bonus": 2,
+    "stamina_bonus": 2,
+    "chakra_control_bonus": 3,
+    "perception_bonus": 3,
+    "willpower_bonus": 2
+  },
+  {
+    "name": "Kaguya",
+    "rarity": "Rare",
+    "lore": "Known for Shikotsumyaku.",
+    "kekkei_genkai": "Shikotsumyaku",
+    "suggested_personalities": [
+      "Fierce",
+      "Aggressive"
+    ],
+    "base_weight": 3.75,
+    "ninjutsu_bonus": 1,
+    "taijutsu_bonus": 3,
+    "genjutsu_bonus": 0,
+    "intelligence_bonus": 1,
+    "strength_bonus": 3,
+    "speed_bonus": 2,
+    "stamina_bonus": 3,
+    "chakra_control_bonus": 1,
+    "perception_bonus": 2,
+    "willpower_bonus": 2
+  },
+  {
+    "name": "Yuki",
+    "rarity": "Rare",
+    "lore": "Known for Ice Release.",
+    "kekkei_genkai": "Ice Release",
+    "suggested_personalities": [
+      "Composed",
+      "Reserved"
+    ],
+    "base_weight": 3.75,
+    "ninjutsu_bonus": 3,
+    "taijutsu_bonus": 1,
+    "genjutsu_bonus": 1,
+    "intelligence_bonus": 2,
+    "strength_bonus": 1,
+    "speed_bonus": 1,
+    "stamina_bonus": 2,
+    "chakra_control_bonus": 3,
+    "perception_bonus": 2,
+    "willpower_bonus": 2
+  },
+  {
+    "name": "Iburi",
+    "rarity": "Rare",
+    "lore": "Known for smoke transformation.",
+    "kekkei_genkai": "Smoke Transformation",
+    "suggested_personalities": [
+      "Secretive",
+      "Adaptable"
+    ],
+    "base_weight": 3.75,
+    "ninjutsu_bonus": 2,
+    "taijutsu_bonus": 1,
+    "genjutsu_bonus": 1,
+    "intelligence_bonus": 2,
+    "strength_bonus": 1,
+    "speed_bonus": 2,
+    "stamina_bonus": 2,
+    "chakra_control_bonus": 2,
+    "perception_bonus": 2,
+    "willpower_bonus": 2
+  },
+  {
+    "name": "Uchiha",
+    "rarity": "Epic",
+    "lore": "Known for Sharingan and fire techniques.",
+    "kekkei_genkai": "Sharingan",
+    "suggested_personalities": [
+      "Ambitious",
+      "Proud"
+    ],
+    "base_weight": 2.6667,
+    "ninjutsu_bonus": 3,
+    "taijutsu_bonus": 2,
+    "genjutsu_bonus": 3,
+    "intelligence_bonus": 2,
+    "strength_bonus": 2,
+    "speed_bonus": 2,
+    "stamina_bonus": 2,
+    "chakra_control_bonus": 3,
+    "perception_bonus": 3,
+    "willpower_bonus": 2
+  },
+  {
+    "name": "Senju",
+    "rarity": "Epic",
+    "lore": "Clan of a thousand skills, co-founders of Konoha.",
+    "kekkei_genkai": "Wood Release (rare)",
+    "suggested_personalities": [
+      "Compassionate",
+      "Strong-willed"
+    ],
+    "base_weight": 2.6667,
+    "ninjutsu_bonus": 3,
+    "taijutsu_bonus": 2,
+    "genjutsu_bonus": 2,
+    "intelligence_bonus": 2,
+    "strength_bonus": 2,
+    "speed_bonus": 2,
+    "stamina_bonus": 3,
+    "chakra_control_bonus": 3,
+    "perception_bonus": 2,
+    "willpower_bonus": 3
+  },
+  {
+    "name": "Uzumaki",
+    "rarity": "Epic",
+    "lore": "Known for sealing techniques and large chakra reserves.",
+    "suggested_personalities": [
+      "Determined",
+      "Energetic"
+    ],
+    "base_weight": 2.6667,
+    "ninjutsu_bonus": 3,
+    "taijutsu_bonus": 2,
+    "genjutsu_bonus": 1,
+    "intelligence_bonus": 2,
+    "strength_bonus": 2,
+    "speed_bonus": 2,
+    "stamina_bonus": 3,
+    "chakra_control_bonus": 3,
+    "perception_bonus": 2,
+    "willpower_bonus": 3
+  },
+  {
+    "name": "Ōtsutsuki",
+    "rarity": "Legendary",
+    "lore": "Ancient clan of extraterrestrial origin.",
+    "kekkei_genkai": "Various (Byakugan, Rinnegan, etc.)",
+    "suggested_personalities": [
+      "Ancient",
+      "Powerful",
+      "Aloof"
+    ],
+    "base_weight": 1.0,
+    "ninjutsu_bonus": 4,
+    "taijutsu_bonus": 3,
+    "genjutsu_bonus": 3,
+    "intelligence_bonus": 3,
+    "strength_bonus": 3,
+    "speed_bonus": 3,
+    "stamina_bonus": 4,
+    "chakra_control_bonus": 4,
+    "perception_bonus": 3,
+    "willpower_bonus": 3
+  },
+  {
+    "name": "Chinoike",
+    "rarity": "Legendary",
+    "lore": "Known for the Ketsuryūgan dōjutsu.",
+    "kekkei_genkai": "Ketsuryūgan",
+    "suggested_personalities": [
+      "Vengeful",
+      "Manipulative"
+    ],
+    "base_weight": 1.0,
+    "ninjutsu_bonus": 3,
+    "taijutsu_bonus": 2,
+    "genjutsu_bonus": 4,
+    "intelligence_bonus": 3,
+    "strength_bonus": 2,
+    "speed_bonus": 2,
+    "stamina_bonus": 3,
+    "chakra_control_bonus": 3,
+    "perception_bonus": 3,
+    "willpower_bonus": 3
+  }
+]

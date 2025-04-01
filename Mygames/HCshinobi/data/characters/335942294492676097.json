@@ -1,0 +1,12 @@
+{
+  "name": "Solos",
+  "clan": "Yamanaka",
+  "level": 1,
+  "exp": 0,
+  "hp": 100,
+  "chakra": 100,
+  "strength": 10,
+  "defense": 10,
+  "speed": 10,
+  "jutsu": []
+}

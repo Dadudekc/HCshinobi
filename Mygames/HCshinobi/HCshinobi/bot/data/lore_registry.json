@@ -1,0 +1,116 @@
+{
+    "lore_entries": [
+        {
+            "id": "first_mission",
+            "trigger": "first_mission",
+            "title": "Footsteps in the Leaves",
+            "chapter": "Chapter 1: The Beginning",
+            "snippet": "A young shinobi takes their first step into danger, the rustling of leaves beneath their feet echoing through the silent forest. The weight of their mission presses upon their shoulders, but their resolve remains unshaken.",
+            "image_url": "https://cdn.example.com/lore/first_mission.jpg",
+            "tags": ["beginning", "training", "first_mission"]
+        },
+        {
+            "id": "rank_up",
+            "trigger": "rank_up",
+            "title": "Ascension",
+            "chapter": "Chapter 2: Growth",
+            "snippet": "The moment of recognition arrives as the village elder places the new rank insignia upon your forehead protector. Your dedication and skill have not gone unnoticed, marking the beginning of a new chapter in your journey.",
+            "image_url": "https://cdn.example.com/lore/rank_up.jpg",
+            "tags": ["promotion", "achievement", "growth"]
+        },
+        {
+            "id": "clan_war_victory",
+            "trigger": "clan_war_victory",
+            "title": "Triumph of the Clan",
+            "chapter": "Chapter 3: Conflict",
+            "snippet": "The dust settles on the battlefield as your clan's banner waves proudly in the wind. Through unity and strength, victory has been achieved, but the cost of war weighs heavy on all who participated.",
+            "image_url": "https://cdn.example.com/lore/clan_victory.jpg",
+            "tags": ["war", "victory", "clan"]
+        },
+        {
+            "id": "secret_mission",
+            "trigger": "secret_mission",
+            "title": "Shadows in the Night",
+            "chapter": "Chapter 4: Stealth",
+            "snippet": "The moon hangs low in the sky as you slip through the darkness, your mission known only to a select few. In the world of shinobi, sometimes the most important battles are fought in silence.",
+            "image_url": "https://cdn.example.com/lore/secret_mission.jpg",
+            "tags": ["stealth", "mission", "mystery"]
+        },
+        {
+            "id": "training_complete",
+            "trigger": "training_complete",
+            "title": "Mastery Achieved",
+            "chapter": "Chapter 5: Training",
+            "snippet": "The sweat drips from your brow as you complete the final technique. Your dedication to training has borne fruit, and your skills have reached new heights. The path of the shinobi is one of constant growth.",
+            "image_url": "https://cdn.example.com/lore/training_complete.jpg",
+            "tags": ["training", "achievement", "growth"]
+        },
+        {
+            "id": "battle_victory",
+            "trigger": "battle_victory",
+            "title": "Victory's Echo",
+            "chapter": "Chapter 6: Battle",
+            "snippet": "The dust settles as you stand victorious. Your opponent's respect is earned through strength and skill. This victory marks not an end, but another step in your journey as a shinobi.",
+            "image_url": "https://cdn.example.com/lore/battle_victory.jpg",
+            "tags": ["battle", "victory", "achievement"]
+        },
+        {
+            "id": "battle_defeat",
+            "trigger": "battle_defeat",
+            "title": "Lessons in Defeat",
+            "chapter": "Chapter 7: Resilience",
+            "snippet": "Though the battle was lost, the lessons learned are invaluable. Every defeat is a stepping stone to greater strength. The true shinobi rises stronger from each setback.",
+            "image_url": "https://cdn.example.com/lore/battle_defeat.jpg",
+            "tags": ["battle", "defeat", "growth"]
+        },
+        {
+            "id": "quest_complete",
+            "trigger": "quest_complete",
+            "title": "Mission Accomplished",
+            "chapter": "Chapter 8: Duty",
+            "snippet": "The mission is complete, but the impact of your actions will echo through the village. Your dedication to duty has strengthened the bonds that protect us all.",
+            "image_url": "https://cdn.example.com/lore/quest_complete.jpg",
+            "tags": ["quest", "achievement", "duty"]
+        },
+        {
+            "id": "character_creation",
+            "trigger": "character_creation",
+            "title": "A New Path Begins",
+            "chapter": "Chapter 0: Origins",
+            "snippet": "The village elder's eyes meet yours as you receive your forehead protector. A new shinobi is born today, ready to carve their path in the annals of history.",
+            "image_url": "https://cdn.example.com/lore/character_creation.jpg",
+            "tags": ["beginning", "character", "origin"]
+        },
+        {
+            "id": "clan_join",
+            "trigger": "clan_join",
+            "title": "Clan Bonds",
+            "chapter": "Chapter 9: Unity",
+            "snippet": "The clan's symbol now adorns your attire, marking you as one of their own. In unity, there is strength, and in strength, there is protection for all.",
+            "image_url": "https://cdn.example.com/lore/clan_join.jpg",
+            "tags": ["clan", "unity", "belonging"]
+        },
+        {
+            "id": "clan_leave",
+            "trigger": "clan_leave",
+            "title": "Parting Ways",
+            "chapter": "Chapter 10: Change",
+            "snippet": "The clan's symbol is removed with solemn ceremony. Though paths diverge, the bonds forged in battle and shared purpose remain forever in your heart.",
+            "image_url": "https://cdn.example.com/lore/clan_leave.jpg",
+            "tags": ["clan", "change", "transition"]
+        }
+    ],
+    "trigger_types": [
+        "first_mission",
+        "rank_up",
+        "clan_war_victory",
+        "secret_mission",
+        "training_complete",
+        "battle_victory",
+        "battle_defeat",
+        "quest_complete",
+        "character_creation",
+        "clan_join",
+        "clan_leave"
+    ]
+} 

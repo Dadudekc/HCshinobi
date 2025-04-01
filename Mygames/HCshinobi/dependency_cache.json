@@ -1,0 +1,341 @@
+{
+    "fix_environment.py": {
+        "hash": "ca168ceb127087f00ac4466013c15be0"
+    },
+    "HCshinobi\\commands\\room_commands.py": {
+        "hash": "885ff5dcafb51cba38f5dadba4130d61"
+    },
+    "HCshinobi\\core\\__init__.py": {
+        "hash": "364e300f56a35187b902903a9bffefa2"
+    },
+    "HCshinobi\\core\\character_system.py": {
+        "hash": "29e89268e0a01a17757315b5c9007ff2"
+    },
+    "HCshinobi\\tests\\test_battle_system.py": {
+        "hash": "8c5c6c8fdd75bc6b70537ff5cd365971"
+    },
+    "dream_modules\\test_runner.py": {
+        "hash": "7704e5e1651cdb64af4fdfc7bf1b8473"
+    },
+    "HCshinobi\\bot\\__init__.py": {
+        "hash": "3e1687290167f81f2d36cdce164262fc"
+    },
+    "HCshinobi\\commands\\training_commands.py": {
+        "hash": "c8eb1c33feb314f8c536077882c4d6aa"
+    },
+    "test_env.py": {
+        "hash": "20e80fd322813046665ba2bc751702ef"
+    },
+    "HCshinobi\\bot\\cogs\\tokens.py": {
+        "hash": "f2137c776c2a04e52a9e712842139269"
+    },
+    "dream_modules\\modules\\discord\\character_commands.py": {
+        "hash": "cd1fcd7be3e810209676cb7bc981bef4"
+    },
+    "HCshinobi\\utils\\ollama_client.py": {
+        "hash": "b87229d6fa173eeed1670ebdb828680b"
+    },
+    "dream_modules\\factory.py": {
+        "hash": "d55a45db6281640419c8a0624070bfc8"
+    },
+    "HCshinobi\\bot\\cogs\\characters.py": {
+        "hash": "a4393f1a96940807f63ba0add36db6c7"
+    },
+    "discord_integration.py": {
+        "hash": "f015094007a878b18b0e5ea28e1ddd81"
+    },
+    "HCshinobi\\__init__.py": {
+        "hash": "a7d6e5ae50647443b8368ef352f65154"
+    },
+    "HCshinobi\\bot\\cogs\\rolling.py": {
+        "hash": "4d15629a828d22c703eb68475b9ccb6f"
+    },
+    "run.py": {
+        "hash": "95f0a19618e72eaafb6a2689cb3e53c5"
+    },
+    "HCshinobi\\utils\\discord_ui.py": {
+        "hash": "4972e1e0129f5bb3919c0e49280cf4b3"
+    },
+    "HCshinobi\\tests\\test_currency_system.py": {
+        "hash": "228d664f5c62f8127e1cf3e4e61927a3"
+    },
+    "dream_modules\\modules\\clan\\clan_manager.py": {
+        "hash": "857048a19d567e4ad3088f8eb54428a4"
+    },
+    "HCshinobi\\core\\clan_assignment_engine.py": {
+        "hash": "f16f798365e48a90206c2566916c7218"
+    },
+    "HCshinobi\\bot\\rolling.py": {
+        "hash": "ecb4c51c2f0b4c23e3f8e8fdcc859df0"
+    },
+    "dream_modules\\modules\\character\\character_manager.py": {
+        "hash": "1b42892411a26c077f692d8d17ca7e7f"
+    },
+    "HCshinobi\\core\\training_system.py": {
+        "hash": "73fa6add75686a270b4accec232dd51b"
+    },
+    "archive\\htmlcov\\coverage_html.js": {
+        "hash": "6a56b7e2505ccd322d0c979b27bb0399"
+    },
+    "HCshinobi\\utils\\openai_client.py": {
+        "hash": "1e751dc9ea9e28773e984f274e556d87"
+    },
+    "run_with_debug.py": {
+        "hash": "72585c5173957977ccb9ef8b906ecd19"
+    },
+    "test_discord_bot.py": {
+        "hash": "e169526b9f4be382d11bedfefed132ec"
+    },
+    "dream_modules\\example_bot.py": {
+        "hash": "93321d284e9d578e24cc4ee32c0c1c7a"
+    },
+    "HCshinobi\\tests\\extensions\\test_rolling.py": {
+        "hash": "f2b1e955380feb051f258d19a78f0067"
+    },
+    "HCshinobi\\utils\\logging.py": {
+        "hash": "a051f9acf3d6d153d32300d166afae6d"
+    },
+    "HCshinobi\\run.py": {
+        "hash": "8a8b9d9366d04382fa8e2bc7630f8e21"
+    },
+    "setup.py": {
+        "hash": "3ac93a55fbcbce97e5963edfbd394bb6"
+    },
+    "HCshinobi\\core\\mission_system.py": {
+        "hash": "2afa04a5ceaf6571e6504c17b3bb9fc6"
+    },
+    "HCshinobi\\bot\\config.py": {
+        "hash": "55c3d5be2aef383e1edd28be2f696f91"
+    },
+    "dream_modules\\core\\module_interface.py": {
+        "hash": "b1ed84d52c574905cbddd4228fbd38d0"
+    },
+    "HCshinobi\\bot\\bot.py": {
+        "hash": "e716b8b6fba85bde475d56883812cb7f"
+    },
+    "HCshinobi\\tests\\test_events.py": {
+        "hash": "43eb0eabefdb54c4a70054eba7a2ed61"
+    },
+    "_discord\\__init__.py": {
+        "hash": "5fc78f6e5ad025776801031da403ab90"
+    },
+    "HCshinobi\\bot\\setup.py": {
+        "hash": "a091b391dba5f9273f2c798f54ba90f9"
+    },
+    "HCshinobi\\bot\\cogs\\battle.py": {
+        "hash": "19a2daa398a28ef3640501f0c8b045b8"
+    },
+    "HCshinobi\\core\\clan_missions.py": {
+        "hash": "41e4c54ca0c58b3af2b9dfcf2a8cdbdd"
+    },
+    "HCshinobi\\bot\\services.py": {
+        "hash": "35c9bfd88baecb5df5ab0d0640d74935"
+    },
+    "HCshinobi\\bot\\events.py": {
+        "hash": "ecf0edc6f267468339fe4e7386750d8b"
+    },
+    "HCshinobi\\tests\\extensions\\test_announcements.py": {
+        "hash": "b06747c80b3f0fee03ea7a04543ffbec"
+    },
+    "HCshinobi\\tests\\extensions\\test_clans.py": {
+        "hash": "26ba5dde84bdd75915d76a6338661cfa"
+    },
+    "HCshinobi\\utils\\file_io.py": {
+        "hash": "ef85f45ccb42d19dc83978f698c6a16d"
+    },
+    "HCshinobi\\commands\\clan_mission_commands.py": {
+        "hash": "9e8a389a3115ed13a56676a398edf81f"
+    },
+    "HCshinobi\\core\\assignment_engine.py": {
+        "hash": "868a046ec9cf8511b33a7846aa71f1ba"
+    },
+    "test_bot.py": {
+        "hash": "47ebadfdc305a13ceb31db99dda5c77c"
+    },
+    "HCshinobi\\commands\\character_commands.py": {
+        "hash": "b17ed3460676e4da7107e4d3bef64985"
+    },
+    "dream_modules\\modules\\clan\\clan_model.py": {
+        "hash": "0c4b3e1f0b45753470abb0e1acf42908"
+    },
+    "dream_modules\\__init__.py": {
+        "hash": "e91cb4ca4f239c17f3c2c0a8801d04a3"
+    },
+    "HCshinobi\\tests\\test_character_system.py": {
+        "hash": "6f6510511f46c21ee98dea83754a9fbd"
+    },
+    "dream_modules\\core\\service_container.py": {
+        "hash": "6c6e9ad09d0cb10036191535f0c361b7"
+    },
+    "HCshinobi\\commands\\currency_commands.py": {
+        "hash": "538cde62911227430f95ec02d8c7bbe9"
+    },
+    "HCshinobi\\tests\\test_bot.py": {
+        "hash": "d7b3d620d3e7e8b123e38330f9a35bc2"
+    },
+    "HCshinobi\\bot\\cogs\\clans.py": {
+        "hash": "acfeba5af4cabb8cda530f25ff6471d8"
+    },
+    "HCshinobi\\core\\quest_system.py": {
+        "hash": "5f1484167b7bf2e0b49b88769f73353c"
+    },
+    "HCshinobi\\tests\\core\\test_token_system.py": {
+        "hash": "c9bee671b580abe43baa10d634654082"
+    },
+    "HCshinobi\\bot\\cogs\\battle_system.py": {
+        "hash": "b5aee257ae6e073ac88c79c1b2629d66"
+    },
+    "HCshinobi\\bot\\core\\events\\gameplay_events.py": {
+        "hash": "6ef78d54ce518f3e135acbfc3aff1fbc"
+    },
+    "HCshinobi\\core\\character_manager.py": {
+        "hash": "0acf94a37122e18dc6523e1d97edf422"
+    },
+    "HCshinobi\\core\\constants.py": {
+        "hash": "d7b39dbbeff7c3d6197c244948897769"
+    },
+    "_discord\\extensions\\__init__.py": {
+        "hash": "4449397924f4f267293634028f09cdb1"
+    },
+    "HCshinobi\\tests\\core\\test_personality_modifiers.py": {
+        "hash": "f293a3337588467e7624b2391ac32886"
+    },
+    "dream_modules\\modules\\character\\character_model.py": {
+        "hash": "84852e4c4195212dad66788961252624"
+    },
+    "HCshinobi\\core\\jutsu_data.py": {
+        "hash": "2386214fde788849cc7dd4849fff3b0e"
+    },
+    "HCshinobi\\commands\\mission_commands.py": {
+        "hash": "a6439941134975dc83c2a59145174e00"
+    },
+    "HCshinobi\\tests\\test_config.py": {
+        "hash": "261d84cf8778e38aea122414fba67374"
+    },
+    "HCshinobi\\core\\clan_data.py": {
+        "hash": "973edd16353a58f0311ba8c7d490e864"
+    },
+    "HCshinobi\\tests\\core\\test_clan_data.py": {
+        "hash": "bfd5d6c188c4b1bd1cf040d6be26fab0"
+    },
+    "HCshinobi\\commands\\announcement_commands.py": {
+        "hash": "66f4219f2de7b979a7d31ebe9f89d395"
+    },
+    "HCshinobi\\bot\\cogs\\help.py": {
+        "hash": "0ff1718459d67804e2b90ecf09a25f1b"
+    },
+    "HCshinobi\\core\\room_system.py": {
+        "hash": "c3d245dee14669741bf3c48fb63c106d"
+    },
+    "HCshinobi\\core\\battle_manager.py": {
+        "hash": "5a047ec9c57a0c80de9525fb036bcbc5"
+    },
+    "HCshinobi\\commands\\quest_commands.py": {
+        "hash": "6ccff8ffa663fb0c2b525f556fe469a2"
+    },
+    "HCshinobi\\core\\engine.py": {
+        "hash": "83ffdc93ab87c12de69f2800139fb1d3"
+    },
+    "create_character.py": {
+        "hash": "f61ac7128a87ae03a092326b3dd582de"
+    },
+    "diagnostic.py": {
+        "hash": "17be41dc336e18e7d37f2a4c38fc6f2a"
+    },
+    "HCshinobi\\core\\battle_system.py": {
+        "hash": "3c3300dcc0473f07764ff2030d6a4766"
+    },
+    "HCshinobi\\bot\\cogs\\announcements.py": {
+        "hash": "8c97c0647a6ffa6f58e0b9e4a71ae9e3"
+    },
+    "HCshinobi\\bot\\cogs\\basic_commands.py": {
+        "hash": "25d9b687545f8090352cf7764d12edc4"
+    },
+    "HCshinobi\\core\\token_system.py": {
+        "hash": "2461f1424b56e7136c1b4a604023526e"
+    },
+    "HCshinobi\\tests\\test_services.py": {
+        "hash": "10992f5f7d9c84c60afb8859bc1ee99b"
+    },
+    "HCshinobi\\bot\\cogs\\profiles.py": {
+        "hash": "e4bffde925840445b5c2776b29f08996"
+    },
+    "HCshinobi\\tests\\test_run_bot.py": {
+        "hash": "357f5f277801acedc3858b14ac6a61cb"
+    },
+    "HCshinobi\\core\\currency_system.py": {
+        "hash": "09c853047380a10578d82e88cbee9753"
+    },
+    "dream_modules\\check_modules.py": {
+        "hash": "afe861f083b68a3a64f199feb3bc286e"
+    },
+    "tests\\test_bot_commands.py": {
+        "hash": "6475d6edc49d13fce5bf1ed28b58f912"
+    },
+    "HCshinobi\\bot\\core\\notifications\\templates.py": {
+        "hash": "7c6c85721aca02fd48440ff8f9d96d00"
+    },
+    "HCshinobi\\core\\character.py": {
+        "hash": "d2244d9955524f31038b29cf35495a66"
+    },
+    "HCshinobi\\tests\\test_bot_init.py": {
+        "hash": "802c4b5e4912f16ff72d04d811a7f59e"
+    },
+    "HCshinobi\\bot\\core\\events\\event_trigger_engine.py": {
+        "hash": "327e6b999b0c52a46525888a6e369be9"
+    },
+    "HCshinobi\\core\\personality_modifiers.py": {
+        "hash": "588a09e048bf7f4a4873f0d721953761"
+    },
+    "HCshinobi\\ai\\npc_prompt_generator.py": {
+        "hash": "56ea05a678b71efbed256ffd9b786659"
+    },
+    "HCshinobi\\commands\\clan_commands.py": {
+        "hash": "f37ffd215aa4b08fadb035d7d0da0129"
+    },
+    "HCshinobi\\commands\\devlog_commands.py": {
+        "hash": "f3b586e6cfb63bcab6e59eec7179d9aa"
+    },
+    "HCshinobi\\bot\\cogs\\npcs.py": {
+        "hash": "e41d36035654aeb98ccb058fc552434b"
+    },
+    "HCshinobi\\commands\\battle_commands.py": {
+        "hash": "439c906f59ddc523d599bf7445ed77ae"
+    },
+    "HCshinobi\\utils\\__init__.py": {
+        "hash": "05b69807261f8d5b584608c879f2b956"
+    },
+    "HCshinobi\\commands\\loot_commands.py": {
+        "hash": "7aade3411260851d2136b03948d64332"
+    },
+    "HCshinobi\\bot\\core\\notifications\\notification_dispatcher.py": {
+        "hash": "3f8228caaadd3bc8b452fbbf1d0359c5"
+    },
+    "HCshinobi\\core\\loot_system.py": {
+        "hash": "012e1c9cc3798ac115cfd04dad5353d4"
+    },
+    "HCshinobi\\utils\\embed_utils.py": {
+        "hash": "614dc7ba0d09c635c0a29555c6b70d33"
+    },
+    "tests\\test_commands.py": {
+        "hash": "cf42b23c59a90887c9500e0473393249"
+    },
+    "post_devlog.py": {
+        "hash": "926e777295a1f01a18a7fe1aa9ee25ed"
+    },
+    "HCshinobi\\core\\clan_system.py": {
+        "hash": "eece8b93760d3b3490a39b61e1811571"
+    },
+    "HCshinobi\\bot\\cogs\\__init__.py": {
+        "hash": "4dea546eb9b7af60f1d1201e72c53daa"
+    },
+    "HCshinobi\\core\\npc_manager.py": {
+        "hash": "5d2a8d621d79f6aa234569cfa81ba697"
+    },
+    "HCshinobi\\bot\\core\\notifications\\formatters.py": {
+        "hash": "7215ee9c7d9dc229d2921a40e899ec5f"
+    },
+    "dream_modules\\command_invoker.py": {
+        "hash": "173040e86507666592481b4a451948d3"
+    }
+}

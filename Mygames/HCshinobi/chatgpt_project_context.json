@@ -1,0 +1,63 @@
+{
+    "project_root": "D:\\Mygames\\HCshinobi",
+    "num_files_analyzed": 2,
+    "analysis_details": {
+        "fix_environment.py": {
+            "language": ".py",
+            "functions": [
+                "check_python_version",
+                "install_dependencies",
+                "check_create_directories",
+                "check_env_file",
+                "seed_example_data",
+                "check_discord_bot",
+                "main"
+            ],
+            "classes": {},
+            "routes": [],
+            "complexity": 7
+        },
+        "dream_modules\\command_invoker.py": {
+            "language": ".py",
+            "functions": [
+                "__str__",
+                "__init__",
+                "get_option",
+                "response",
+                "__init__"
+            ],
+            "classes": {
+                "MockUser": {
+                    "methods": [
+                        "__str__"
+                    ],
+                    "docstring": "Mock Discord user for testing.",
+                    "base_classes": []
+                },
+                "MockGuild": {
+                    "methods": [],
+                    "docstring": "Mock Discord guild for testing.",
+                    "base_classes": []
+                },
+                "MockInteraction": {
+                    "methods": [
+                        "__init__",
+                        "get_option",
+                        "response"
+                    ],
+                    "docstring": "Mock Discord interaction for testing slash commands.",
+                    "base_classes": []
+                },
+                "CommandInvoker": {
+                    "methods": [
+                        "__init__"
+                    ],
+                    "docstring": "Test invoker for Discord slash commands.",
+                    "base_classes": []
+                }
+            },
+            "routes": [],
+            "complexity": 10
+        }
+    }
+}

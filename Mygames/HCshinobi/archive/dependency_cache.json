@@ -1,0 +1,119 @@
+{
+    "HCshinobi\\utils\\logging.py": {
+        "hash": "a051f9acf3d6d153d32300d166afae6d"
+    },
+    "discord_integration.py": {
+        "hash": "4d31fe531da29ba76c44950f58352b9e"
+    },
+    "run.py": {
+        "hash": "a61c5b732fa449a268a95983fdc4f19f"
+    },
+    "HCshinobi\\core\\clan_assignment_engine.py": {
+        "hash": "932630dd0ae7a1c1202d53a06379910a"
+    },
+    "HCshinobi\\discord\\bot.py": {
+        "hash": "4023569b5f6c09389b510266c07ea0e5"
+    },
+    "HCshinobi\\discord\\extensions\\clans.py": {
+        "hash": "cc947919276fc5e0972e61eaf6c23d99"
+    },
+    "HCshinobi\\discord\\extensions\\npcs.py": {
+        "hash": "eaf4f787a777e6f66030aac38b4c0864"
+    },
+    "HCshinobi\\discord\\extensions\\__init__.py": {
+        "hash": "f60cfa067d55b49b5de609593920903c"
+    },
+    "HCshinobi\\discord\\rolling.py": {
+        "hash": "36803c80e0c075591ccaebb5af21ba7a"
+    },
+    "HCshinobi\\core\\assignment_engine.py": {
+        "hash": "868a046ec9cf8511b33a7846aa71f1ba"
+    },
+    "HCshinobi\\ai\\npc_prompt_generator.py": {
+        "hash": "56ea05a678b71efbed256ffd9b786659"
+    },
+    "tests\\core\\test_clan_data.py": {
+        "hash": "bfd5d6c188c4b1bd1cf040d6be26fab0"
+    },
+    "HCshinobi\\utils\\file_io.py": {
+        "hash": "b74eade9e67a0414662106652c66b5b2"
+    },
+    "htmlcov\\coverage_html.js": {
+        "hash": "6a56b7e2505ccd322d0c979b27bb0399"
+    },
+    "HCshinobi\\core\\constants.py": {
+        "hash": "6ac85c1c6ce758714ee2cb00ed217f1e"
+    },
+    "HCshinobi\\discord\\__init__.py": {
+        "hash": "3e1687290167f81f2d36cdce164262fc"
+    },
+    "tests\\core\\test_token_system.py": {
+        "hash": "c9bee671b580abe43baa10d634654082"
+    },
+    "HCshinobi\\core\\character_manager.py": {
+        "hash": "74f92fc097570c9d1698745ba95a5460"
+    },
+    "HCshinobi\\utils\\ollama_client.py": {
+        "hash": "b87229d6fa173eeed1670ebdb828680b"
+    },
+    "HCshinobi\\core\\token_system.py": {
+        "hash": "2461f1424b56e7136c1b4a604023526e"
+    },
+    "setup.py": {
+        "hash": "3622a7426639beda46489aaa424a8760"
+    },
+    "HCshinobi\\discord\\extensions\\announcements.py": {
+        "hash": "2e4127b53a475e31c248d0c8898a31b6"
+    },
+    "HCshinobi\\__init__.py": {
+        "hash": "e15ca19e3c5a36438eced0f8a0ca509c"
+    },
+    "HCshinobi\\core\\personality_modifiers.py": {
+        "hash": "588a09e048bf7f4a4873f0d721953761"
+    },
+    "tests\\extensions\\test_announcements.py": {
+        "hash": "37a96e9367bd56400ee2e6fc60f4d32d"
+    },
+    "npc_manager.py": {
+        "hash": "135e5a9eeb50700c8da7a073da4a050c"
+    },
+    "HCshinobi\\discord\\extensions\\tokens.py": {
+        "hash": "a4689b9255723aadb579da0f94d7fc0c"
+    },
+    "tests\\extensions\\test_rolling.py": {
+        "hash": "6132a88ce826d2517e1826cfd4de83a0"
+    },
+    "HCshinobi\\utils\\__init__.py": {
+        "hash": "05b69807261f8d5b584608c879f2b956"
+    },
+    "personality_modifiers.py": {
+        "hash": "23eabda4cc59d2d648315261c188f4f7"
+    },
+    "HCshinobi\\core\\clan_data.py": {
+        "hash": "b30c9bd95551418a585630061ae36a3f"
+    },
+    "tests\\test_clan_assignment.py": {
+        "hash": "70215c29c50b1727eba44e6f62e68659"
+    },
+    "clan_data.py": {
+        "hash": "c685de94ffc10e0ca298af63542a13c7"
+    },
+    "HCshinobi\\discord\\extensions\\rolling.py": {
+        "hash": "10c103b6b888810c26a041d4472f8606"
+    },
+    "tests\\core\\test_personality_modifiers.py": {
+        "hash": "f293a3337588467e7624b2391ac32886"
+    },
+    "HCshinobi\\core\\__init__.py": {
+        "hash": "364e300f56a35187b902903a9bffefa2"
+    },
+    "HCshinobi\\core\\npc_manager.py": {
+        "hash": "5d2a8d621d79f6aa234569cfa81ba697"
+    },
+    "HCshinobi\\core\\battle_manager.py": {
+        "hash": "5a047ec9c57a0c80de9525fb036bcbc5"
+    },
+    "HCshinobi\\discord\\extensions\\battle.py": {
+        "hash": "b8ee8443f1740da482e3008e93b1cc32"
+    }
+}
