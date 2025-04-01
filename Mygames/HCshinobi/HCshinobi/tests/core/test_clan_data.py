@@ -1,6 +1,6 @@
 """Tests for the ClanData core service."""
 import pytest
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, AsyncMock, MagicMock
 from HCshinobi.core.clan_data import ClanData
 from HCshinobi.core.constants import RarityTier, CLAN_FILE
 from HCshinobi.utils.file_io import load_json, save_json
@@ -42,8 +42,8 @@ def mock_clan_data_content():
         }
     ]
 
-@pytest_asyncio.fixture
-async def clan_data_instance(tmp_path, mock_clan_data_content):
+@pytest.fixture
+def clan_data_instance(tmp_path, mock_clan_data_content):
     """Create a ClanData instance with mocked dependencies, ensuring it's initialized."""
     data_dir = str(tmp_path)
     clan_file_path = tmp_path / "clans" / CLAN_FILE
@@ -51,10 +51,10 @@ async def clan_data_instance(tmp_path, mock_clan_data_content):
     
     # Mock logger and file IO directly
     mock_logger = MagicMock()
-    mock_save_json = AsyncMock()
+    mock_save_json = MagicMock()
 
     # Selective load based on path
-    async def selective_load(path):
+    def selective_load(path):
         normalized_path = Path(path).resolve()
         normalized_target = clan_file_path.resolve()
         if normalized_path == normalized_target:
@@ -64,31 +64,28 @@ async def clan_data_instance(tmp_path, mock_clan_data_content):
     # Patch dependencies
     with patch('HCshinobi.core.clan_data.load_json', selective_load), \
          patch('HCshinobi.core.clan_data.save_json', mock_save_json), \
-         patch('HCshinobi.core.clan_data.get_logger', return_value=mock_logger):
+         patch('HCshinobi.core.clan_data.logger', mock_logger):
         # Initialize ClanData with the temp data directory
         instance = ClanData(data_dir=str(tmp_path))
-        # Await the initialization which loads data
-        await instance.initialize()
+        # Call synchronous initialization which loads data
+        instance.initialize()
         # Return instance and the mock for save assertions
         yield (instance, mock_save_json) # Use yield if cleanup is needed later
 
 # --- Tests ---
-@pytest.mark.asyncio
-async def test_initialization(clan_data_instance):
+def test_initialization(clan_data_instance):
     """Test initialization and loading."""
     instance, _ = clan_data_instance # Unpack
     assert len(instance.clans) == 2
     assert instance.clans[0]['name'] == "TestClan1"
 
-@pytest.mark.asyncio
-async def test_load_existing_clans(clan_data_instance, mock_clan_data_content):
+def test_load_existing_clans(clan_data_instance, mock_clan_data_content):
     """Test loading pre-existing clan data."""
     instance, _ = clan_data_instance # Unpack
     # The fixture already loads the data via initialize()
     assert instance.clans == mock_clan_data_content
 
-@pytest.mark.asyncio
-async def test_load_invalid_data(tmp_path):
+def test_load_invalid_data(tmp_path):
     """Test loading invalid data (not a list)."""
     data_dir = str(tmp_path)
     clan_file_path = tmp_path / "clans" / CLAN_FILE
@@ -98,29 +95,27 @@ async def test_load_invalid_data(tmp_path):
         json.dump({"invalid": "data"}, f)
         
     mock_logger = MagicMock()
-    mock_save_json = AsyncMock()
-    # Mock load_json for this test to return None, simulating load failure
-    mock_load_json_invalid = AsyncMock(return_value=None)
+    mock_save_json = MagicMock()
+    mock_load_json_invalid = MagicMock(return_value=None)
 
+    # Patch the module-level logger directly
     with patch('HCshinobi.core.clan_data.load_json', mock_load_json_invalid), \
          patch('HCshinobi.core.clan_data.save_json', mock_save_json), \
-         patch('HCshinobi.core.clan_data.get_logger', return_value=mock_logger):
+         patch('HCshinobi.core.clan_data.logger', mock_logger): # Patching the logger instance
         instance = ClanData(data_dir=data_dir)
-        await instance.initialize()
+        instance.initialize()
         assert len(instance.clans) > 0 # Default clans should be created
         # When load_json returns None, it logs an ERROR then creates defaults
         mock_logger.error.assert_called() # Corrected assertion
         mock_save_json.assert_called()
 
-@pytest.mark.asyncio
-async def test_get_all_clans(clan_data_instance, mock_clan_data_content):
+def test_get_all_clans(clan_data_instance, mock_clan_data_content):
     """Test retrieving all clans."""
     instance, _ = clan_data_instance # Unpack
     clans = instance.get_all_clans() # This method is synchronous
     assert clans == mock_clan_data_content
 
-@pytest.mark.asyncio
-async def test_get_clan_by_name(clan_data_instance, mock_clan_data_content):
+def test_get_clan_by_name(clan_data_instance, mock_clan_data_content):
     """Test retrieving a clan by name."""
     instance, _ = clan_data_instance # Unpack
     clan = instance.get_clan_by_name("TestClan1") # Synchronous
@@ -129,8 +124,7 @@ async def test_get_clan_by_name(clan_data_instance, mock_clan_data_content):
     clan_none = instance.get_clan_by_name("NonExistent") # Synchronous
     assert clan_none is None
 
-@pytest.mark.asyncio
-async def test_get_clans_by_rarity(clan_data_instance):
+def test_get_clans_by_rarity(clan_data_instance):
     """Test retrieving clans by rarity."""
     instance, _ = clan_data_instance # Unpack
     common_clans = instance.get_clans_by_rarity(RarityTier.COMMON) # Synchronous
@@ -165,7 +159,7 @@ async def test_add_clan(clan_data_instance):
     }
 
     # Use the instance method which should handle saving via mocked save_json
-    success = await instance.add_clan(new_clan)
+    success = instance.add_clan(new_clan)
     assert success
     assert len(instance.clans) == initial_count + 1
     assert instance.clans[-1]['name'] == "NewClan"
@@ -174,7 +168,7 @@ async def test_add_clan(clan_data_instance):
 
     # Test duplicate clan
     mock_save_json.reset_mock()
-    success = await instance.add_clan(new_clan)
+    success = instance.add_clan(new_clan)
     assert not success
     mock_save_json.assert_not_called() # Save shouldn't be called for duplicates
 
@@ -183,7 +177,7 @@ async def test_add_clan(clan_data_instance):
     invalid_clan = new_clan.copy()
     invalid_clan['name'] = "InvalidClan"
     invalid_clan['rarity'] = "InvalidRarity"
-    success = await instance.add_clan(invalid_clan)
+    success = instance.add_clan(invalid_clan)
     assert not success
     mock_save_json.assert_not_called()
 
@@ -194,7 +188,7 @@ async def test_add_clan(clan_data_instance):
         "name": "IncompleteClan",
         # Missing rarity
     }
-    success = await instance.add_clan(incomplete_clan)
+    success = instance.add_clan(incomplete_clan)
     assert not success
     mock_save_json.assert_not_called()
 
@@ -209,7 +203,7 @@ async def test_update_clan(clan_data_instance):
         "lore": "Updated lore",
         "base_weight": 15.0
     }
-    success = await instance.update_clan("TestClan1", update_data)
+    success = instance.update_clan("TestClan1", update_data)
     assert success
     updated_clan = instance.get_clan_by_name("TestClan1")
     assert updated_clan['lore'] == "Updated lore"
@@ -218,26 +212,25 @@ async def test_update_clan(clan_data_instance):
 
     # Test non-existent clan
     mock_save_json.reset_mock()
-    success = await instance.update_clan("NonExistentClan", update_data)
+    success = instance.update_clan("NonExistentClan", update_data)
     assert not success
     mock_save_json.assert_not_called()
 
     # Test invalid rarity update (update_clan should validate)
     mock_save_json.reset_mock()
     invalid_update = {"rarity": "InvalidRarity"}
-    success = await instance.update_clan("TestClan1", invalid_update)
+    success = instance.update_clan("TestClan1", invalid_update)
     assert not success
     mock_save_json.assert_not_called()
 
     # Test empty name update (update_clan should validate)
     mock_save_json.reset_mock()
     invalid_update = {"name": ""}
-    success = await instance.update_clan("TestClan1", invalid_update)
+    success = instance.update_clan("TestClan1", invalid_update)
     assert not success
     mock_save_json.assert_not_called()
 
-@pytest.mark.asyncio
-async def test_get_clan_base_weights(clan_data_instance):
+def test_get_clan_base_weights(clan_data_instance):
     """Test retrieving clan base weights."""
     instance, _ = clan_data_instance # Unpack
     weights = instance.get_clan_base_weights() # Synchronous

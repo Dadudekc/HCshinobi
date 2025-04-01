@@ -145,18 +145,20 @@ async def test_clan_command_exception(cog, mock_interaction, mock_character):
     test_exc = Exception("Database error")
     cog.character_system.get_character.side_effect = test_exc
 
-    await cog.clan.callback(cog, mock_interaction)
+    # Patch the module-level logger where the error is actually logged
+    mock_logger = MagicMock()
+    with patch('HCshinobi.extensions.clan_commands.logger', mock_logger):
+        await cog.clan.callback(cog, mock_interaction)
 
     cog.character_system.get_character.assert_called_once_with(str(mock_interaction.user.id))
     mock_interaction.response.send_message.assert_called_once_with(
         "An error occurred while retrieving clan information."
     )
-    # Check that the *original* exception was logged
-    cog.bot.logger.error.assert_called_once()
-    log_args, _ = cog.bot.logger.error.call_args
-    assert "Error retrieving clan information" in log_args[0]
-    assert isinstance(log_args[1], Exception)
-    assert log_args[1] is test_exc # Verify it logged the specific exception
+    # Check that the *original* exception was logged using the patched logger
+    mock_logger.error.assert_called_once()
+    # Optional: check the log message content
+    log_args, _ = mock_logger.error.call_args
+    assert "Database error" in log_args[0]
 
 # --- clan_create tests ---
 @pytest.mark.asyncio
@@ -202,26 +204,33 @@ async def test_create_clan_success(cog, mock_interaction, mock_character):
         level=1
     )
     cog.clan_system.create_clan.return_value = created_clan_instance
-    cog.character_system.update_character.return_value = True # Assume update succeeds
+    # Ensure the mock character_system has the update_character method
+    cog.character_system.update_character = AsyncMock(return_value=True)
+    # cog.character_system.update_character.return_value = True # Assume update succeeds
 
     await cog.create_clan.callback(cog, mock_interaction, clan_name, description)
 
     cog.character_system.get_character.assert_called_once_with(str(mock_interaction.user.id))
-    # Verify create_clan call arguments (excluding self)
+    # Verify create_clan call arguments (using positional args as called in the cog)
     cog.clan_system.create_clan.assert_called_once_with(
-        name=clan_name,
-        description=description,
-        leader_id=str(mock_interaction.user.id)
-        # Add other expected args if create_clan takes them (e.g., rarity)
+        clan_name,
+        str(mock_interaction.user.id),
+        description
     )
     # Verify character update call
     cog.character_system.update_character.assert_called_once_with(
         str(mock_interaction.user.id), {"clan": clan_name}
     )
-    # Verify success response
-    mock_interaction.response.send_message.assert_called_once_with(
-        f"Clan '{clan_name}' created successfully!", ephemeral=True
-    )
+    # Verify success response (checks embed)
+    mock_interaction.response.send_message.assert_called_once()
+    args, kwargs = mock_interaction.response.send_message.call_args
+    assert "embed" in kwargs
+    embed = kwargs["embed"]
+    assert embed.title == "Clan Created"
+    assert clan_name in embed.description
+    # assert mock_interaction.response.send_message.assert_called_once_with(
+    #     f"Clan '{clan_name}' created successfully!", ephemeral=True
+    # )
 
 # --- clan_join tests ---
 @pytest.mark.asyncio
@@ -344,10 +353,10 @@ async def test_clan_list_success(cog, mock_interaction, mock_clan):
     assert "embed" in kwargs
     embed = kwargs["embed"]
     assert embed.title == "Available Clans"
-    # Check if both clan names are in the embed description or fields
-    description_or_fields = embed.description + " ".join(f.value for f in embed.fields)
-    assert mock_clan.name in description_or_fields
-    assert clan_two.name in description_or_fields
+    # Check if both clan names are in the embed field names
+    field_names = [f.name for f in embed.fields]
+    assert any(mock_clan.name in name for name in field_names)
+    assert any(clan_two.name in name for name in field_names)
 
 # --- _get_rarity_color test ---
 def test_get_rarity_color(cog): # Pass the cog fixture

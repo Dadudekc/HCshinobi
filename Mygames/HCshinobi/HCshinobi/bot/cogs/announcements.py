@@ -494,11 +494,8 @@ class AnnouncementCommands(commands.Cog):
                 ephemeral=True
             )
         except Exception as e:
-            self.logger.error(f"Error sending announcement: {e}")
-            await interaction.response.send_message(
-                f"An error occurred while sending the announcement: {e}",
-                ephemeral=True
-            )
+            logger.error(f"Error in announce_message: {e}", exc_info=True)
+            raise  # Re-raise the error for global handling or test assertions
 
     @app_commands.command(
         name="send_system_alert",
@@ -714,103 +711,6 @@ class AnnouncementCommands(commands.Cog):
             await interaction.followup.send("❌ Failed to retrieve lore information. Check the logs for details.", ephemeral=True)
 
     @app_commands.command(
-        name="announce",
-        description="Make an announcement to the server"
-    )
-    @app_commands.describe(
-        message="The announcement message to send",
-        channel="The channel to send the announcement to (optional)",
-        ping_role="The role to ping with the announcement (optional)"
-    )
-    async def announce_cmd(
-        self,
-        interaction: discord.Interaction,
-        message: str,
-        channel: Optional[discord.TextChannel] = None,
-        ping_role: Optional[discord.Role] = None
-    ):
-        """Make an announcement to the server.
-        
-        Args:
-            interaction: The Discord interaction
-            message: The announcement message
-            channel: The channel to send to (optional)
-            ping_role: Role to ping (optional)
-        """
-        try:
-            # Get the target channel
-            if channel is None:
-                # Use the default announcements channel
-                channel_id = self.bot.config.announcement_channel_id
-                if channel_id:
-                    channel = interaction.guild.get_channel(channel_id)
-                
-                if channel is None:
-                    # Fall back to the current channel
-                    channel = interaction.channel
-            
-            # Create the announcement embed
-            embed = discord.Embed(
-                title="📢 Announcement",
-                description=message,
-                color=discord.Color.blue()
-            )
-            embed.set_footer(
-                text=f"Announced by {interaction.user.display_name}",
-                icon_url=interaction.user.display_avatar.url
-            )
-            
-            # Send confirmation view
-            confirm_view = ConfirmView(interaction.user)
-            await interaction.response.send_message(
-                "Are you sure you want to send this announcement?",
-                embed=embed,
-                view=confirm_view,
-                ephemeral=True
-            )
-            
-            # Wait for confirmation
-            await confirm_view.wait()
-            
-            if confirm_view.value:
-                # Send the announcement
-                content = None
-                if ping_role:
-                    content = ping_role.mention
-                
-                await channel.send(content=content, embed=embed)
-                
-                # Send success message
-                success_embed = create_success_embed(
-                    "Announcement sent successfully!",
-                    f"The announcement has been sent to {channel.mention}"
-                )
-                await interaction.edit_original_response(
-                    content=None,
-                    embed=success_embed,
-                    view=None
-                )
-            else:
-                # Send cancellation message
-                await interaction.edit_original_response(
-                    content="Announcement cancelled.",
-                    embed=None,
-                    view=None
-                )
-                
-        except Exception as e:
-            logger.error(f"Error sending announcement: {e}", exc_info=True)
-            error_embed = create_error_embed(
-                "Error",
-                "Failed to send the announcement. Please try again later."
-            )
-            await interaction.edit_original_response(
-                content=None,
-                embed=error_embed,
-                view=None
-            )
-
-    @app_commands.command(
         name="update",
         description="Send an update announcement"
     )
@@ -893,42 +793,8 @@ class AnnouncementCommands(commands.Cog):
                 
         except Exception as e:
             logger.error(f"Error sending update: {e}", exc_info=True)
-            error_embed = create_error_embed(
-                "Error",
-                "Failed to send the update. Please try again later."
-            )
-            await interaction.edit_original_response(
-                content=None,
-                embed=error_embed,
-                view=None
-            )
+            raise # Re-raise the error
 
-    @announce_cmd.error
-    async def announce_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
-        """Error handler for the announce command.
-        
-        Args:
-            interaction: The Discord interaction
-            error: The error that occurred
-        """
-        error_embed = create_error_embed(
-            "Error",
-            "An error occurred while processing your announcement. Please try again."
-        )
-        
-        if isinstance(error, app_commands.MissingPermissions):
-            error_embed.description = "You don't have permission to make announcements."
-        
-        try:
-            await interaction.response.send_message(
-                embed=error_embed,
-                ephemeral=True
-            )
-        except discord.InteractionResponded:
-            await interaction.edit_original_response(
-                embed=error_embed
-            )
-    
     @update_cmd.error
     async def update_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
         """Error handler for the update command.

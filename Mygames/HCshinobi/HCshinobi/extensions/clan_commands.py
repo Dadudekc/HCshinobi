@@ -99,6 +99,20 @@ class ClanCommands(commands.Cog):
             if not clan:
                 await interaction.response.send_message("Failed to create clan. The name may be taken.")
                 return
+            
+            # Update the character's clan
+            update_success = await self.character_system.update_character(
+                str(interaction.user.id),
+                {"clan": clan.name}
+            )
+            if not update_success:
+                # Log error, maybe inform user? Clan was created but assignment failed.
+                logger.error(f"Clan '{clan.name}' created, but failed to assign to character {interaction.user.id}")
+                await interaction.response.send_message(
+                    f"Clan '{clan.name}' created, but there was an issue assigning it to your character.", 
+                    ephemeral=True
+                )
+                return
                 
             embed = discord.Embed(
                 title="Clan Created",

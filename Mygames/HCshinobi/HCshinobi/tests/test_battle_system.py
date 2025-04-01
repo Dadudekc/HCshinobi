@@ -103,10 +103,16 @@ async def test_battle_flow(battle_system, test_characters):
 
     # Check that the battle is removed from active battles after end
     # This might happen in check_battle_end or end_battle, let's assume end_battle
-    ended_state = await battle_system.end_battle(battle_id)
-    assert ended_state is not None
-    assert ended_state.defender_hp == 0
-    assert battle_id not in battle_system.active_battles
+    winner_id = await battle_system.end_battle(battle_id)
+    # Assert the correct winner ID is returned
+    assert winner_id == attacker.id 
+    # Check the state in battle_history
+    assert battle_id in battle_system.battle_history
+    final_state = battle_system.battle_history[battle_id]
+    assert final_state.defender_hp == 0
+    assert final_state.winner == attacker.id
+    assert final_state.is_active is False
+    assert battle_id not in battle_system.active_battles # Should be removed
 
 @pytest.mark.asyncio
 async def test_battle_timeout(battle_system, test_characters):
