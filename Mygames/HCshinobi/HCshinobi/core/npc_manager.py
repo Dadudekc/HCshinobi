@@ -6,6 +6,7 @@ import uuid
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 import os
+import asyncio # Added import
 
 # Use centralized constants, utils
 from .constants import NPC_FILE, MAX_NPC_COUNT, DEFAULT_NPC_STATUS
@@ -25,15 +26,22 @@ class NPCManager:
     Enforces NPC limits (MAX_NPC_COUNT).
     """
 
-    def __init__(self, npc_file_path: Optional[str] = None):
+    def __init__(self, data_dir: str):
         """Initialize the NPC manager by loading existing NPC data.
 
         Args:
-            npc_file_path: Optional path to the NPC JSON file. Defaults to NPC_FILE from constants.
+            data_dir: Directory containing the NPC JSON file.
         """
-        self.npc_file = npc_file_path if npc_file_path is not None else NPC_FILE
+        # Construct the path to the NPC file
+        self.npc_file = os.path.join(data_dir, NPC_FILE)
         self.npcs: Dict[str, Dict[str, Any]] = {}
+        # Loading is deferred to ready_hook
+
+    async def ready_hook(self):
+        """Asynchronously load NPC data after initialization."""
+        logger.info("NPCManager ready_hook starting...")
         self._load_npcs()
+        logger.info("NPCManager ready_hook finished. Loaded %d NPCs.", len(self.npcs))
 
     def _load_npcs(self) -> None:
         """Load NPC data from self.npc_file."""

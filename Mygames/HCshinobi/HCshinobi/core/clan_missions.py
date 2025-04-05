@@ -5,6 +5,7 @@ import json
 import os
 from datetime import datetime, timedelta
 import random
+import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -118,9 +119,15 @@ class ClanMissions:
         """
         self.data_dir = data_dir
         self.missions_file = os.path.join(data_dir, "clan_missions.json")
-        self.load_missions()
+        self.active_missions: Dict = {}
     
-    def load_missions(self):
+    async def ready_hook(self):
+        """Load clan missions data after initialization."""
+        logger.info("ClanMissions ready_hook starting...")
+        self._load_missions()
+        logger.info(f"ClanMissions ready_hook finished. Loaded active missions for {len(self.active_missions)} users.")
+    
+    def _load_missions(self):
         """Load active missions from file."""
         try:
             if os.path.exists(self.missions_file):

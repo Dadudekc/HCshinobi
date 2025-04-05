@@ -1,0 +1,45 @@
+﻿{
+    "training_dummy": {
+        "name": "Training Dummy",
+        "level": 1,
+        "hp": 100,
+        "chakra": 100,
+        "stamina": 100,
+        "strength": 10,
+        "speed": 10,
+        "defense": 10,
+        "willpower": 10,
+        "chakra_control": 10,
+        "intelligence": 10,
+        "perception": 10,
+        "ninjutsu": 10,
+        "taijutsu": 10,
+        "genjutsu": 10,
+        "jutsu": [],
+        "equipment": {},
+        "inventory": []
+    },
+    "genin_instructor": {
+        "name": "Genin Instructor",
+        "level": 10,
+        "hp": 200,
+        "chakra": 200,
+        "stamina": 200,
+        "strength": 20,
+        "speed": 20,
+        "defense": 20,
+        "willpower": 20,
+        "chakra_control": 20,
+        "intelligence": 20,
+        "perception": 20,
+        "ninjutsu": 20,
+        "taijutsu": 20,
+        "genjutsu": 20,
+        "jutsu": ["Basic Clone Technique", "Substitution Technique", "Transformation Technique"],
+        "equipment": {
+            "weapon": "Kunai",
+            "armor": "Flak Jacket"
+        },
+        "inventory": ["Shuriken", "Smoke Bomb"]
+    }
+}

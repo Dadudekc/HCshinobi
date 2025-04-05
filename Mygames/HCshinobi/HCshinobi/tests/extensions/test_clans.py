@@ -274,6 +274,8 @@ async def test_join_clan_success(cog, mock_interaction, mock_character, mock_cla
     """Test successful /clan_join."""
     mock_character.clan = None
     cog.character_system.get_character.return_value = mock_character
+    # Ensure update_character is mocked as async
+    cog.character_system.update_character = AsyncMock(return_value=True)
     cog.clan_system.get_clan.return_value = mock_clan
     cog.clan_system.add_member.return_value = True
     await cog.join_clan.callback(cog, mock_interaction, mock_clan.name)
@@ -317,6 +319,8 @@ async def test_leave_clan_success(cog, mock_interaction, mock_character):
     """Test successful /clan_leave."""
     mock_character.clan = "Test Clan"
     cog.character_system.get_character.return_value = mock_character
+    # Ensure update_character is mocked as async
+    cog.character_system.update_character = AsyncMock(return_value=True)
     cog.clan_system.remove_member.return_value = True
     await cog.leave_clan.callback(cog, mock_interaction)
     cog.clan_system.remove_member.assert_called_once_with(mock_character.clan, str(mock_interaction.user.id))
@@ -374,4 +378,87 @@ def test_get_rarity_color(cog): # Pass the cog fixture
 # Removed: test_setup_missing_attributes (similar to above)
 # Removed: test_clan_info & test_clan_info_not_found (functionality merged into /clan)
 
-# TODO: Add tests for exception handling in create, join, leave, list commands if needed. 
+async def test_clan_command_exceptions(self):
+    """Test exception handling in clan commands."""
+    # Test create command exceptions
+    with self.assertRaises(ValueError):
+        await self.clan_cog.create_clan(self.interaction, "")  # Empty name
+        
+    with self.assertRaises(ValueError):
+        await self.clan_cog.create_clan(self.interaction, "A" * 51)  # Name too long
+        
+    # Test join command exceptions
+    with self.assertRaises(ValueError):
+        await self.clan_cog.join_clan(self.interaction, "")  # Empty clan name
+        
+    with self.assertRaises(ValueError):
+        await self.clan_cog.join_clan(self.interaction, "NonexistentClan")  # Clan doesn't exist
+        
+    # Test leave command exceptions
+    with self.assertRaises(ValueError):
+        await self.clan_cog.leave_clan(self.interaction)  # Not in a clan
+        
+    # Test list command exceptions
+    with self.assertRaises(ValueError):
+        await self.clan_cog.list_clans(self.interaction, page=0)  # Invalid page number
+        
+    with self.assertRaises(ValueError):
+        await self.clan_cog.list_clans(self.interaction, page_size=0)  # Invalid page size
+        
+    # Test clan info command exceptions
+    with self.assertRaises(ValueError):
+        await self.clan_cog.clan_info(self.interaction, "")  # Empty clan name
+        
+    with self.assertRaises(ValueError):
+        await self.clan_cog.clan_info(self.interaction, "NonexistentClan")  # Clan doesn't exist
+        
+    # Test clan leader command exceptions
+    with self.assertRaises(ValueError):
+        await self.clan_cog.clan_leader(self.interaction, "")  # Empty clan name
+        
+    with self.assertRaises(ValueError):
+        await self.clan_cog.clan_leader(self.interaction, "NonexistentClan")  # Clan doesn't exist
+        
+    # Test clan members command exceptions
+    with self.assertRaises(ValueError):
+        await self.clan_cog.clan_members(self.interaction, "")  # Empty clan name
+        
+    with self.assertRaises(ValueError):
+        await self.clan_cog.clan_members(self.interaction, "NonexistentClan")  # Clan doesn't exist
+        
+    # Test clan disband command exceptions
+    with self.assertRaises(ValueError):
+        await self.clan_cog.disband_clan(self.interaction)  # Not in a clan
+        
+    with self.assertRaises(ValueError):
+        await self.clan_cog.disband_clan(self.interaction)  # Not clan leader
+        
+    # Test clan kick command exceptions
+    with self.assertRaises(ValueError):
+        await self.clan_cog.kick_member(self.interaction, None)  # No member specified
+        
+    with self.assertRaises(ValueError):
+        await self.clan_cog.kick_member(self.interaction, "NonexistentUser")  # User doesn't exist
+        
+    with self.assertRaises(ValueError):
+        await self.clan_cog.kick_member(self.interaction, "ValidUser")  # Not clan leader
+        
+    # Test clan promote command exceptions
+    with self.assertRaises(ValueError):
+        await self.clan_cog.promote_member(self.interaction, None)  # No member specified
+        
+    with self.assertRaises(ValueError):
+        await self.clan_cog.promote_member(self.interaction, "NonexistentUser")  # User doesn't exist
+        
+    with self.assertRaises(ValueError):
+        await self.clan_cog.promote_member(self.interaction, "ValidUser")  # Not clan leader
+        
+    # Test clan demote command exceptions
+    with self.assertRaises(ValueError):
+        await self.clan_cog.demote_member(self.interaction, None)  # No member specified
+        
+    with self.assertRaises(ValueError):
+        await self.clan_cog.demote_member(self.interaction, "NonexistentUser")  # User doesn't exist
+        
+    with self.assertRaises(ValueError):
+        await self.clan_cog.demote_member(self.interaction, "ValidUser")  # Not clan leader 

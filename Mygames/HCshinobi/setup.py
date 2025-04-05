@@ -1,6 +1,6 @@
-"""Setup script for dream modules package.
+"""Setup script for HCshinobi package.
 
-This script handles the installation of the dream modules package
+This script handles the installation of the HCshinobi package
 and its dependencies.
 """
 from setuptools import setup, find_packages
@@ -10,13 +10,13 @@ with open("README.md", "r", encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
-    name="dream-modules",
+    name="HCshinobi",
     version="1.0.0",
     author="Victor",
-    description="Modular components for Discord bots and RPG systems",
+    description="Discord bot for Shinobi RPG system",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/dream-modules",
+    url="https://github.com/yourusername/HCshinobi",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -27,7 +27,6 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
-        "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Games/Entertainment :: Role-Playing",
     ],
     python_requires=">=3.8",
@@ -47,21 +46,10 @@ setup(
             "flake8>=4.0.0",
             "mypy>=0.910",
         ],
-        "docs": [
-            "sphinx>=4.0.0",
-            "sphinx-rtd-theme>=1.0.0",
-            "sphinx-autodoc-typehints>=1.12.0",
-        ],
     },
     entry_points={
         "console_scripts": [
-            "dream-test=dream_modules.test_runner:main",
-            "dream-example=dream_modules.example_bot:main",
+            "hcshinobi=HCshinobi.run:main",
         ],
-    },
-    project_urls={
-        "Bug Reports": "https://github.com/yourusername/dream-modules/issues",
-        "Source": "https://github.com/yourusername/dream-modules",
-        "Documentation": "https://dream-modules.readthedocs.io/",
     },
 ) 

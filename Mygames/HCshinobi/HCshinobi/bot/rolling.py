@@ -21,19 +21,27 @@ except ImportError:
 async def process_clan_roll(
     user_id: str,
     username: str,
+    # Dependencies are now assumed to be available via a context or bot instance
+    # that provides access to the initialized services.
+    clan_engine: ClanAssignmentEngine,
     token_system: Optional[TokenSystem] = None,
-    clan_engine: Optional[ClanAssignmentEngine] = None,
-    personality_modifiers: Optional[PersonalityModifiers] = None
+    # Added parameters for personality and boost
+    personality: Optional[str] = None,
+    token_boost_clan: Optional[str] = None,
+    token_count: int = 0
 ) -> Dict[str, Any]:
     """
     Process a clan roll request from Discord. Assigns clan purely based on weights.
+    Uses the provided ClanAssignmentEngine instance.
     
     Args:
         user_id: Discord ID of the user
         username: Display name of the user
-        token_system: TokenSystem instance (optional)
-        clan_engine: ClanAssignmentEngine instance (optional)
-        personality_modifiers: PersonalityModifiers instance (optional)
+        clan_engine: Initialized ClanAssignmentEngine instance.
+        token_system: Initialized TokenSystem instance (optional, if token usage is added).
+        personality: Optional player personality choice.
+        token_boost_clan: Optional clan name to boost with tokens.
+        token_count: Number of tokens to use for boosting (0-3).
         
     Returns:
         Dict[str, Any]: The clan assignment result containing at least:
@@ -41,40 +49,76 @@ async def process_clan_roll(
             - tokens_spent: Always 0 in this simplified version
             
     Raises:
-        ValueError: If core systems are missing or assignment fails
+        ValueError: If clan assignment fails internally.
     """
-    # Default instances if not provided (for backward compatibility or testing)
-    if token_system is None:
-        logger.warning("No TokenSystem provided, creating default instance")
-        token_system = TokenSystem()
+    # Remove the default instance creation
+    # if token_system is None:
+    #     logger.warning("No TokenSystem provided, creating default instance")
+    #     token_system = TokenSystem()
         
+    # if clan_engine is None:
+    #     logger.warning("No ClanAssignmentEngine provided, creating default instance")
+    #     clan_engine = ClanAssignmentEngine() # This was using the old/wrong version
+
     if clan_engine is None:
-        logger.warning("No ClanAssignmentEngine provided, creating default instance")
-        clan_engine = ClanAssignmentEngine()
-        
-    if personality_modifiers is None:
-        logger.warning("No PersonalityModifiers provided, creating default instance")
-        personality_modifiers = PersonalityModifiers()
-    
-    # Add a small delay for dramatic effect
-    await asyncio.sleep(1.5)
-    
+         logger.error("ClanAssignmentEngine was not provided to process_clan_roll.")
+         raise ValueError("Clan Assignment Engine is required.")
+
+    # Personality, token_boost_clan, and token_count are now passed as arguments
+
+    # --- Optional: Add token consumption logic here if boosting costs tokens ---
+    if token_count > 0:
+        if token_system is None:
+            logger.warning(f"User {user_id} attempted boost with {token_count} tokens, but TokenSystem is unavailable.")
+            # Decide handling: proceed without cost, or raise error?
+            # For now, let's log and proceed, assuming boost is free if system missing.
+            pass
+        else:
+            try:
+                # Assuming a method exists to use tokens for boosting
+                # We might need to add this method to TokenSystem if it doesn't exist
+                # success, message = token_system.use_tokens_for_boost(user_id, token_count)
+                # if not success:
+                #     logger.warning(f"Token boost failed for {user_id}: {message}")
+                #     # Maybe raise an error or inform the user?
+                #     # For now, just log and continue the assignment
+                #     pass
+                logger.info(f"User {user_id} is boosting with {token_count} tokens. (Consumption logic placeholder)") # Placeholder log
+            except Exception as token_error:
+                logger.error(f"Error using tokens for boost for user {user_id}: {token_error}", exc_info=True)
+                # Decide handling: proceed without boost, raise error?
+                # For now, log and proceed without boost?
+                token_count = 0 # Reset token count on error? Or raise?
+                token_boost_clan = None # Clear target clan too?
+                # For safety, let's just log and continue the assignment for now
+                pass
+    # -----------------------------------------------------------------------
+
     try:
-        # Assign clan using the assignment engine - remove unused args
-        result = clan_engine.assign_clan(
+        # Call the assign_clan method on the provided engine instance
+        assignment_result = clan_engine.assign_clan(
             player_id=user_id,
             player_name=username,
+            personality=personality, # Use passed parameter
+            token_boost_clan=token_boost_clan, # Use passed parameter
+            token_count=token_count # Use passed parameter
         )
         
-        # Add tokens spent (always 0) to result for consistency
-        result['tokens_spent'] = 0
-        
-        logger.info(f"User {user_id} assigned to clan {result['clan_name']}")
-        return result
-        
+        if not assignment_result or "error" in assignment_result:
+            error_msg = assignment_result.get("error", "Unknown error") if assignment_result else "No result"
+            logger.error(f"Clan assignment failed for user {user_id}: {error_msg}")
+            raise ValueError(f"Clan assignment failed: {error_msg}")
+            
+        # Simplify the return value for now
+        return {
+            "clan_name": assignment_result.get("assigned_clan", "Unknown"),
+            "tokens_spent": token_count # Currently always 0
+        }
+
     except Exception as e:
-        logger.error(f"Error during clan assignment for user {user_id}: {str(e)}", exc_info=True)
-        raise ValueError(f"Clan assignment error: {str(e)}")
+        logger.error(f"Unexpected error during clan roll processing for {user_id}: {e}", exc_info=True)
+        # Re-raise or handle as appropriate for the calling context
+        raise ValueError(f"Internal error during clan assignment: {e}")
 
 
 async def process_reroll(

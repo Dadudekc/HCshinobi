@@ -47,7 +47,7 @@ class ClanCommands(commands.Cog):
     async def clan(self, interaction: discord.Interaction):
         """Clan management commands."""
         try:
-            character = await self.character_system.get_character(str(interaction.user.id))
+            character = self.character_system.get_character(str(interaction.user.id))
             if not character:
                 await interaction.response.send_message("You need to create a character first!")
                 return
@@ -86,7 +86,7 @@ class ClanCommands(commands.Cog):
             description: Optional clan description
         """
         try:
-            character = await self.character_system.get_character(str(interaction.user.id))
+            character = self.character_system.get_character(str(interaction.user.id))
             if not character:
                 await interaction.response.send_message("You need to create a character first!")
                 return
@@ -100,13 +100,11 @@ class ClanCommands(commands.Cog):
                 await interaction.response.send_message("Failed to create clan. The name may be taken.")
                 return
             
-            # Update the character's clan
             update_success = await self.character_system.update_character(
                 str(interaction.user.id),
                 {"clan": clan.name}
             )
             if not update_success:
-                # Log error, maybe inform user? Clan was created but assignment failed.
                 logger.error(f"Clan '{clan.name}' created, but failed to assign to character {interaction.user.id}")
                 await interaction.response.send_message(
                     f"Clan '{clan.name}' created, but there was an issue assigning it to your character.", 
@@ -134,7 +132,7 @@ class ClanCommands(commands.Cog):
             name: Name of the clan to join
         """
         try:
-            character = await self.character_system.get_character(str(interaction.user.id))
+            character = self.character_system.get_character(str(interaction.user.id))
             if not character:
                 await interaction.response.send_message("You need to create a character first!")
                 return
@@ -153,6 +151,13 @@ class ClanCommands(commands.Cog):
                 await interaction.response.send_message("Failed to join clan.")
                 return
                 
+            update_success = await self.character_system.update_character(
+                str(interaction.user.id),
+                {"clan": clan.name}
+            )
+            if not update_success:
+                logger.error(f"Joined clan '{clan.name}', but failed to assign to character {interaction.user.id}")
+                
             embed = discord.Embed(
                 title="Clan Joined",
                 description=f"Successfully joined clan: {clan.name}",
@@ -168,7 +173,7 @@ class ClanCommands(commands.Cog):
     async def leave_clan(self, interaction: discord.Interaction):
         """Leave current clan."""
         try:
-            character = await self.character_system.get_character(str(interaction.user.id))
+            character = self.character_system.get_character(str(interaction.user.id))
             if not character:
                 await interaction.response.send_message("You need to create a character first!")
                 return
@@ -177,10 +182,18 @@ class ClanCommands(commands.Cog):
                 await interaction.response.send_message("You are not in a clan!")
                 return
                 
-            success = await self.clan_system.remove_member(character.clan, str(interaction.user.id))
+            clan_name = character.clan
+            success = await self.clan_system.remove_member(clan_name, str(interaction.user.id))
             if not success:
                 await interaction.response.send_message("Failed to leave clan.")
                 return
+                
+            update_success = await self.character_system.update_character(
+                str(interaction.user.id),
+                {"clan": None}
+            )
+            if not update_success:
+                logger.error(f"Left clan '{clan_name}', but failed to update character {interaction.user.id}")
                 
             await interaction.response.send_message("Successfully left your clan.")
             

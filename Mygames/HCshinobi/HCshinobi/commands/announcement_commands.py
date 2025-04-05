@@ -241,10 +241,10 @@ class AnnouncementCommands(commands.Cog):
         await interaction.response.defer(ephemeral=True)
         
         try:
-            # Get announcement channel
-            channel = interaction.guild.get_channel(self.bot.announcement_channel_id)
+            # Get announcement channel using bot instance
+            channel = self.bot.get_channel(self.bot.announcement_channel_id)
             if not channel:
-                await interaction.followup.send("❌ Announcement channel not found!", ephemeral=True)
+                await interaction.followup.send("❌ Announcement channel not found! Check bot configuration.", ephemeral=True)
                 return
             
             # Create initial embed
@@ -275,4 +275,8 @@ class AnnouncementCommands(commands.Cog):
             
         except Exception as e:
             self.logger.error(f"Error in countdown command: {e}")
-            await interaction.followup.send("❌ Failed to start countdown. Please try again.", ephemeral=True) 
+            await interaction.followup.send("❌ Failed to start countdown. Please try again.", ephemeral=True)
+
+async def setup(bot):
+    """Set up the announcement commands cog."""
+    await bot.add_cog(AnnouncementCommands(bot)) 

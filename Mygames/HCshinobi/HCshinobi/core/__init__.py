@@ -1,23 +1,22 @@
 """
 Core modules for the Naruto MMO Discord game.
-Contains clan assignment, token management, and NPC systems.
+Contains various systems for the bot.
 """
 
-"""Core modules for the HCshinobi bot."""
-from .clan import Clan
-from .clan_system import ClanSystem
-from .character import Character
-from .character_system import CharacterSystem
-from .currency_system import CurrencySystem
-from .battle_system import BattleSystem
-from .token_system import TokenSystem
+# Avoid importing modules directly here to prevent circular dependencies.
+# Modules should import directly what they need.
 
-__all__ = [
-    'Clan',
-    'ClanSystem',
-    'Character',
-    'CharacterSystem',
-    'CurrencySystem',
-    'BattleSystem',
-    'TokenSystem'
-] 
+# You can still define __all__ if you want to control `from . import *`,
+# but it's generally better to use explicit imports anyway.
+
+# Example: Keep __all__ empty or minimal
+__all__ = []
+
+# Commented out original imports:
+# from .clan import Clan
+# from .clan_system import ClanSystem
+# from .character import Character
+# from .character_system import CharacterSystem
+# from .currency_system import CurrencySystem
+# from .battle_system import BattleSystem
+# from .token_system import TokenSystem 

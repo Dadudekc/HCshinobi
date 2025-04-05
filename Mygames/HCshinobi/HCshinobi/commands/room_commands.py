@@ -4,17 +4,20 @@ from discord.ext import commands
 import logging
 
 from HCshinobi.core.room_system import RoomSystem
+from HCshinobi.core.character_system import CharacterSystem
 
 class RoomCommands(commands.Cog):
-    def __init__(self, bot, room_system: RoomSystem):
+    def __init__(self, bot, room_system: RoomSystem, character_system: CharacterSystem):
         """Initialize room commands.
         
         Args:
             bot: The bot instance
             room_system: The room system instance
+            character_system: The character system instance
         """
         self.bot = bot
         self.room_system = room_system
+        self.character_system = character_system
         self.logger = logging.getLogger(__name__)
 
     async def cog_command_error(self, ctx, error):
@@ -184,4 +187,4 @@ class RoomCommands(commands.Cog):
 
 async def setup(bot):
     """Set up the room commands cog."""
-    await bot.add_cog(RoomCommands(bot, bot.room_system)) 
+    await bot.add_cog(RoomCommands(bot, bot.services.room_system, bot.services.character_system)) 

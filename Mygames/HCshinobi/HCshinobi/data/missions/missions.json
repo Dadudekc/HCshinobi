@@ -1,0 +1,74 @@
+[
+    {
+      "mission_id": "D001",
+      "title": "Lost Cat",
+      "description": "Help find a missing cat in the village.",
+      "rank": "D",
+      "reward_exp": 100,
+      "reward_ryo": 1000,
+      "requirements": {"level": 1},
+      "objectives": ["Search the village", "Find the cat", "Return the cat to its owner"],
+      "time_limit_hours": 1,
+      "location": "Village"
+    },
+    {
+      "mission_id": "D002",
+      "title": "Garden Help",
+      "description": "Help an elderly villager with their garden.",
+      "rank": "D",
+      "reward_exp": 75,
+      "reward_ryo": 1500,
+      "requirements": {"level": 1},
+      "objectives": ["Clear weeds", "Plant new flowers", "Water the garden"],
+      "time_limit_hours": 2,
+      "location": "Village"
+    },
+    {
+      "mission_id": "D003",
+      "title": "Deliver Scrolls",
+      "description": "Deliver important scrolls to various locations in the village.",
+      "rank": "D",
+      "reward_exp": 60,
+      "reward_ryo": 1200,
+      "requirements": {"level": 1},
+      "objectives": ["Collect scrolls", "Deliver to locations", "Get signatures"],
+      "time_limit_hours": 3,
+      "location": "Village"
+    },
+    {
+      "mission_id": "D004",
+      "title": "Clean Training Ground",
+      "description": "Clean and maintain a training ground after use.",
+      "rank": "D",
+      "reward_exp": 65,
+      "reward_ryo": 1300,
+      "requirements": {"level": 1},
+      "objectives": ["Remove debris", "Repair targets", "Organize equipment"],
+      "time_limit_hours": 2,
+      "location": "Training Ground"
+    },
+    {
+      "mission_id": "C001",
+      "title": "Bandit Patrol",
+      "description": "Patrol the village outskirts for bandits.",
+      "rank": "C",
+      "reward_exp": 150,
+      "reward_ryo": 3000,
+      "requirements": {"level": 5},
+      "objectives": ["Patrol the outskirts", "Report suspicious activity", "Defeat any bandits"],
+      "time_limit_hours": 4,
+      "location": "Village Outskirts"
+    },
+    {
+      "mission_id": "B001",
+      "title": "Escort Mission",
+      "description": "Escort a merchant through dangerous territory.",
+      "rank": "B",
+      "reward_exp": 300,
+      "reward_ryo": 6000,
+      "requirements": {"level": 10},
+      "objectives": ["Meet the merchant", "Protect the caravan", "Reach destination"],
+      "time_limit_hours": 8,
+      "location": "Trade Route"
+    }
+  ]

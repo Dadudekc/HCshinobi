@@ -17,6 +17,8 @@ from HCshinobi.core.character_system import CharacterSystem
 from HCshinobi.core.clan_system import ClanSystem
 from HCshinobi.core.battle_system import BattleSystem
 from HCshinobi.bot.core.notifications.notification_dispatcher import NotificationDispatcher
+from HCshinobi.bot.config import BotConfig, load_config # Import real config loading
+from discord.ext import commands
 
 @pytest.fixture
 def setup_test_environment(tmp_path):
@@ -136,6 +138,42 @@ def mock_bot(mock_config):
     
     return bot
 
+@pytest.fixture
+def mock_author():
+    """Creates a mock author (discord.Member)."""
+    author = MagicMock(spec=discord.Member)
+    author.id = 12345
+    author.mention = "<@12345>"
+    author.name = "TestUser"
+    return author
+
+@pytest.fixture
+def mock_recipient():
+    """Creates a mock recipient (discord.Member)."""
+    recipient = MagicMock(spec=discord.Member)
+    recipient.id = 67890
+    recipient.mention = "<@67890>"
+    recipient.name = "RecipientUser"
+    return recipient
+
+@pytest.fixture
+def mock_ctx(mock_author):
+    """Creates a mock command context."""
+    ctx = AsyncMock(spec=commands.Context)
+    ctx.author = mock_author
+    ctx.send = AsyncMock()
+    return ctx
+
+@pytest.fixture
+def mock_currency_system(mock_bot):
+    """Returns the mocked CurrencySystem from the mock_bot."""
+    return mock_bot.services.currency_system
+
+@pytest.fixture
+def mock_clan_system(mock_bot):
+    """Returns the mocked ClanSystem from the mock_bot."""
+    return mock_bot.services.clan_system
+
 @pytest_asyncio.fixture
 async def mock_services(mock_config, temp_data_dir):
     services = MagicMock(spec=ServiceContainer)
@@ -243,3 +281,19 @@ async def token_system(tmp_path, mock_token_data):
         instance = TokenSystem(token_file=str(token_file), log_file=str(log_file))
         await instance.initialize() # Await the new async initializer
         yield instance # Yield the initialized instance 
+
+@pytest_asyncio.fixture
+async def real_services(mock_config_file): # Use the fixture that sets up the mock config file
+    """Provides a real, initialized ServiceContainer instance and handles shutdown."""
+    # Load config using the mocked file path from mock_config_file fixture
+    # Assuming load_config() can work with the structure provided by mock_config_file
+    config = load_config() # This might need adjustment based on load_config implementation
+
+    services = ServiceContainer(config)
+    try:
+        await services.initialize()
+        yield services # Provide the initialized services to the test
+    finally:
+        # Ensure shutdown is called even if initialization or test fails
+        if services._initialized: # Check if it was successfully initialized
+            await services.shutdown() 

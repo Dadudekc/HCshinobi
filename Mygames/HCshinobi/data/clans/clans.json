@@ -2,158 +2,178 @@
   {
     "name": "Inuzuka",
     "rarity": "Common",
-    "lore": "Known for their ninja dogs.",
+    "lore": "A clan renowned for their close bond with ninja dogs and fierce, instinct-driven combat.",
     "suggested_personalities": [
       "Loyal",
       "Energetic"
     ],
-    "strength_bonus": 2,
-    "defense_bonus": 1,
-    "speed_bonus": 3,
+    "starting_bonuses": {
+      "strength": 2,
+      "defense": 1,
+      "speed": 3
+    },
     "starting_jutsu": [
-      "Fang Over Fang",
-      "Fang Passing Fang"
+      "Basic Fang Attack",
+      "Coordinated Howl"
     ]
   },
   {
     "name": "Akimichi",
     "rarity": "Common",
-    "lore": "Known for body expansion jutsu.",
+    "lore": "A clan known for their body expansion techniques and raw physical power in close combat.",
     "suggested_personalities": [
       "Kind",
       "Generous"
     ],
-    "strength_bonus": 3,
-    "defense_bonus": 2,
-    "speed_bonus": 1,
+    "starting_bonuses": {
+      "strength": 3,
+      "defense": 2,
+      "speed": 1
+    },
     "starting_jutsu": [
-      "Expansion Jutsu",
-      "Human Bullet Tank"
+      "Partial Expansion",
+      "Calorie Control Drill"
     ]
   },
   {
     "name": "Nara",
     "rarity": "Common",
-    "lore": "Known for shadow manipulation.",
+    "lore": "Masters of shadow manipulation, they use basic techniques to bind and control their foes.",
     "suggested_personalities": [
       "Intelligent",
       "Strategic"
     ],
-    "strength_bonus": 1,
-    "defense_bonus": 1,
-    "speed_bonus": 2,
+    "starting_bonuses": {
+      "strength": 1,
+      "defense": 1,
+      "speed": 2
+    },
     "starting_jutsu": [
       "Shadow Imitation",
-      "Shadow Sewing"
+      "Basic Shadow Bind"
     ]
   },
   {
     "name": "Yamanaka",
     "rarity": "Common",
-    "lore": "Known for mind-related techniques.",
+    "lore": "A clan of mentalists who use subtle mind transfer techniques and genjutsu to support their allies.",
     "suggested_personalities": [
       "Sociable",
       "Intuitive"
     ],
-    "strength_bonus": 1,
-    "defense_bonus": 1,
-    "speed_bonus": 2,
+    "starting_bonuses": {
+      "strength": 1,
+      "defense": 1,
+      "speed": 2
+    },
     "starting_jutsu": [
       "Mind Transfer",
-      "Mind Transmission"
+      "Basic Sensory Link"
     ]
   },
   {
     "name": "Sarutobi",
     "rarity": "Common",
-    "lore": "Known for strong chakra and fire affinity.",
+    "lore": "A storied clan with a deep connection to fire, embodying tradition and a steadfast spirit.",
     "suggested_personalities": [
       "Wise",
       "Honorable"
     ],
-    "strength_bonus": 2,
-    "defense_bonus": 2,
-    "speed_bonus": 1,
+    "starting_bonuses": {
+      "strength": 2,
+      "defense": 2,
+      "speed": 1
+    },
     "starting_jutsu": [
-      "Enma Staff",
-      "Fire Release: Fireball"
+      "Basic Fireball Jutsu",
+      "Simple Ash Cloud"
     ]
   },
   {
     "name": "Aburame",
     "rarity": "Uncommon",
-    "lore": "Known for insect manipulation.",
+    "lore": "A secretive clan that harnesses insect-based ninjutsu through chakra symbiosis for precision strikes.",
     "suggested_personalities": [
       "Calm",
       "Analytical"
     ],
-    "strength_bonus": 2,
-    "defense_bonus": 2,
-    "speed_bonus": 2,
+    "starting_bonuses": {
+      "strength": 2,
+      "defense": 2,
+      "speed": 2
+    },
     "starting_jutsu": [
-      "Insect Sphere",
-      "Insect Clone"
+      "Insect Infestation",
+      "Basic Insect Strike"
     ]
   },
   {
-    "name": "Hyuga",
+    "name": "Hyūga",
     "rarity": "Uncommon",
-    "lore": "Known for Byakugan and gentle fist.",
+    "lore": "An ancient clan famed for the Byakugan and Gentle Fist techniques, excelling in close-quarters combat.",
     "suggested_personalities": [
       "Proud",
       "Disciplined"
     ],
-    "strength_bonus": 3,
-    "defense_bonus": 2,
-    "speed_bonus": 3,
+    "starting_bonuses": {
+      "strength": 3,
+      "defense": 2,
+      "speed": 3
+    },
     "starting_jutsu": [
       "Gentle Fist",
-      "Eight Trigrams Palm Rotation"
+      "Basic Eight Trigrams Rotation"
     ]
   },
   {
     "name": "Uchiha",
-    "rarity": "Uncommon",
-    "lore": "Known for Sharingan and fire techniques.",
+    "rarity": "Legendary",
+    "lore": "A powerful clan of Hidden Leaf renowned for their Sharingan and fire techniques, carrying a heavy emotional legacy.",
     "suggested_personalities": [
       "Proud",
-      "Determined"
+      "Passionate"
     ],
-    "strength_bonus": 3,
-    "defense_bonus": 2,
-    "speed_bonus": 3,
+    "starting_bonuses": {
+      "strength": 4,
+      "defense": 3,
+      "speed": 4
+    },
     "starting_jutsu": [
-      "Fire Release: Fireball",
-      "Shuriken Shadow Clone"
+      "Advanced Fireball Jutsu",
+      "Refined Genjutsu"
     ]
   },
   {
     "name": "Senju",
     "rarity": "Uncommon",
-    "lore": "Known for strong life force and wood release.",
+    "lore": "One of the founding clans, celebrated for their mastery of Wood Release and natural leadership.",
     "suggested_personalities": [
       "Noble",
       "Protective"
     ],
-    "strength_bonus": 3,
-    "defense_bonus": 3,
-    "speed_bonus": 2,
+    "starting_bonuses": {
+      "strength": 3,
+      "defense": 3,
+      "speed": 2
+    },
     "starting_jutsu": [
-      "Wood Release: Wood Clone",
-      "Wood Release: Wood Wall"
+      "Wood Clone",
+      "Basic Wood Wall"
     ]
   },
   {
     "name": "Uzumaki",
-    "rarity": "Uncommon",
-    "lore": "Known for sealing techniques and strong life force.",
+    "rarity": "Legendary",
+    "lore": "A resilient clan famed for their sealing techniques and robust chakra reserves, guardians of forbidden knowledge.",
     "suggested_personalities": [
       "Resilient",
-      "Creative"
+      "Innovative"
     ],
-    "strength_bonus": 2,
-    "defense_bonus": 3,
-    "speed_bonus": 2,
+    "starting_bonuses": {
+      "strength": 3,
+      "defense": 4,
+      "speed": 2
+    },
     "starting_jutsu": [
       "Adamantine Sealing Chains",
       "Uzumaki Sealing Method"

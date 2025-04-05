@@ -5,6 +5,8 @@ import pickle
 import logging
 import shutil
 import platform
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from selenium.webdriver.common.by import By
 import undetected_chromedriver as uc
@@ -21,6 +23,8 @@ class OpenAIClient:
     # Static tracking of booted state
     _booted = False
     _instance = None
+    # Thread executor for blocking operations
+    _executor = ThreadPoolExecutor(max_workers=1)
 
     def __init__(self, profile_dir=None, cookie_dir=None, target_gpt_url=None, headless=False, driver_path=None, api_key=None):
         """
@@ -178,9 +182,9 @@ class OpenAIClient:
         except Exception as e:
             logger.error(f"❌ Failed to save cookies: {e}")
 
-    def load_openai_cookies(self):
+    async def load_openai_cookies(self):
         """
-        Load OpenAI cookies from file and refresh session.
+        Load OpenAI cookies from file and refresh session. Async version.
         """
         if not os.path.exists(self.COOKIE_FILE):
             logger.warning(f"⚠️ No OpenAI cookie file found at {self.COOKIE_FILE}. Manual login may be required.")
@@ -188,7 +192,7 @@ class OpenAIClient:
 
         # Navigate to the base domain first to set cookies
         self.driver.get(self.base_domain + "/")
-        time.sleep(2)
+        await asyncio.sleep(2)  # Non-blocking sleep
 
         try:
             with open(self.COOKIE_FILE, "rb") as f:
@@ -198,30 +202,15 @@ class OpenAIClient:
             self.driver.delete_all_cookies()
 
             for cookie in cookies:
-                # Ensure cookie domain matches or is a subdomain of the base domain
-                if cookie.get('domain') and cookie['domain'].endswith(parsed_url.netloc):
-                     # Remove SameSite attribute if present and problematic, common issue
-                     if 'sameSite' in cookie:
-                         del cookie['sameSite']
-                     try:
-                         self.driver.add_cookie(cookie)
-                     except Exception as add_cookie_err:
-                          logger.warning(f"⚠️ Could not add cookie: {cookie.get('name')}. Error: {add_cookie_err}")
-                else:
-                    logger.warning(f"🍪 Skipping cookie for domain {cookie.get('domain')}, doesn't match base {parsed_url.netloc}")
-
-
-            logger.info("Attempting to navigate to target GPT URL after loading cookies...")
-            self.driver.get(self.target_gpt_url) # Navigate to target URL after setting cookies
-            time.sleep(5) # Wait for potential redirects and page load
-            logger.info("✅ OpenAI cookies loaded and session refreshed.")
+                try:
+                    self.driver.add_cookie(cookie)
+                except Exception as cookie_err:
+                    logger.debug(f"⚠️ Error adding cookie: {cookie_err}")
+                    
+            logger.info("✅ Loaded OpenAI cookies")
             return True
         except Exception as e:
-            logger.error(f"❌ Failed to load cookies: {e}", exc_info=True)
-            # Clear potentially corrupted cookie file
-            if os.path.exists(self.COOKIE_FILE):
-                logger.warning(f"Deleting potentially corrupted cookie file: {self.COOKIE_FILE}")
-                os.remove(self.COOKIE_FILE)
+            logger.error(f"❌ Failed to load cookies: {e}")
             return False
 
     def is_logged_in(self):
@@ -300,140 +289,192 @@ class OpenAIClient:
         if not self.using_api and not self.driver:
             raise RuntimeError("❌ Web scraping driver not initialized. Call `.boot()` first.")
 
-    def process_prompt(self, prompt, timeout=180, model_url=None):
+    async def process_prompt(self, prompt, timeout=180, model_url=None, model=None):
         """
-        Process a prompt using either the API or web scraping method.
+        Send a prompt to OpenAI using the specified model and get the response.
+        Async version that doesn't block the event loop.
         
         Args:
-            prompt (str): The prompt to send to OpenAI.
-            timeout (int): Maximum time to wait for a response (seconds).
-            model_url (str, optional): Optional override for the target GPT URL.
-            
-        Returns:
-            str: The response from OpenAI.
+            prompt: The user prompt.
+            timeout: Maximum time to wait for a response in seconds.
+            model_url: Optional URL to a specific model when using web interface.
+            model: Optional model name to use when using API (defaults to "gpt-4").
         """
+        if self.using_api:
+            # This directly uses the API for a clean, reliable experience
+            try:
+                # Use the specified model or fall back to gpt-4
+                model_name = model if model else "gpt-4"
+                logger.info(f"Using model: {model_name} via API")
+                
+                response = await asyncio.get_event_loop().run_in_executor(
+                    self._executor,
+                    lambda: self.openai.ChatCompletion.create(
+                        model=model_name,  # Use the specified model
+                        messages=[
+                            {"role": "system", "content": "You are a helpful assistant."},
+                            {"role": "user", "content": prompt}
+                        ]
+                    )
+                )
+                return response.choices[0].message.content
+            except Exception as e:
+                logger.error(f"❌ API call failed: {e}")
+                return f"Error: {str(e)}"
+        
+        # Web-based approach for the rest
         self._assert_ready()
         
-        # Use API if available
+        # Use the specified model URL or default to the configured target
+        target_url = model_url or self.target_gpt_url
+        
+        # If a model is specified and we're using web interface, try to update the URL
+        if model and not model_url and "chat.openai.com" in self.target_gpt_url:
+            # Attempt to construct a URL with the model parameter
+            base_url = self.target_gpt_url.split("?")[0]
+            target_url = f"{base_url}?model={model}"
+            logger.info(f"Using model-specific URL: {target_url}")
+        
+        # Navigate to the model URL
+        await asyncio.get_event_loop().run_in_executor(
+            self._executor,
+            lambda: self.driver.get(target_url)
+        )
+        
+        # Wait for page load
+        await asyncio.sleep(3)  # Non-blocking sleep
+            
+        try:
+            # Wait for the textarea to be present
+            prompt_textarea = await asyncio.get_event_loop().run_in_executor(
+                self._executor,
+                lambda: WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located((By.TAG_NAME, "textarea"))
+                )
+            )
+            
+            # Clear any existing text and send our prompt
+            await asyncio.get_event_loop().run_in_executor(
+                self._executor,
+                lambda: prompt_textarea.clear()
+            )
+            
+            # Send the prompt with a natural typing effect
+            await self.send_prompt_smoothly(prompt_textarea, prompt)
+            
+            # Press Enter to submit
+            await asyncio.get_event_loop().run_in_executor(
+                self._executor,
+                lambda: prompt_textarea.send_keys(Keys.RETURN)
+            )
+            
+            await asyncio.sleep(3)  # Non-blocking wait after sending
+            
+            # Now get the full response
+            return await self.get_full_response(timeout)
+            
+        except Exception as e:
+            error_msg = f"❌ Error processing prompt: {str(e)}"
+            logger.error(error_msg, exc_info=True)
+            self._save_page_source("error_processing_prompt")
+            return f"Error: {error_msg}"
+
+    async def get_chatgpt_response(self, prompt, timeout=180, model_url=None, model=None):
+        """
+        Async wrapper around process_prompt that returns just the text response.
+        This is the main external-facing method most callers should use.
+        
+        Args:
+            prompt: The user prompt.
+            timeout: Maximum time to wait for a response in seconds.
+            model_url: Optional URL to a specific model when using web interface.
+            model: Optional model name to use when using API (defaults to "gpt-4").
+        """
+        if self.using_api:
+            # If using the API, process_prompt already returns clean text
+            return await self.process_prompt(prompt, timeout, model_url, model)
+        
+        # For web scraping, we need to run this in the executor to prevent blocking
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(
+            self._executor, 
+            lambda: self.process_prompt_sync(prompt, timeout, model_url, model)
+        )
+    
+    def process_prompt_sync(self, prompt, timeout=180, model_url=None, model=None):
+        """
+        Synchronous version of process_prompt for use with run_in_executor.
+        This should NOT be called directly by external code.
+        
+        Args:
+            prompt: The user prompt.
+            timeout: Maximum time to wait for a response in seconds.
+            model_url: Optional URL to a specific model when using web interface.
+            model: Optional model name to use when using API (defaults to "gpt-4").
+        """
+        # Implementation similar to original process_prompt but synchronous
+        self._assert_ready()
+        
+        # Handle API mode
         if self.using_api:
             try:
-                logger.info(f"Sending prompt to OpenAI API: {prompt[:50]}...")
+                # Use the specified model or fall back to gpt-4
+                model_name = model if model else "gpt-4"
+                logger.info(f"Using model: {model_name} via API (sync)")
+                
                 response = self.openai.ChatCompletion.create(
-                    model="gpt-4",  # Or client-specified model
+                    model=model_name,
                     messages=[
                         {"role": "system", "content": "You are a helpful assistant."},
                         {"role": "user", "content": prompt}
-                    ],
-                    max_tokens=2000
+                    ]
                 )
-                result = response.choices[0].message.content
-                logger.info(f"Received API response: {result[:50]}...")
-                return result
+                return response.choices[0].message.content
             except Exception as e:
-                logger.error(f"❌ OpenAI API request failed: {e}", exc_info=True)
-                raise
-        # Fall back to web scraping
-        else:
-            return self.get_chatgpt_response(prompt, timeout, model_url)
-
-    def get_chatgpt_response(self, prompt, timeout=180, model_url=None):
-        """
-        Sends a prompt to the target ChatGPT URL and retrieves the full response.
-
-        Args:
-            prompt (str): The prompt text to send.
-            timeout (int): Maximum time in seconds to wait for the response.
-            model_url (str, optional): Specific URL to send the prompt to (overrides the default target_gpt_url). Defaults to None.
-
-        Returns:
-            str: The retrieved response text, or "" if an error occurs.
-        """
-        self._assert_ready()
-        logger.info("✉️ Sending prompt to ChatGPT...")
-
+                logger.error(f"❌ API call failed: {e}")
+                return f"Error: {str(e)}"
+        
+        # Use the specified model URL or default to the configured target
+        target_url = model_url or self.target_gpt_url
+        
+        # If a model is specified and we're using web interface, try to update the URL
+        if model and not model_url and "chat.openai.com" in self.target_gpt_url:
+            # Attempt to construct a URL with the model parameter
+            base_url = self.target_gpt_url.split("?")[0]
+            target_url = f"{base_url}?model={model}"
+            logger.info(f"Using model-specific URL: {target_url}")
+        
+        # Navigate to the model URL
+        self.driver.get(target_url)
+        
+        # Wait for page load
+        time.sleep(5)
+            
         try:
-            # Use the specific model_url if provided, otherwise default to the instance's target_gpt_url
-            current_target_url = model_url if model_url else self.target_gpt_url
-            logger.info(f"Navigating to URL: {current_target_url}")
-            self.driver.get(current_target_url)
-            time.sleep(3) # Wait for page load
-
-            # Re-verify login state before sending prompt, attempt relogin if needed
-            if not self.is_logged_in():
-                 logger.warning("Session seems invalid before sending prompt. Attempting re-login...")
-                 if not self.login_openai():
-                      logger.error("❌ Re-login failed. Cannot send prompt.")
-                      return ""
-                 # After re-login, ensure we are back on the target page
-                 logger.info(f"Re-navigating to {current_target_url} after re-login.")
-                 self.driver.get(current_target_url)
-                 time.sleep(3)
-
-
-            wait = WebDriverWait(self.driver, 20) # Increased wait time
-
-            # Wait for the main text area (adjust selector if needed)
-            # Common selectors: textarea#prompt-textarea, div[contenteditable="true"]
-            try:
-                 # Prioritize the textarea ID if known
-                 input_element = wait.until(EC.element_to_be_clickable(
-                     (By.ID, "prompt-textarea"))
-                 )
-                 logger.info("✅ Found prompt textarea by ID.")
-            except:
-                 logger.warning("⚠️ Could not find textarea by ID, trying contenteditable div...")
-                 try:
-                    input_element = wait.until(EC.element_to_be_clickable(
-                        (By.CSS_SELECTOR, "div.ProseMirror[contenteditable='true']")) # Fallback selector
-                    )
-                    logger.info("✅ Found ProseMirror input div.")
-                 except Exception as el_err:
-                      logger.error(f"❌ Could not find a suitable input element after waiting: {el_err}")
-                      self._save_page_source("error_find_input") # Save page source for debugging
-                      return ""
-
-
-            input_element.click()
-            # Clear any existing text potentially? input_element.clear() might be needed
-            input_element.clear()
-            time.sleep(0.5)
-
-
-            # Type the prompt slowly
-            if not self.send_prompt_smoothly(input_element, prompt, delay=0.03):
-                 logger.error("❌ Failed to type prompt into element.")
-                 return ""
-
-            # Find and click the submit button (more reliable than Enter key)
-            # Selector needs to be robust (e.g., button with specific data-testid or aria-label)
-            try:
-                 # Example: Find button by data-testid (inspect element to find the actual value)
-                 # submit_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-testid='send-button']")))
-
-                 # Example: Find button with SVG path associated with send (more complex, might be needed)
-                 # submit_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[.//path[contains(@d, 'M7 11L12')]]"))) # Example send icon path d attribute
-
-                 # Fallback: Sending Enter key (less reliable)
-                 logger.warning("⚠️ Could not find specific submit button, sending RETURN key as fallback.")
-                 input_element.send_keys(Keys.RETURN)
-
-                 # If using a specific button:
-                 # submit_button.click()
-
-                 logger.info("✅ Prompt submitted, waiting for response...")
-
-            except Exception as submit_err:
-                 logger.error(f"❌ Failed to find or click submit button / send RETURN key: {submit_err}")
-                 self._save_page_source("error_submit_prompt")
-                 return ""
-
-
-            return self.get_full_response(timeout=timeout)
-
+            # Wait for the textarea to be present
+            prompt_textarea = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.TAG_NAME, "textarea"))
+            )
+            
+            # Clear any existing text and send our prompt
+            prompt_textarea.clear()
+            
+            # Send the prompt with a natural typing effect
+            self.send_prompt_smoothly_sync(prompt_textarea, prompt)
+            
+            # Press Enter to submit
+            prompt_textarea.send_keys(Keys.RETURN)
+            
+            time.sleep(3)
+            
+            # Now get the full response
+            return self.get_full_response_sync(timeout)
+            
         except Exception as e:
-            logger.error(f"❌ Error in get_chatgpt_response: {e}", exc_info=True)
-            self._save_page_source("error_get_response")
-            return ""
+            error_msg = f"❌ Error processing prompt: {str(e)}"
+            logger.error(error_msg, exc_info=True)
+            self._save_page_source("error_processing_prompt")
+            return f"Error: {error_msg}"
 
     def get_full_response(self, timeout=180):
         """
@@ -530,19 +571,30 @@ class OpenAIClient:
         logger.info(f"✅ Final response captured. Length: {len(full_response_text)}")
         return full_response_text
 
-    def send_prompt_smoothly(self, element, prompt, delay=0.05):
+    async def send_prompt_smoothly(self, element, prompt, delay=0.05):
         """
-        Sends the prompt text one character at a time for a more human-like interaction.
+        Send the prompt with a more natural typing cadence.
+        Uses asyncio.sleep to avoid blocking the event loop.
         """
-        self._assert_ready()
-        try:
-            for char in prompt:
-                element.send_keys(char)
-                time.sleep(delay)
-            return True
-        except Exception as e:
-             logger.error(f"❌ Error sending keys smoothly: {e}", exc_info=True)
-             return False
+        # Implementation that uses async sleep and runs typing in executor
+        for chunk in self._chunk_prompt(prompt):
+            await asyncio.get_event_loop().run_in_executor(
+                self._executor,
+                lambda: element.send_keys(chunk)
+            )
+            await asyncio.sleep(delay)  # Non-blocking sleep between chunks
+    
+    def send_prompt_smoothly_sync(self, element, prompt, delay=0.05):
+        """
+        Synchronous version of send_prompt_smoothly for use with run_in_executor.
+        """
+        for char in prompt:
+            element.send_keys(char)
+            time.sleep(delay)
+    
+    def _chunk_prompt(self, prompt, chunk_size=3):
+        """Helper to break prompt into chunks for smoother typing simulation"""
+        return [prompt[i:i+chunk_size] for i in range(0, len(prompt), chunk_size)]
 
     def login_openai(self):
         """
@@ -596,46 +648,33 @@ class OpenAIClient:
         except Exception as e:
              logger.error(f"❌ Failed to save page source: {e}")
 
-    def shutdown(self):
-        """Clean up resources used by the OpenAIClient."""
-        if self.using_api:
-            logger.info("API client shutdown - no resources to clean up.")
-            self._booted = False
-            if OpenAIClient._instance is self:
-                OpenAIClient._booted = False
-            return
-            
-        if not self._booted or not self.driver:
-            logger.info("OpenAI client already shut down or not initialized.")
-            return
-
-        try:
-            logger.info("Shutting down OpenAI client...")
+    async def shutdown(self):
+        """
+        Cleanly close the browser driver.
+        Async version that doesn't block the event loop.
+        """
+        if self.driver:
             try:
-                # Save cookies before closing if using web scraping
-                if hasattr(self, 'save_openai_cookies'):
-                    self.save_openai_cookies()
-            except Exception as cookie_err:
-                logger.warning(f"Could not save cookies during shutdown: {cookie_err}")
-
-            # Close the driver
-            if self.driver:
-                try:
-                    self.driver.quit()
-                    logger.info("Chrome driver closed cleanly.")
-                except Exception as e:
-                    logger.warning(f"Error during driver.quit(): {e}")
-                    self._force_kill_chromedriver()
-                finally:
-                    self.driver = None
-
-            self._booted = False
-            if OpenAIClient._instance is self:
-                OpenAIClient._booted = False
-            logger.info("✅ OpenAI client shut down.")
-        except Exception as e:
-            logger.error(f"❌ Error during OpenAI client shutdown: {e}", exc_info=True)
-            self._force_kill_chromedriver()
+                logger.info("Closing Chrome driver...")
+                await asyncio.get_event_loop().run_in_executor(
+                    self._executor,
+                    lambda: self.driver.quit()
+                )
+                self.driver = None
+                self._booted = False
+                logger.info("✅ Chrome driver closed successfully")
+            except Exception as e:
+                logger.error(f"❌ Error closing Chrome driver: {e}", exc_info=True)
+                # Try force killing as a fallback
+                await asyncio.get_event_loop().run_in_executor(
+                    self._executor,
+                    self._force_kill_chromedriver
+                )
+        
+        # Also shut down the executor
+        self._executor.shutdown(wait=False)
+        
+        logger.info("✅ OpenAI client shutdown complete")
 
     def _force_kill_chromedriver(self):
         """

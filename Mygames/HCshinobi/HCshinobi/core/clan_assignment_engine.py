@@ -7,6 +7,7 @@ import os
 import random
 import time
 import logging
+import asyncio # Added import
 from typing import Dict, List, Optional, Tuple, Any
 
 # Use absolute imports for core modules and constants
@@ -17,7 +18,16 @@ from HCshinobi.core.constants import (
     OVERPOPULATED_PENALTY_MILD,
     OVERPOPULATED_PENALTY_SEVERE,
     TOKEN_BOOST_PER_TOKEN,
-    MAX_TOKEN_BOOST
+    MAX_TOKEN_BOOST,
+    # Import path constants
+    CLAN_POPULATION_FILE,
+    LOG_DIR,
+    # Import directory/file constants
+    DATA_DIR,
+    CLANS_SUBDIR,
+    CLANS_FILE,
+    ASSIGNMENT_HISTORY_FILE,
+    DEFAULT_CLAN_WEIGHT
 )
 from HCshinobi.core.clan_data import ClanData
 from HCshinobi.core.personality_modifiers import PersonalityModifiers
@@ -42,61 +52,74 @@ class ClanAssignmentEngine:
     Handles persistence of clan population data.
     """
     
-    def __init__(self):
-        """Initialize the clan assignment engine."""
-        self.clan_data = ClanData()  # Use ClanData for clan management
-        self.player_clans = {}
+    def __init__(self, clan_data_service: ClanData, personality_modifiers_service: PersonalityModifiers):
+        """Initialize the clan assignment engine.
+
+        Args:
+            clan_data_service: Initialized ClanData service instance.
+            personality_modifiers_service: Initialized PersonalityModifiers service instance.
+        """
+        # self.data_dir = data_dir # No longer needed if paths come from constants
+        self.log_dir = LOG_DIR # Use constant
+        self.clan_data = clan_data_service # Use injected service
+        self.personality_modifiers = personality_modifiers_service # Use injected service
+        self.player_clans = {} # Consider removing if clan is stored on Character object
         self.clan_populations = {}
-        # Set the path to the clan population file
-        self.clan_population_file = os.path.join("data", "clan_populations.json")
-        self.load_clans()
-        
-    def load_clans(self):
-        """Load clan data using ClanData."""
+        # Construct the full path for the population file
+        self.clan_population_file_path = os.path.join(DATA_DIR, CLAN_POPULATION_FILE)
+
+    async def ready_hook(self):
+        """Initialize ClansAssignmentEngine with clan data."""
         try:
-            # Use ClanData to get all clans
-            all_clans = self.clan_data.get_all_clans()
-            logger.info(f"Successfully loaded {len(all_clans)} clans from ClanData")
-            
-            # Initialize populations for all clans
-            self.clan_populations = {clan['name']: 0 for clan in all_clans}
+            # Load clans from ClanData service
+            clans = self.clan_data.get_all_clans()
+            # Type-check to avoid string index errors
+            if isinstance(clans, dict):
+                logger.info(f"Successfully loaded {len(clans)} clans from ClanData")
+            else:
+                logger.warning(f"Unexpected data type from ClanData.get_all_clans(): {type(clans)}. Expected dict.")
         except Exception as e:
-            logger.error(f"Error loading clans: {e}")
-            self.clan_populations = {}
-        
-        # Create data directory for population file if it doesn't exist
-        pop_dir = os.path.dirname(self.clan_population_file)
-        if pop_dir:
-            os.makedirs(pop_dir, exist_ok=True)
-        
-        # Initialize or load clan population data
+            logger.error(f"Error loading clans from ClanData: {e}")
+            
+        # Load clan population data
         self.clan_populations = self._load_clan_population_data()
         
-        # Ensure logs directory exists
-        # Consider making log file path configurable too
-        os.makedirs("logs", exist_ok=True)
+        # Ensure logs directory exists using constant
+        os.makedirs(self.log_dir, exist_ok=True)
+        logger.info(f"Ensured log directory exists: {self.log_dir}")
+        logger.info(f"ClanAssignmentEngine ready_hook finished. Initialized populations for {len(self.clan_populations)} clans.")
     
     def _load_clan_population_data(self) -> Dict[str, int]:
         """
-        Load clan population data from self.clan_population_file.
+        Load clan population data from the specified file path.
         If file doesn't exist, initialize with zero counts for all defined clans.
         Filters loaded data to only include currently defined clans.
         """
-        defined_clan_names = {clan["name"] for clan in self.clan_data.get_all_clans()}
-        
+        # Filter population data to only include currently defined clans
+        try:
+            # Iterate over the values (clan dictionaries) instead of keys
+            defined_clan_names = {clan["name"] for clan in self.clan_data.get_all_clans().values()}
+        except AttributeError:
+             # Handle case where clan_data might not be fully initialized or get_all_clans is missing
+            logger.error("Failed to get clan names from clan_data. Check clan_data initialization.")
+            defined_clan_names = set()
+            
+        # Use the full path variable
+        file_path = self.clan_population_file_path
+
         # Ensure directory exists
-        pop_dir = os.path.dirname(self.clan_population_file)
+        pop_dir = os.path.dirname(file_path)
         if pop_dir:
             os.makedirs(pop_dir, exist_ok=True)
 
-        if not os.path.exists(self.clan_population_file):
-            logger.info(f"Clan population file {self.clan_population_file} not found. Initializing.")
+        if not os.path.exists(file_path):
+            logger.info(f"Clan population file {file_path} not found. Initializing.")
             populations = {clan_name: 0 for clan_name in defined_clan_names}
             self._save_clan_population_data(populations) # Save the initialized data
             return populations
         
         try:
-            with open(self.clan_population_file, 'r', encoding='utf-8') as f: 
+            with open(file_path, 'r', encoding='utf-8') as f: 
                 loaded_populations = json.load(f)
                 if not isinstance(loaded_populations, dict):
                      raise ValueError("Population file does not contain a valid dictionary.")
@@ -118,7 +141,7 @@ class ClanAssignmentEngine:
                 # Log if filtering removed any clans
                 removed_clans = set(loaded_populations.keys()) - set(filtered_populations.keys())
                 if removed_clans:
-                     logger.warning(f"Loaded population data contained clans not currently defined: {removed_clans}. Filtered count: {len(filtered_populations)}. Consider cleaning {self.clan_population_file}")
+                     logger.warning(f"Loaded population data contained clans not currently defined: {removed_clans}. Filtered count: {len(filtered_populations)}. Consider cleaning {file_path}")
                      updated = True # Mark for potential resave if desired
                 
                 # Optional: Save the cleaned/updated data back
@@ -126,22 +149,26 @@ class ClanAssignmentEngine:
                 #     self._save_clan_population_data(filtered_populations)
                      
                 return filtered_populations
-        except (json.JSONDecodeError, FileNotFoundError, IOError, ValueError) as e: 
-            logger.error(f"Error loading or processing clan population file {self.clan_population_file}: {e}. Re-initializing.", exc_info=True)
+        except (json.JSONDecodeError, FileNotFoundError, IOError, ValueError) as e:
+            # Use the full path variable (Corrected log line)
+            logger.error(f"Error loading or processing clan population file {file_path}: {e}. Re-initializing.", exc_info=True)
             populations = {clan_name: 0 for clan_name in defined_clan_names}
             self._save_clan_population_data(populations)
             return populations
     
     def _save_clan_population_data(self, clan_populations: Dict[str, int]) -> None:
         """Save clan population data to self.clan_population_file."""
+        # Use the full path variable
+        file_path = self.clan_population_file_path
+
         # Ensure directory exists (redundant if done in init/load, but safe)
-        pop_dir = os.path.dirname(self.clan_population_file)
+        pop_dir = os.path.dirname(file_path)
         if pop_dir:
             os.makedirs(pop_dir, exist_ok=True)
             
-        with open(self.clan_population_file, 'w') as f:
+        with open(file_path, 'w') as f:
             json.dump(clan_populations, f, indent=2)
-        # logger.debug(f"Saved clan populations to {self.clan_population_file}")
+        # logger.debug(f"Saved clan populations to {file_path}")
     
     def _calculate_base_weights(self) -> Dict[str, float]:
         """
@@ -151,13 +178,35 @@ class ClanAssignmentEngine:
         Returns:
             Dict[str, float]: Dictionary mapping clan names to their base weights
         """
-        all_clans = self.clan_data.get_all_clans()
-        base_weights = {clan["name"]: clan.get("base_weight", 0) for clan in all_clans}
-        # Log clans with zero base weight
-        zero_weight_clans = [name for name, weight in base_weights.items() if weight == 0]
-        if zero_weight_clans:
-            logger.warning(f"Clans with zero base weight calculated: {zero_weight_clans}")
-        return base_weights
+        try:
+            all_clans = self.clan_data.get_all_clans()
+            
+            # Handle if all_clans is a dictionary where keys are clan IDs/names and values are clan data
+            if isinstance(all_clans, dict):
+                base_weights = {}
+                for clan_id, clan in all_clans.items():
+                    # Determine clan name based on structure
+                    if isinstance(clan, dict) and "name" in clan:
+                        clan_name = clan["name"]
+                        base_weight = clan.get("base_weight", DEFAULT_CLAN_WEIGHT)
+                    else:
+                        # Use the key as name if clan is not a dict or doesn't have 'name'
+                        clan_name = clan_id
+                        base_weight = DEFAULT_CLAN_WEIGHT
+                    base_weights[clan_name] = base_weight
+            # For other return types (like a list), use a simpler approach
+            else:
+                logger.warning(f"Unexpected data type from get_all_clans: {type(all_clans)}. Using empty weights.")
+                base_weights = {}
+                
+            # Log clans with zero base weight
+            zero_weight_clans = [name for name, weight in base_weights.items() if weight == 0]
+            if zero_weight_clans:
+                logger.warning(f"Clans with zero base weight calculated: {zero_weight_clans}")
+            return base_weights
+        except Exception as e:
+            logger.error(f"Error calculating base weights: {e}", exc_info=True)
+            return {}
     
     def _apply_population_adjustments(self, weights: Dict[str, float]) -> Dict[str, float]:
         """
@@ -367,9 +416,15 @@ class ClanAssignmentEngine:
             "duration_ms": (end_time - start_time) * 1000,
             "final_weights": {k: round(v, 4) for k, v in final_weights.items()} # Store rounded weights
         }
-        logger.info(f"Assigned Clan: {assigned_clan} (Rarity: {assigned_clan_rarity}) to Player: {player_name} ({player_id}) [Personality: {personality}, Tokens: {token_count} for {token_boost_clan}] took {assignment_details['duration_ms']:.2f} ms")
-        # TODO: Consider more structured logging (e.g., JSON logs)
-
+        
+        # Log structured JSON data
+        log_data = {
+            "event_type": "clan_assignment",
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "data": assignment_details
+        }
+        logger.info(json.dumps(log_data, ensure_ascii=False))
+        
         return assignment_details
 
     def mark_player_death(

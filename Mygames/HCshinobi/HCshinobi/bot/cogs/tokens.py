@@ -4,14 +4,13 @@ Discord Cog for Token-related commands.
 import discord
 from discord import app_commands
 from discord.ext import commands
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Any
 import logging
 
 # Adjust import paths
 try:
     from ...core.token_system import TokenSystem, TokenError
     # from ...utils.logging import log_command, log_error # If needed for specific logging
-    # TODO: Inject TokenSystem via self.bot
 except ImportError as e:
     logging.error(f"Error importing core modules in tokens.py: {e}. Dependency injection needed.")
     class TokenError(Exception): pass
@@ -36,18 +35,29 @@ logger = logging.getLogger(__name__)
 
 # Type hint for bot
 if TYPE_CHECKING:
-    from ..bot import HCShinobiBot
+    # Assume bot object structure includes services
+    from ..bot import HCBot 
+    class BotWithServices(HCBot):
+         services: Any # Replace Any with actual ServiceContainer type if available
 
 class TokenCommands(commands.Cog):
     """Commands for token management and usage."""
 
-    def __init__(self, bot: 'HCShinobiBot'):
+    # --- MODIFIED: Use bot.services for injection --- #
+    def __init__(self, bot: 'BotWithServices'):
         self.bot = bot
-        # Access TokenSystem via self.bot (Dependency Injection)
-        self.token_system: TokenSystem = getattr(bot, 'token_system', TokenSystem())
-        if not isinstance(self.token_system, TokenSystem):
-            logger.error("TokenSystem service not properly injected/initialized for TokenCommands.")
-        logger.info("TokenCommands Cog initialized with injected TokenSystem.")
+        # Access TokenSystem via bot.services
+        self.token_system: Optional[TokenSystem] = None
+        if hasattr(bot, 'services') and hasattr(bot.services, 'token_system'):
+            self.token_system = bot.services.token_system
+        
+        if not self.token_system:
+            logger.error("TokenSystem service not found via bot.services in TokenCommands __init__.")
+            # Decide how to handle: raise error, disable cog, or operate without?
+            # For now, commands will check self.token_system availability.
+        else:
+             logger.info("TokenCommands Cog initialized with injected TokenSystem.")
+    # --- END MODIFIED --- #
 
     @app_commands.command(
         name="tokens",
@@ -212,11 +222,13 @@ class TokenCommands(commands.Cog):
             await interaction.followup.send(f"An unexpected error occurred: {e}")
 
 
-async def setup(bot: 'HCShinobiBot'):
+async def setup(bot: 'BotWithServices'):
     """Sets up the TokenCommands cog."""
-    if not hasattr(bot, "token_system"):
-        logger.error("Bot is missing required attribute 'token_system' for TokenCommands.")
+    # --- MODIFIED: Check bot.services.token_system --- #
+    if not hasattr(bot, 'services') or not hasattr(bot.services, 'token_system') or bot.services.token_system is None:
+        logger.error("Bot is missing required attribute 'services.token_system' for TokenCommands.")
         return # Prevent loading if dependency missing
+    # --- END MODIFIED --- #
 
     await bot.add_cog(TokenCommands(bot))
     logger.info("TokenCommands Cog loaded and added to bot.") 

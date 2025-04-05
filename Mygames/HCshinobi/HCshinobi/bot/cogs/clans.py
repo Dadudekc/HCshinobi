@@ -48,8 +48,11 @@ except ImportError as e:
         def __init__(self, value):
             self.value = value
 
+# Import the path constant
+from HCshinobi.utils.config import DEFAULT_CLANS_PATH
+
 # Fix the typo here and update the path to point to the data directory
-CLANS_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "data", "clans.json")
+CLANS_FILE = DEFAULT_CLANS_PATH
 
 class ClanCommands(commands.Cog):
     """Commands for clan management."""
@@ -90,11 +93,19 @@ class ClanCommands(commands.Cog):
 
     @app_commands.command(
         name="roll_clan",
-        description="Roll for your clan assignment based on weighted rarities"
+        description="Roll for your clan assignment, optionally selecting personality and boosting."
+    )
+    @app_commands.describe(
+        personality="Choose a personality trait (optional).",
+        boost_clan="Enter the exact name of a clan to boost your chances for (optional).",
+        boost_tokens="Number of tokens (1-3) to use for boosting the selected clan (optional)."
     )
     async def roll_clan(
         self,
-        interaction: discord.Interaction
+        interaction: discord.Interaction,
+        personality: Optional[str] = None,
+        boost_clan: Optional[str] = None,
+        boost_tokens: Optional[app_commands.Range[int, 0, 3]] = 0
     ):
         """Roll for clan assignment randomly based on weighted rarities."""
         await interaction.response.defer(ephemeral=False, thinking=True)
@@ -102,7 +113,7 @@ class ClanCommands(commands.Cog):
         username = interaction.user.display_name
 
         # Ensure core systems are available
-        if not all([self.clan_engine, self.token_system, self.clan_data, self.personality_modifiers]):
+        if not all([self.clan_engine, self.token_system, self.clan_data]):
              await interaction.followup.send("Sorry, core systems are not available. Please contact an admin.", ephemeral=True)
              logger.error(f"Required services unavailable for roll_clan command by {user_id}")
              return
@@ -114,6 +125,13 @@ class ClanCommands(commands.Cog):
                 await interaction.followup.send(f"You already belong to the {existing_clan} clan. Use `/my_clan` to see details.", ephemeral=True)
                 return
 
+            # Validate boost tokens vs boost clan
+            if boost_tokens > 0 and not boost_clan:
+                 await interaction.followup.send("If you specify boost tokens (>0), you must also specify the `boost_clan` name.", ephemeral=True)
+                 return
+            if boost_clan and boost_tokens == 0:
+                 boost_clan = None # Ignore clan if tokens are 0
+
             # Process roll using the imported function/logic
             try:
                 result = await process_clan_roll(
@@ -121,7 +139,9 @@ class ClanCommands(commands.Cog):
                     username=username,
                     token_system=self.token_system,
                     clan_engine=self.clan_engine,
-                    personality_modifiers=self.personality_modifiers
+                    personality=personality,
+                    token_boost_clan=boost_clan,
+                    token_count=boost_tokens
                 )
             except Exception as e:
                 logger.error(f"Error during process_clan_roll: {e}", exc_info=True)

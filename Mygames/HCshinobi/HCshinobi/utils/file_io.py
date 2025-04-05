@@ -1,11 +1,13 @@
 """
-File I/O utilities for HCShinobi bot.
+File I/O utilities for the HCShinobi application.
+Contains functions for loading and saving JSON data, both synchronously and asynchronously.
 """
 
 import os
 import json
 import logging
-from typing import Any, Optional
+import aiofiles
+from typing import Any, Optional, Dict, Union
 
 logger = logging.getLogger(__name__)
 
@@ -18,71 +20,106 @@ def ensure_directory(path: str) -> None:
         logger.error(f"Failed to create directory {path}: {e}")
         raise
 
-def load_json(path: str) -> Optional[Any]:
-    """Load JSON data from a file.
+def load_json(file_path: str, default=None) -> Optional[Dict[str, Any]]:
+    """
+    Load data from a JSON file (synchronous).
     
     Args:
-        path: Path to the JSON file
+        file_path: Path to the JSON file
+        default: Default value to return if file doesn't exist or is invalid JSON
         
     Returns:
-        Loaded JSON data or None if loading fails
+        Loaded JSON data as dictionary, or default value if file doesn't exist
     """
     try:
-        # Ensure the directory exists
-        directory = os.path.dirname(path)
-        if directory:
-            ensure_directory(directory)
+        if not os.path.exists(file_path):
+            logger.warning(f"File not found: {file_path}")
+            return default
             
-        # If the file doesn't exist, return None
-        if not os.path.exists(path):
-            logger.warning(f"File not found: {path}")
-            return None
-            
-        # Try to load the file
-        with open(path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except json.JSONDecodeError as e:
-        # Check if error is related to BOM and try with utf-8-sig encoding
-        if "BOM" in str(e):
-            try:
-                logger.info(f"Retrying with utf-8-sig encoding for {path}")
-                with open(path, 'r', encoding='utf-8-sig') as f:
-                    return json.load(f)
-            except Exception as inner_e:
-                logger.error(f"Failed to parse JSON with utf-8-sig in {path}: {inner_e}")
-                return None
-        logger.error(f"Invalid JSON in {path}: {e}")
-        return None
-    except PermissionError as e:
-        logger.error(f"Permission denied accessing {path}: {e}")
-        return None
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return data
+    except json.JSONDecodeError:
+        logger.error(f"Invalid JSON in file: {file_path}")
+        return default
     except Exception as e:
-        logger.error(f"Error loading JSON from {path}: {e}")
-        return None
+        logger.error(f"Error loading JSON from {file_path}: {e}")
+        return default
 
-def save_json(path: str, data: Any) -> bool:
-    """Save data to a JSON file.
+def save_json(file_path: str, data, indent=4) -> bool:
+    """
+    Save data to a JSON file (synchronous).
     
     Args:
-        path: Path to save the JSON file
-        data: Data to save
+        file_path: Path to save the JSON file
+        data: Data to save (must be JSON serializable)
+        indent: Number of spaces for indentation
         
     Returns:
-        True if save was successful, False otherwise
+        True if successful, False otherwise
     """
     try:
-        # Ensure the directory exists
-        directory = os.path.dirname(path)
-        if directory:
-            ensure_directory(directory)
+        directory = os.path.dirname(file_path)
+        if directory and not os.path.exists(directory):
+            os.makedirs(directory, exist_ok=True)
             
-        # Save the file with pretty printing
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=indent, ensure_ascii=False)
+            logger.debug(f"Data saved to {file_path}")
         return True
-    except PermissionError as e:
-        logger.error(f"Permission denied saving to {path}: {e}")
-        return False
     except Exception as e:
-        logger.error(f"Error saving JSON to {path}: {e}")
+        logger.error(f"Error saving JSON to {file_path}: {e}")
+        return False
+
+async def async_load_json(file_path: str, default=None) -> Optional[Dict[str, Any]]:
+    """
+    Load data from a JSON file (asynchronous).
+    
+    Args:
+        file_path: Path to the JSON file
+        default: Default value to return if file doesn't exist or is invalid JSON
+        
+    Returns:
+        Loaded JSON data as dictionary, or default value if file doesn't exist
+    """
+    try:
+        if not os.path.exists(file_path):
+            logger.warning(f"File not found: {file_path}")
+            return default
+            
+        async with aiofiles.open(file_path, 'r', encoding='utf-8') as f:
+            content = await f.read()
+            data = json.loads(content)
+            return data
+    except json.JSONDecodeError:
+        logger.error(f"Invalid JSON in file: {file_path}")
+        return default
+    except Exception as e:
+        logger.error(f"Error loading JSON from {file_path}: {e}")
+        return default
+
+async def async_save_json(file_path: str, data, indent=4) -> bool:
+    """
+    Save data to a JSON file (asynchronous).
+    
+    Args:
+        file_path: Path to save the JSON file
+        data: Data to save (must be JSON serializable)
+        indent: Number of spaces for indentation
+        
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        directory = os.path.dirname(file_path)
+        if directory and not os.path.exists(directory):
+            os.makedirs(directory, exist_ok=True)
+            
+        content = json.dumps(data, indent=indent, ensure_ascii=False)
+        async with aiofiles.open(file_path, 'w', encoding='utf-8') as f:
+            await f.write(content)
+            logger.debug(f"Data saved to {file_path}")
+        return True
+    except Exception as e:
+        logger.error(f"Error saving JSON to {file_path}: {e}")
         return False

@@ -11,6 +11,10 @@ from dotenv import load_dotenv
 import discord
 import logging
 from typing import Optional
+from pathlib import Path
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Configure detailed logging
 logging.basicConfig(
@@ -28,7 +32,7 @@ logger.info("Starting HCShinobi bot in debug mode")
 
 try:
     logger.info("Importing bot modules...")
-    from HCshinobi.bot.bot import HCShinobiBot
+    from HCshinobi.bot.bot import HCBot
     from HCshinobi.bot.config import load_config, BotConfig
     from HCshinobi.bot.services import ServiceContainer
     logger.info("Successfully imported bot modules")
@@ -64,7 +68,11 @@ async def run_bot(config: BotConfig, services: ServiceContainer) -> None:
         
         # Create bot instance
         logger.info("Creating bot instance...")
-        bot = HCShinobiBot(config, services)
+        bot = HCBot(config)
+        
+        # Set up the bot (this will initialize services)
+        logger.info("Setting up bot...")
+        await bot.setup()
         
         # Start the bot
         logger.info("Starting bot login...")
@@ -96,9 +104,6 @@ async def run_bot(config: BotConfig, services: ServiceContainer) -> None:
         if bot and not bot.is_closed():
             logger.info("Closing bot connection...")
             await bot.close()
-        if services:
-            logger.info("Shutting down services...")
-            await services.shutdown()
 
 def main():
     """Main entry point for the bot with improved error handling and debugging."""
@@ -116,16 +121,9 @@ def main():
         config = load_config()
         logger.info("Configuration loaded successfully")
         
-        # Initialize services
-        logger.info("Initializing services...")
-        services = asyncio.run(initialize_services(config))
-        if not services:
-            logger.critical("Failed to initialize services. Check the logs for details.")
-            sys.exit(1)
-        
         # Run the bot
         logger.info("Running bot...")
-        asyncio.run(run_bot(config, services))
+        asyncio.run(run_bot(config, None))  # Pass None for services since bot will create its own
         
     except KeyboardInterrupt:
         logger.info("Bot shutting down due to keyboard interrupt...")

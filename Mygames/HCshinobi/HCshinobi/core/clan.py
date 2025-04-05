@@ -20,6 +20,9 @@ class Clan:
     speed_bonus: int = 0
     suggested_personalities: Optional[List[str]] = None
     starting_jutsu: Optional[List[str]] = None
+    village: Optional[str] = None
+    kekkei_genkai: Optional[List[str]] = None
+    traits: Optional[List[str]] = None
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert clan to dictionary.
@@ -41,7 +44,10 @@ class Clan:
             'defense_bonus': self.defense_bonus,
             'speed_bonus': self.speed_bonus,
             'suggested_personalities': self.suggested_personalities,
-            'starting_jutsu': self.starting_jutsu
+            'starting_jutsu': self.starting_jutsu,
+            'village': self.village,
+            'kekkei_genkai': self.kekkei_genkai,
+            'traits': self.traits
         }
         
     @classmethod
@@ -68,5 +74,8 @@ class Clan:
             defense_bonus=data.get('defense_bonus', 0),
             speed_bonus=data.get('speed_bonus', 0),
             suggested_personalities=data.get('suggested_personalities'),
-            starting_jutsu=data.get('starting_jutsu')
+            starting_jutsu=data.get('starting_jutsu'),
+            village=data.get('village'),
+            kekkei_genkai=data.get('kekkei_genkai'),
+            traits=data.get('traits')
         ) 

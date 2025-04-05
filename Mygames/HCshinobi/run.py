@@ -189,7 +189,10 @@ class ShinobiBot(commands.Bot):
         # Initialize core systems
         self.currency_system = CurrencySystem(self.data_dir)
         self.character_system = CharacterSystem(self.data_dir)
-        self.battle_system = BattleSystem(self.character_system)
+        self.battle_system = BattleSystem(
+            character_system=self.character_system,
+            data_dir=self.data_dir
+        )
         self.training_system = TrainingSystem(self.data_dir, self.character_system, self.currency_system)
         self.quest_system = QuestSystem(self.data_dir)
         self.clan_system = ClanSystem(self.data_dir)
@@ -259,6 +262,24 @@ class ShinobiBot(commands.Bot):
             activity=discord.Game(name="!help"),
             status=discord.Status.online
         )
+        
+        # Start the battle cleanup task
+        self.battle_cleanup_task.start()
+    
+    @tasks.loop(hours=6)
+    async def battle_cleanup_task(self):
+        """Background task to clean up inactive battles every 6 hours."""
+        try:
+            logger.info("Running scheduled inactive battle cleanup...")
+            await self.battle_system.cleanup_inactive_battles()
+            logger.info("Inactive battle cleanup completed")
+        except Exception as e:
+            logger.error(f"Error in battle cleanup task: {e}", exc_info=True)
+    
+    @battle_cleanup_task.before_loop
+    async def before_battle_cleanup(self):
+        """Wait until the bot is ready before starting the battle cleanup task."""
+        await self.wait_until_ready()
     
     async def on_message(self, message):
         """Handle incoming messages."""

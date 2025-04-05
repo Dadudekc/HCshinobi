@@ -1,0 +1,26 @@
+[
+    {
+      "mission_id": "S001",
+      "title": "Intelligence Gathering",
+      "description": "Infiltrate an enemy outpost and gather intelligence.",
+      "rank": "S",
+      "reward_exp": 1000,
+      "reward_ryo": 20000,
+      "requirements": {"level": 20, "jutsu": "Stealth"},
+      "objectives": ["Infiltrate outpost", "Retrieve documents", "Escape undetected"],
+      "time_limit_hours": 12,
+      "location": "Enemy Territory"
+    },
+    {
+      "mission_id": "A001",
+      "title": "Protect the Feudal Lord",
+      "description": "Act as a bodyguard for the Feudal Lord during a summit.",
+      "rank": "A",
+      "reward_exp": 500,
+      "reward_ryo": 10000,
+      "requirements": {"level": 15},
+      "objectives": ["Secure the perimeter", "Stay alert for threats", "Ensure Lord's safety"],
+      "time_limit_hours": 24,
+      "location": "Capital City"
+    }
+  ]

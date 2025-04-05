@@ -1,0 +1,54 @@
+[
+  {
+    "id": "retrieve_scroll_1",
+    "title": "Retrieve the Lost Scroll",
+    "description": "A vital scroll was lost near the training grounds. Can you retrieve it?",
+    "difficulty": "D",
+    "min_rank": "Genin",
+    "stages": {
+      "start": {
+        "text": "You arrive at the edge of the training grounds. The area is dense with trees. How do you proceed?",
+        "choices": [
+          {"text": "Search systematically", "next_stage": "search_success"},
+          {"text": "Use Perception", "conditions": {"stat": "perception", "value": 12}, "next_stage": "perception_check"},
+          {"text": "Charge in blindly", "next_stage": "charge_fail"}
+        ]
+      },
+      "perception_check": {
+         "text": "You focus your senses...",
+         "choices": [
+            {"text": "Continue", "random_check": {"stat": "perception", "dc": 10}, "next_stage_success": "found_scroll", "next_stage_failure": "search_fail"}
+         ]
+      },
+      "search_success": {
+        "text": "Your systematic search pays off! You spot the scroll partially hidden under some leaves.",
+        "choices": [
+          {"text": "Retrieve it", "next_stage": "found_scroll"}
+        ]
+      },
+      "found_scroll": {
+         "text": "Success! You have the scroll.",
+         "outcomes": { "rewards": {"ryo": 100, "xp": 25} },
+         "choices": [] // Terminal stage
+      },
+      "charge_fail": {
+        "text": "You rush in and stumble into a hidden ditch, twisting your ankle slightly. The scroll is nowhere in sight.",
+         "outcomes": { "penalties": {"hp": -5} },
+        "choices": [
+           {"text": "Give up", "next_stage": "mission_fail"}
+        ]
+      },
+      "search_fail": {
+         "text": "Despite your efforts, you couldn't locate the scroll.",
+         "choices": [
+           {"text": "Report failure", "next_stage": "mission_fail"}
+         ]
+      },
+      "mission_fail": {
+         "text": "Mission Failed. You return empty-handed.",
+         "choices": [] // Terminal stage
+      }
+    }
+  }
+  // Add more mission definitions here, each with a min_rank
+] 

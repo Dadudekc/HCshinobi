@@ -11,7 +11,7 @@ import discord
 import logging
 from typing import Optional
 
-from HCshinobi.bot.bot import HCShinobiBot
+from HCshinobi.bot.bot import HCBot
 from HCshinobi.bot.config import load_config, BotConfig
 from HCshinobi.bot.services import ServiceContainer
 
@@ -32,7 +32,8 @@ async def run_bot(config: BotConfig, services: ServiceContainer) -> None:
     bot = None
     try:
         # Create bot instance
-        bot = HCShinobiBot(config, services)
+        bot = HCBot(config)
+        await bot.setup()
         
         # Start the bot
         logger.info("Starting bot login...")

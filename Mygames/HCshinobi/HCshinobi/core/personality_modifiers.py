@@ -7,7 +7,9 @@ import os
 import asyncio # Add asyncio import
 
 # Use centralized constants, utils
-from .constants import MODIFIERS_FILE
+# --- MODIFIED: Remove MODIFIERS_FILE import --- #
+# from .constants import MODIFIERS_FILE
+# --- END MODIFIED --- #
 from ..utils.file_io import load_json, save_json
 from ..utils.logging import get_logger
 
@@ -18,49 +20,107 @@ class PersonalityModifiers:
     Manages personality-based modifiers for clan assignment, loading from 
     and saving to a JSON file.
     """
+    # --- MODIFIED: Added filename constant --- #
+    MODIFIERS_FILENAME = "modifiers.json"
+    # --- END MODIFIED --- #
 
-    def __init__(self, modifiers_file_path: Optional[str] = None):
-        """Initialize the personality modifiers manager by loading data.
+    # --- MODIFIED: Updated __init__ to accept data_dir --- #
+    def __init__(self, data_dir: str):
+        """Initialize the personality modifiers manager.
 
         Args:
-            modifiers_file_path: Optional path to the modifiers JSON file. 
-                                 Defaults to MODIFIERS_FILE from constants.
+            data_dir: The base data directory.
         """
-        self.modifiers_file = modifiers_file_path if modifiers_file_path is not None else MODIFIERS_FILE
+        self.data_dir = data_dir
+        # Construct the full path using data_dir and filename constant
+        self.modifiers_file = os.path.join(self.data_dir, self.MODIFIERS_FILENAME)
+        # --- END MODIFIED --- #
         self.personality_modifiers: Dict[str, Dict[str, float]] = {}
-        # Remove synchronous call, initialization happens via async initialize()
-        # self._load_or_create_modifiers()
+        # Initialization now happens via async ready_hook
 
-    async def initialize(self):
-        """Asynchronously load or create modifiers."""
-        await self._load_or_create_modifiers()
+    # --- MODIFIED: Rename sync init method --- #
+    def _initialize_sync(self):
+        """Synchronously load or create modifiers. (Called by ready_hook)"""
+        self._load_or_create_modifiers()
+    # --- END MODIFIED --- #
 
-    async def _load_or_create_modifiers(self) -> None:
+    # --- NEW: Async Ready Hook --- #
+    async def ready_hook(self):
+        """Asynchronously prepares the system (loads data)."""
+        logger.info("PersonalityModifiers ready hook: Loading/Creating modifiers...")
+        # NOTE: Current _load_or_create_modifiers uses sync file I/O.
+        # This can be refactored later if file_io becomes async.
+        self._load_or_create_modifiers() 
+        logger.info("PersonalityModifiers ready hook completed.")
+    # --- END NEW --- #
+
+    def _load_or_create_modifiers(self) -> None: # Remains synchronous for now
         """
-        Load personality modifiers asynchronously from self.modifiers_file or create defaults.
+        Load personality modifiers synchronously from self.modifiers_file or create defaults.
         """
         # Ensure parent directory exists before trying to load
         dir_path = os.path.dirname(self.modifiers_file)
         if dir_path:
             os.makedirs(dir_path, exist_ok=True)
 
-        loaded_data = await load_json(self.modifiers_file) # Use await
+        loaded_data = load_json(self.modifiers_file) # Remove await
+        is_valid = False
         if loaded_data is not None and isinstance(loaded_data, dict):
-            # TODO: Add deeper validation for structure and value types/ranges
-            self.personality_modifiers = loaded_data
-            logger.info(f"Loaded {len(self.personality_modifiers)} personalities from {self.modifiers_file}")
-        else:
-            if loaded_data is not None: # File existed but was invalid
-                 logger.warning(f"Modifiers file {self.modifiers_file} invalid or failed to load. Creating default modifiers.")
+            # --- NEW: Deeper Validation --- #
+            validated_modifiers = {}
+            validation_passed = True
+            for personality, modifiers in loaded_data.items():
+                if not isinstance(personality, str) or not personality:
+                    logger.warning(f"Invalid personality key type or empty in {self.modifiers_file}: {personality}. Skipping.")
+                    validation_passed = False
+                    continue
+                if not isinstance(modifiers, dict):
+                    logger.warning(f"Invalid modifier value type for personality '{personality}' in {self.modifiers_file}. Expected dict, got {type(modifiers)}. Skipping personality.")
+                    validation_passed = False
+                    continue
+                
+                valid_clan_mods = {}
+                clan_mod_valid = True
+                for clan, value in modifiers.items():
+                    if not isinstance(clan, str) or not clan:
+                        logger.warning(f"Invalid clan key type or empty for personality '{personality}' in {self.modifiers_file}: {clan}. Skipping modifier.")
+                        clan_mod_valid = False
+                        continue
+                    if not isinstance(value, (int, float)) or value <= 0:
+                        logger.warning(f"Invalid modifier value for clan '{clan}' under personality '{personality}' in {self.modifiers_file}. Expected positive number, got {value}. Skipping modifier.")
+                        clan_mod_valid = False
+                        continue
+                    valid_clan_mods[clan] = float(value) # Ensure float
+                
+                if clan_mod_valid:
+                    validated_modifiers[personality] = valid_clan_mods
+                else:
+                    validation_passed = False # Mark overall validation as failed if any inner part fails
+            
+            if validation_passed:
+                self.personality_modifiers = validated_modifiers
+                logger.info(f"Loaded and validated {len(self.personality_modifiers)} personalities from {self.modifiers_file}")
+                is_valid = True
+            else:
+                 logger.warning(f"Validation failed for some entries in {self.modifiers_file}. Partially loaded {len(validated_modifiers)} valid personalities. Check warnings.")
+                 # Decide: Use partially loaded data or default? Using partial for now.
+                 self.personality_modifiers = validated_modifiers
+                 is_valid = len(validated_modifiers) > 0 # Consider it valid if at least something loaded
+            # --- END NEW VALIDATION --- #
+        
+        # If loading/validation failed or file didn't exist
+        if not is_valid:
+            if loaded_data is not None: # File existed but was invalid/empty after validation
+                 logger.warning(f"Modifiers file {self.modifiers_file} invalid or empty after validation. Creating default modifiers.")
             else: # File didn't exist or load_json returned None
                  logger.info(f"Modifiers file {self.modifiers_file} not found or empty. Creating default modifiers.")
             self.personality_modifiers = self._create_default_modifiers() # Sync method
-            await self._save_modifiers() # Await the async save
+            self._save_modifiers() # Save the defaults if created
 
-    async def _save_modifiers(self) -> None:
-        """Save the current personality modifiers asynchronously to self.modifiers_file."""
+    def _save_modifiers(self) -> None: # Changed to sync method
+        """Save the current personality modifiers synchronously to self.modifiers_file."""
         try:
-            await save_json(self.modifiers_file, self.personality_modifiers) # Use await
+            save_json(self.modifiers_file, self.personality_modifiers) # Remove await
             # logger.debug(f"Saved personality modifiers to {self.modifiers_file}")
         except Exception as e:
              logger.error(f"Failed to save personality modifiers to {self.modifiers_file}: {e}", exc_info=True)
@@ -120,7 +180,7 @@ class PersonalityModifiers:
         """Get a list of all defined personality traits."""
         return list(self.personality_modifiers.keys())
 
-    async def add_personality(self, personality: str, modifiers: Dict[str, float]) -> bool:
+    def add_personality(self, personality: str, modifiers: Dict[str, float]) -> bool: # Changed to sync method
         """
         Add a new personality trait with its clan modifiers.
         Validates modifier values (should be positive floats).
@@ -145,11 +205,11 @@ class PersonalityModifiers:
 
         # Add personality and save
         self.personality_modifiers[personality] = modifiers
-        await self._save_modifiers() # Await the async save
+        self._save_modifiers() # Remove await
         logger.info(f"Added new personality: {personality}")
         return True
 
-    async def update_personality(self, personality: str, modifiers: Dict[str, float]) -> bool:
+    def update_personality(self, personality: str, modifiers: Dict[str, float]) -> bool: # Changed to sync method
         """
         Update the modifiers for an existing personality trait.
         Validates modifier values.
@@ -171,11 +231,11 @@ class PersonalityModifiers:
 
         # Update personality and save
         self.personality_modifiers[personality] = modifiers
-        await self._save_modifiers() # Await the async save
+        self._save_modifiers() # Remove await
         logger.info(f"Updated modifiers for personality: {personality}")
         return True
 
-    async def remove_personality(self, personality: str) -> bool:
+    def remove_personality(self, personality: str) -> bool: # Changed to sync method
         """
         Remove a personality trait and its modifiers.
         Saves the updated modifiers to the file.
@@ -192,7 +252,7 @@ class PersonalityModifiers:
 
         # Remove personality and save
         del self.personality_modifiers[personality]
-        await self._save_modifiers() # Await the async save
+        self._save_modifiers() # Remove await
         logger.info(f"Removed personality: {personality}")
         return True
 

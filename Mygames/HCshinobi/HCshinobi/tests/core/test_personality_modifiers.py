@@ -18,17 +18,17 @@ def mock_modifier_data():
         "Aggressive": {"Kaguya": 1.7, "Uchiha": 1.3}
     }
 
-@pytest_asyncio.fixture
-async def personality_modifiers_instance(tmp_path, mock_modifier_data):
+@pytest.fixture
+def personality_modifiers_instance(tmp_path, mock_modifier_data):
     """Create a PersonalityModifiers instance with mocked dependencies and initialized."""
     modifiers_file_path = tmp_path / MODIFIERS_FILE
     modifiers_file_path.parent.mkdir(exist_ok=True)
 
     mock_logger = MagicMock()
-    mock_save_json = AsyncMock()
+    mock_save_json = MagicMock()
 
     # Selective load based on path
-    async def selective_load(path):
+    def selective_load(path):
         normalized_path = Path(path).resolve()
         normalized_target = modifiers_file_path.resolve()
         if normalized_path == normalized_target:
@@ -39,25 +39,22 @@ async def personality_modifiers_instance(tmp_path, mock_modifier_data):
          patch('HCshinobi.core.personality_modifiers.save_json', mock_save_json), \
          patch('HCshinobi.core.personality_modifiers.get_logger', return_value=mock_logger):
         instance = PersonalityModifiers(modifiers_file_path=str(modifiers_file_path))
-        await instance.initialize()
+        instance.initialize()
         yield (instance, mock_save_json)
 
 # --- Tests ---
-@pytest.mark.asyncio
-async def test_initialization(personality_modifiers_instance):
+def test_initialization(personality_modifiers_instance):
     """Test initialization and loading."""
     instance, _ = personality_modifiers_instance # Unpack
     assert len(instance.personality_modifiers) == 2
     assert "Aggressive" in instance.personality_modifiers
 
-@pytest.mark.asyncio
-async def test_load_existing_modifiers(personality_modifiers_instance, mock_modifier_data):
+def test_load_existing_modifiers(personality_modifiers_instance, mock_modifier_data):
     """Test loading pre-existing modifier data."""
     instance, _ = personality_modifiers_instance # Unpack
     assert instance.personality_modifiers == mock_modifier_data
 
-@pytest.mark.asyncio
-async def test_load_invalid_data(tmp_path):
+def test_load_invalid_data(tmp_path):
     """Test loading invalid data (not a dict)."""
     modifiers_file_path = tmp_path / MODIFIERS_FILE
     modifiers_file_path.parent.mkdir(exist_ok=True)
@@ -65,22 +62,22 @@ async def test_load_invalid_data(tmp_path):
         json.dump(["invalid"], f) # Write list instead of dict
 
     mock_logger = MagicMock()
-    mock_save_json = AsyncMock()
+    mock_save_json = MagicMock()
     # Mock load_json to return None for this test
-    mock_load_json_invalid = AsyncMock(return_value=None)
+    mock_load_json_invalid = MagicMock(return_value=None)
 
+    # Patch module-level logger directly
     with patch('HCshinobi.core.personality_modifiers.load_json', mock_load_json_invalid), \
          patch('HCshinobi.core.personality_modifiers.save_json', mock_save_json), \
-         patch('HCshinobi.core.personality_modifiers.get_logger', return_value=mock_logger):
+         patch('HCshinobi.core.personality_modifiers.logger', mock_logger): # Patch the logger instance
         instance = PersonalityModifiers(modifiers_file_path=str(modifiers_file_path))
-        await instance.initialize()
+        instance.initialize()
         assert len(instance.personality_modifiers) > 0 # Default should load
         # When load_json returns None, it logs INFO then creates defaults
         mock_logger.info.assert_called() # Assertion remains info
         mock_save_json.assert_called()
 
-@pytest.mark.asyncio
-async def test_get_clan_modifiers(personality_modifiers_instance):
+def test_get_clan_modifiers(personality_modifiers_instance):
     """Test retrieving modifiers for a specific personality."""
     instance, _ = personality_modifiers_instance # Unpack
     mods = instance.get_clan_modifiers("Intelligent") # Synchronous
@@ -92,8 +89,7 @@ async def test_get_clan_modifiers(personality_modifiers_instance):
     mods_empty = instance.get_clan_modifiers("") # Synchronous
     assert mods_empty == {}
 
-@pytest.mark.asyncio
-async def test_get_all_personalities(personality_modifiers_instance):
+def test_get_all_personalities(personality_modifiers_instance):
     """Test retrieving all defined personality traits."""
     instance, _ = personality_modifiers_instance # Unpack
     personalities = instance.get_all_personalities() # Synchronous
@@ -112,7 +108,7 @@ async def test_add_personality(personality_modifiers_instance):
     new_personality = "Calm"
     new_modifiers = {"Aburame": 1.6, "Hyuga": 1.2}
     
-    success = await instance.add_personality(new_personality, new_modifiers)
+    success = instance.add_personality(new_personality, new_modifiers)
     assert success
     assert len(instance.get_all_personalities()) == initial_count + 1
     assert "Calm" in instance.get_all_personalities()
@@ -121,13 +117,13 @@ async def test_add_personality(personality_modifiers_instance):
 
     # Test adding existing
     mock_save_json.reset_mock()
-    success = await instance.add_personality("Aggressive", {"ClanX": 1.1})
+    success = instance.add_personality("Aggressive", {"ClanX": 1.1})
     assert not success
     mock_save_json.assert_not_called()
 
     # Test adding invalid modifiers
     mock_save_json.reset_mock()
-    success = await instance.add_personality("InvalidMods", {"ClanY": -0.5})
+    success = instance.add_personality("InvalidMods", {"ClanY": -0.5})
     assert not success
     mock_save_json.assert_not_called()
 
@@ -139,20 +135,20 @@ async def test_update_personality(personality_modifiers_instance):
 
     updated_modifiers = {"Nara": 1.8, "Uchiha": 1.1, "NewClan": 1.0}
     
-    success = await instance.update_personality("Intelligent", updated_modifiers)
+    success = instance.update_personality("Intelligent", updated_modifiers)
     assert success
     assert instance.get_clan_modifiers("Intelligent") == updated_modifiers
     mock_save_json.assert_called_once()
 
     # Test updating non-existent
     mock_save_json.reset_mock()
-    success = await instance.update_personality("NonExistent", {"ClanZ": 1.0})
+    success = instance.update_personality("NonExistent", {"ClanZ": 1.0})
     assert not success
     mock_save_json.assert_not_called()
 
     # Test updating with invalid modifiers
     mock_save_json.reset_mock()
-    success = await instance.update_personality("Intelligent", {"ClanA": 0})
+    success = instance.update_personality("Intelligent", {"ClanA": 0})
     assert not success
     mock_save_json.assert_not_called()
 
@@ -163,7 +159,7 @@ async def test_remove_personality(personality_modifiers_instance):
     mock_save_json.reset_mock()
     initial_count = len(instance.get_all_personalities())
 
-    success = await instance.remove_personality("Aggressive")
+    success = instance.remove_personality("Aggressive")
     assert success
     assert len(instance.get_all_personalities()) == initial_count - 1
     assert "Aggressive" not in instance.get_all_personalities()
@@ -171,7 +167,7 @@ async def test_remove_personality(personality_modifiers_instance):
 
     # Test removing non-existent
     mock_save_json.reset_mock()
-    success = await instance.remove_personality("NonExistent")
+    success = instance.remove_personality("NonExistent")
     assert not success
     mock_save_json.assert_not_called()
 

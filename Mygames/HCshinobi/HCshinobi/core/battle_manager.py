@@ -4,12 +4,18 @@ Manages active battle simulations between players and AI opponents.
 
 import logging
 import uuid
-from typing import Dict, Any, Optional
+import random
+import asyncio
+import time
+from typing import Dict, Any, Optional, Tuple, List
 from dataclasses import dataclass, field
+from enum import Enum, auto
 
 # Import dependencies from other core modules and utils
 from .character_manager import CharacterManager
 from ..utils.ollama_client import OllamaClient, OllamaError
+from .battle_system import BattleSystem
+from .character import Character
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +46,16 @@ class BattleState:
     last_action_description: str = "Battle started!"
     message_id: Optional[int] = None # Store message ID for potential updates
 
+class BattleError(Enum):
+    """Enumeration of possible battle-related errors."""
+    PLAYER_NOT_FOUND = auto()
+    OPPONENT_NOT_FOUND = auto()
+    BATTLE_IN_PROGRESS = auto()
+    INVALID_OPPONENT = auto()
+    BATTLE_NOT_FOUND = auto()
+    INVALID_ACTION = auto()
+    SYSTEM_ERROR = auto()
+
 class BattleManagerError(Exception):
     """Custom exception for Battle Manager errors."""
     pass
@@ -47,342 +63,380 @@ class BattleManagerError(Exception):
 class BattleManager:
     """Handles the creation, state management, and progression of battles."""
 
-    def __init__(self, character_manager: CharacterManager, ollama_client: OllamaClient):
+    def __init__(self, character_manager: CharacterManager, ollama_client: Optional[OllamaClient], battle_system: BattleSystem):
         """
         Initializes the BattleManager.
 
         Args:
             character_manager: Instance of CharacterManager to load character data.
             ollama_client: Instance of OllamaClient to interact with the AI model.
+            battle_system: Instance of BattleSystem to manage battle state.
         """
         self.character_manager = character_manager
         self.ollama_client = ollama_client
-        self.active_battles: Dict[str, BattleState] = {} # Keyed by battle_id
+        self.battle_system = battle_system
+        self.battle_history: Dict[str, List[Dict[str, Any]]] = {}
         logger.info("BattleManager initialized.")
 
-    def _create_participant(self, character_id: str) -> Optional[BattleParticipant]:
-        """Loads character data and creates a BattleParticipant."""
-        char_data = self.character_manager.get_character(character_id)
-        if not char_data:
-            logger.error(f"Failed to create participant: Character '{character_id}' not found.")
-            return None
-
-        # --- Read HP & Chakra from base_stats --- 
-        # Default to 100 if base_stats or values are missing
-        stats = char_data.get('base_stats', {})
-        max_hp = stats.get('hp', 100) 
-        current_hp = max_hp
-        max_chakra = stats.get('chakra_pool', 100) # Read chakra pool
-        current_chakra = max_chakra # Initialize current chakra
-        # --- End HP & Chakra Reading --- 
-
-        return BattleParticipant(
-            character_id=character_id,
-            character_data=char_data,
-            current_hp=current_hp,
-            max_hp=max_hp,
-            current_chakra=current_chakra, # Pass chakra values
-            max_chakra=max_chakra
-        )
-
-    async def start_battle(
+    async def get_battle_history(
         self,
-        interaction_context: Any,
-        player_character_id: str,
-        opponent_character_id: str
-    ) -> BattleState:
-        """
-        Starts a new battle instance.
-
-        Args:
-            interaction_context: Discord interaction or context where the battle was initiated.
-            player_character_id: The ID/name of the player's character.
-            opponent_character_id: The ID/name of the opponent's character (e.g., "Solomon").
-
-        Returns:
-            The initial BattleState object.
-
-        Raises:
-            BattleManagerError: If characters cannot be loaded.
-        """
-        logger.info(f"Attempting to start battle: Player '{player_character_id}' vs Opponent '{opponent_character_id}'")
+        player_id: str,
+        page: int = 1,
+        page_size: int = 10,
+        filters: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """Get paginated and filtered battle history for a player.
         
-        player = self._create_participant(player_character_id)
-        opponent = self._create_participant(opponent_character_id)
-
-        if not player or not opponent:
-            raise BattleManagerError("Failed to start battle: Could not load character data for one or both participants.")
-
-        battle = BattleState(
-            interaction_context=interaction_context,
-            player=player,
-            opponent=opponent
-        )
-        
-        self.active_battles[battle.battle_id] = battle
-        logger.info(f"Battle {battle.battle_id} started successfully.")
-        return battle
-
-    def get_battle_state(self, battle_id: str) -> Optional[BattleState]:
-        """Retrieves the current state of an active battle."""
-        return self.active_battles.get(battle_id)
-
-    async def process_player_action(self, battle_id: str, action: str, details: Optional[Dict] = None) -> BattleState:
-        """
-        Processes an action taken by the player.
-        (Placeholder - actual game logic to be implemented here)
-        This might involve updating HP, applying effects, etc.
-        After processing, it should trigger the AI's turn.
-
         Args:
-            battle_id: The ID of the battle.
-            action: The action performed by the player (e.g., 'attack', 'defend', 'use_skill').
-            details: Additional details about the action (e.g., skill name, target).
-
-        Returns:
-            The updated BattleState after the player's action and potentially the AI's response.
+            player_id: The player's Discord ID
+            page: Page number (1-based)
+            page_size: Number of battles per page
+            filters: Optional dictionary of filters (e.g., {"result": "victory", "enemy_type": "boss"})
             
-        Raises:
-            BattleManagerError: If the battle ID is invalid or action processing fails.
-        """
-        battle = self.get_battle_state(battle_id)
-        if not battle:
-            raise BattleManagerError(f"Invalid battle ID: {battle_id}")
-        if battle.is_ai_turn:
-             raise BattleManagerError("Cannot process player action: It's currently the AI's turn.")
-
-        logger.info(f"[Battle {battle_id}] Processing player action: {action} {details or ''}")
-
-        # --- Placeholder Action Logic ---
-        # TODO: Implement actual logic based on 'action' and 'details'
-        # Example: Reduce opponent HP on 'attack'
-        if action == 'attack':
-            damage = 10 # Placeholder
-            battle.opponent.current_hp -= damage
-            battle.last_action_description = f"{battle.player.character_id} attacked {battle.opponent.character_id} for {damage} damage!"
-            logger.debug(f"[Battle {battle_id}] Opponent HP reduced to {battle.opponent.current_hp}")
-        elif action == 'pass':
-             battle.last_action_description = f"{battle.player.character_id} passed their turn."
-        else:
-             battle.last_action_description = f"{battle.player.character_id} performed action: {action}. (Logic TBD)"
-        # --- End Placeholder --- 
-        
-        # Check for battle end condition (e.g., opponent defeated - though maybe not for Solomon)
-        if battle.opponent.current_hp <= 0:
-             # Handle opponent defeat (might differ for winless scenario)
-             logger.info(f"[Battle {battle_id}] Opponent defeated.")
-             # return self.end_battle(battle_id, f"{battle.player.character_id} won!") # Example end
-
-        # It's now the AI's turn
-        battle.is_ai_turn = True
-        battle.turn_number += 1 # Increment turn after player AND AI go, or just after player? Decide later.
-
-        # Trigger AI turn processing
-        try:
-            return await self._process_ai_turn(battle_id)
-        except Exception as e:
-            logger.error(f"[Battle {battle_id}] Error during subsequent AI turn processing: {e}", exc_info=True)
-            # Decide how to handle: raise, return current state, etc.
-            # For now, return state after player action but before AI potentially failed
-            return battle 
-
-    async def _process_ai_turn(self, battle_id: str) -> BattleState:
-        """
-        Generates and processes the AI opponent's action using Ollama.
-        Includes improved prompt engineering and basic action handling.
-
-        Args:
-            battle_id: The ID of the battle.
-
         Returns:
-            The updated BattleState after the AI's action.
-            
-        Raises:
-            BattleManagerError: If the battle ID is invalid or AI processing fails.
+            Dict containing:
+            - battles: List of battle records for the current page
+            - total_pages: Total number of pages
+            - total_battles: Total number of battles matching filters
         """
-        battle = self.get_battle_state(battle_id)
-        if not battle:
-            raise BattleManagerError(f"Invalid battle ID: {battle_id}")
-        if not battle.is_ai_turn:
-            raise BattleManagerError("Cannot process AI turn: It's not the AI's turn.")
-
-        ai_char = battle.opponent
-        player_char = battle.player
-        logger.info(f"[Battle {battle_id}] Processing AI ({ai_char.character_id}) turn ({battle.turn_number})...")
-
-        # --- 1. Prepare Data for Prompt --- 
-        ai_data = ai_char.character_data
-        combat_behavior = ai_data.get('combat_behavior', {})
-        personality = ai_data.get('personality_philosophy', {})
-        signature_techniques = ai_data.get('signature_techniques', [])
-
-        # --- Placeholder Chakra Costs --- 
-        # TODO: Define these properly, maybe in technique data itself
-        TECHNIQUE_COSTS = {
-            "Amaterasu": 150, 
-            "Kamui Phase": 100, 
-            "Eclipse Fang Severance": 200,
-            "Attack": 0,
-            "Defend": 0,
-            "Pass": 0
+        if player_id not in self.battle_history:
+            return {"battles": [], "total_pages": 0, "total_battles": 0}
+            
+        # Apply filters if provided
+        filtered_battles = self.battle_history[player_id]
+        if filters:
+            for key, value in filters.items():
+                filtered_battles = [
+                    battle for battle in filtered_battles
+                    if battle.get(key) == value
+                ]
+                
+        # Sort battles by timestamp (newest first)
+        filtered_battles.sort(key=lambda x: x.get("timestamp", 0), reverse=True)
+        
+        # Calculate pagination
+        total_battles = len(filtered_battles)
+        total_pages = (total_battles + page_size - 1) // page_size
+        page = max(1, min(page, total_pages))  # Ensure page is within bounds
+        
+        # Get battles for current page
+        start_idx = (page - 1) * page_size
+        end_idx = start_idx + page_size
+        page_battles = filtered_battles[start_idx:end_idx]
+        
+        return {
+            "battles": page_battles,
+            "total_pages": total_pages,
+            "total_battles": total_battles,
+            "current_page": page,
+            "page_size": page_size
         }
-        # --- End Placeholder Costs --- 
 
-        # --- Determine Available Actions --- 
+    def _get_error_message(self, error: BattleError, **kwargs) -> Dict[str, Any]:
+        """Get a user-friendly error message and code for the UI."""
+        error_messages = {
+            BattleError.PLAYER_NOT_FOUND: {
+                "code": "PLAYER_NOT_FOUND",
+                "message": "❌ Player not found in the game system."
+            },
+            BattleError.OPPONENT_NOT_FOUND: {
+                "code": "OPPONENT_NOT_FOUND",
+                "message": "❌ Opponent not found in the game system."
+            },
+            BattleError.BATTLE_IN_PROGRESS: {
+                "code": "BATTLE_IN_PROGRESS",
+                "message": "❌ You are already in a battle. Finish or flee from your current battle first."
+            },
+            BattleError.INVALID_OPPONENT: {
+                "code": "INVALID_OPPONENT",
+                "message": "❌ You cannot battle this opponent."
+            },
+            BattleError.BATTLE_NOT_FOUND: {
+                "code": "BATTLE_NOT_FOUND",
+                "message": "❌ Battle not found. It may have ended or been cancelled."
+            },
+            BattleError.INVALID_ACTION: {
+                "code": "INVALID_ACTION",
+                "message": "❌ Invalid action for the current battle state."
+            },
+            BattleError.SYSTEM_ERROR: {
+                "code": "SYSTEM_ERROR",
+                "message": "❌ An unexpected error occurred in the battle system."
+            }
+        }
+        return error_messages.get(error, {
+            "code": "UNKNOWN_ERROR",
+            "message": "❌ An unknown error occurred."
+        })
+
+    async def start_battle(self, player_id: str, opponent_id: str) -> Dict[str, Any]:
+        """Start a new battle between a player and an opponent (NPC or another player)."""
+        try:
+            # Check if player exists
+            player_char = await self.character_manager.get_character(player_id)
+            if not player_char:
+                return self._get_error_message(BattleError.PLAYER_NOT_FOUND)
+                
+            # Check if opponent exists
+            opponent_char = await self.character_manager.get_character(opponent_id)
+            if not opponent_char:
+                return self._get_error_message(BattleError.OPPONENT_NOT_FOUND)
+                
+            # Check if player is already in battle
+            if player_id in self.battle_history:
+                return self._get_error_message(BattleError.BATTLE_IN_PROGRESS)
+                
+            # Check if opponent is already in battle
+            if opponent_id in self.battle_history:
+                return self._get_error_message(BattleError.INVALID_OPPONENT)
+                
+            # Check level difference for PvP battles
+            is_npc = hasattr(opponent_char, 'is_npc') and opponent_char.is_npc
+            if not is_npc:
+                level_diff = abs(player_char.level - opponent_char.level)
+                if level_diff > 5:
+                    return self._get_error_message(
+                        BattleError.INVALID_OPPONENT,
+                        message="❌ Level difference too high for PvP battle (max 5 levels)."
+                    )
+                    
+            # Check for valid battle conditions
+            if not self._validate_battle_conditions(player_char, opponent_char):
+                return self._get_error_message(BattleError.INVALID_OPPONENT)
+                
+            # Start the battle
+            battle_id = await self.battle_system.start_battle(player_id, opponent_id)
+            if not battle_id:
+                return self._get_error_message(BattleError.SYSTEM_ERROR)
+                
+            # Store battle data
+            self.battle_history[player_id] = [{"battle_id": battle_id, "timestamp": time.time()}]
+            
+            return {
+                "code": "SUCCESS",
+                "message": "Battle started successfully!",
+                "battle_id": battle_id,
+                "battle_type": "pvp" if not is_npc else "pve",
+                "level_diff": level_diff if not is_npc else 0
+            }
+        
+        except Exception as e:
+            logger.error(f"Error starting battle: {e}", exc_info=True)
+            return self._get_error_message(BattleError.SYSTEM_ERROR)
+
+    def _validate_battle_conditions(self, player: Character, opponent: Character) -> bool:
+        """Validate battle conditions between player and opponent."""
+        # Check if either participant is dead
+        if player.hp <= 0 or opponent.hp <= 0:
+            return False
+            
+        # Check if either participant is in a restricted state
+        restricted_attr = 'restricted'
+        if (hasattr(player, restricted_attr) and getattr(player, restricted_attr)) or \
+           (hasattr(opponent, restricted_attr) and getattr(opponent, restricted_attr)):
+            return False
+            
+        # Check for special battle restrictions
+        special_battle_attr = 'in_special_battle'
+        if (hasattr(player, special_battle_attr) and getattr(player, special_battle_attr)) or \
+           (hasattr(opponent, special_battle_attr) and getattr(opponent, special_battle_attr)):
+            return False
+            
+        # Check for clan war restrictions
+        clan_war_attr = 'in_clan_war'
+        if (hasattr(player, clan_war_attr) and getattr(player, clan_war_attr)) or \
+           (hasattr(opponent, clan_war_attr) and getattr(opponent, clan_war_attr)):
+            return False
+            
+        # Check for tournament restrictions
+        tournament_attr = 'in_tournament'
+        if (hasattr(player, tournament_attr) and getattr(player, tournament_attr)) or \
+           (hasattr(opponent, tournament_attr) and getattr(opponent, tournament_attr)):
+            return False
+            
+        return True
+
+    def get_battle_state(self, battle_id: str) -> Optional[Any]: # Return type depends on BattleSystem.get_battle_state
+        """Retrieve the current state of a battle from the BattleSystem."""
+        return self.battle_system.get_battle_state(battle_id)
+
+    async def process_player_action(self, player_id: str, action: Dict[str, Any], battle_id: Optional[str] = None) -> Optional[Any]:
+        """Process a player's action in a specific battle."""
+        logger.debug(f"Processing action for player {player_id}: {action}")
+
+        # Find the battle if ID is not provided
+        if not battle_id:
+            battle_id = self.battle_system.get_battle_id_for_player(player_id)
+            if not battle_id:
+                logger.warning(f"Player {player_id} tried to act but is not in an active battle.")
+                return self._get_error_message(BattleError.BATTLE_NOT_FOUND)
+
+        # Delegate turn processing to BattleSystem
+        try:
+            # Use the battle_system method directly
+            battle_state, message = await self.battle_system.process_action(
+                battle_id,
+                player_id,
+                action['type'],
+                **action
+            )
+
+            if not battle_state:
+                return self._get_error_message(BattleError.BATTLE_NOT_FOUND, message=message)
+
+            # Check if battle ended after player action
+            if not battle_state.is_active:
+                # Handle battle end cleanup if needed in manager (e.g., history)
+                # self.end_battle(battle_id, message)
+                return {"code": "BATTLE_ENDED", "message": message, "final_state": battle_state}
+                
+            # Determine if it's now AI's turn (if opponent is AI)
+            # This logic might belong more in BattleSystem or need adjustment based on opponent type
+            # opponent_is_ai = battle_state.opponent.get("is_ai", False) # Need a way to know if opponent is AI
+            # if opponent_is_ai and battle_state.current_turn_player_id == battle_state.opponent.id:
+            #     await self._process_ai_turn(battle_id)
+            
+            return {"code": "SUCCESS", "message": message, "battle_state": battle_state}
+
+        except BattleManagerError as e:
+            logger.warning(f"Battle action error: {e}")
+            return self._get_error_message(BattleError.INVALID_ACTION, message=str(e))
+        except Exception as e:
+            logger.error(f"Error processing player action: {e}", exc_info=True)
+            return self._get_error_message(BattleError.SYSTEM_ERROR)
+
+    async def _process_ai_turn(self, battle_id: str):
+        """Handle the AI's turn logic."""
+        # --- MODIFIED: Fetch state from BattleSystem --- #
+        battle_state = self.battle_system.get_battle_state(battle_id)
+        if not battle_state or not battle_state.is_active:
+            logger.warning(f"_process_ai_turn called for inactive/invalid battle {battle_id}")
+            return None
+        
+        # Determine which participant is the AI (assuming opponent for now)
+        if battle_state.current_turn_player_id == battle_state.attacker.id:
+             logger.warning(f"_process_ai_turn called for battle {battle_id}, but it's not the opponent's turn.")
+             return None # Or return current state? 
+        ai_char = battle_state.defender # Assume AI is defender for this example
+        player_char = battle_state.attacker
+        ai_player_id = ai_char.id
+        # --- END MODIFIED --- #
+
+        logger.info(f"[Battle {battle_id}] Processing AI ({ai_player_id}) turn ({battle_state.turn_number})...")
+
+        # --- 1. Prepare Data for Prompt (Refined Cost Check) --- 
+        combat_behavior = getattr(ai_char, 'combat_behavior', {}) # Example access
+        personality = getattr(ai_char, 'personality_philosophy', {}) # Example access
+        signature_techniques = getattr(ai_char, 'jutsu', []) # Example access: Use learned jutsu list
+        master_jutsu_data = self.battle_system.master_jutsu_data # Access via BattleSystem
+
+        # --- Accurate Cost/Availability Check --- #
         available_actions = []
-        # Basic Taijutsu/Actions
-        available_actions.append({"name": "Attack", "cost": TECHNIQUE_COSTS["Attack"]})
-        available_actions.append({"name": "Defend", "cost": TECHNIQUE_COSTS["Defend"]})
-        # Signature Techniques (check basic chakra cost)
-        for tech in signature_techniques:
-             tech_name = tech.get('name')
-             cost = TECHNIQUE_COSTS.get(tech_name, 9999) # Default high cost if not defined
-             if tech_name and ai_char.current_chakra >= cost:
-                  available_actions.append({"name": tech_name, "cost": cost})
-             # Simple check for specific key abilities mentioned previously
-             elif "Amaterasu" in tech_name and ai_char.current_chakra >= TECHNIQUE_COSTS["Amaterasu"]:
-                 available_actions.append({"name": "Amaterasu", "cost": TECHNIQUE_COSTS["Amaterasu"]})
-             elif "Kamui" in tech_name and ai_char.current_chakra >= TECHNIQUE_COSTS["Kamui Phase"]:
-                 available_actions.append({"name": "Kamui Phase", "cost": TECHNIQUE_COSTS["Kamui Phase"]})
+        # Basic Actions
+        available_actions.append({"name": "Attack", "cost": 0, "type": "basic_attack"})
+        # --- Defend Action - Leave commented until handled by BattleSystem --- #
+        # available_actions.append({"name": "Defend", "cost": 0, "type": "defend"})
+        # --- End Defend Action --- #
+        available_actions.append({"name": "Pass", "cost": 0, "type": "pass"})
 
-        # Always allow passing
-        available_actions.append({"name": "Pass", "cost": TECHNIQUE_COSTS["Pass"]})
+        # Signature Techniques
+        for tech_name in signature_techniques:
+             jutsu_info = master_jutsu_data.get(tech_name)
+             if not jutsu_info:
+                 logger.warning(f"[Battle {battle_id}] AI {ai_char.name} knows jutsu '{tech_name}' but it's not in master data. Skipping.")
+                 continue
+                 
+             cost = jutsu_info.get('cost_amount', 0)
+             cost_type = jutsu_info.get('cost_type', 'chakra') # Default to chakra
+             current_resource = getattr(ai_char, cost_type, 0)
+
+             if current_resource >= cost:
+                  available_actions.append({"name": tech_name, "cost": cost, "type": "jutsu"})
+             else:
+                 logger.debug(f"[Battle {battle_id}] AI {ai_char.name} cannot afford {tech_name} (Needs {cost} {cost_type}, Has {current_resource}).")
+        # --- END MODIFIED --- #
         
         action_list_str = ", ".join([f"{a['name']} (Cost: {a['cost']})" for a in available_actions])
-        # --- End Available Actions --- 
 
-        # --- 2. Construct Prompt --- 
+        # --- 2. Construct Prompt (Using getattr for Character Attributes) --- 
         system_prompt_lines = [
-            f"You are {ai_char.character_id}, {ai_data.get('titles', ['a formidable shinobi'])[0]}.",
-            "Your core traits: " + ", ".join(ai_data.get('core_traits', [])),
-            f"Your personality: Reserved ({personality.get('reserved_demeanor', '')}), Controlled Escalation ({personality.get('controlled_escalation', '')}), Disciplined ({personality.get('willpower_discipline', '')}).",
-            f"Your combat directives: Precision over flash ({combat_behavior.get('directives',{}).get('precision_over_flash')}), Gradual escalation ({combat_behavior.get('directives',{}).get('gradual_escalation')}), Calculated resource use ({combat_behavior.get('directives',{}).get('calculated_resource_use')}).",
-            f"Your goal is to test your opponent, {player_char.character_id}, efficiently and methodically, not necessarily to defeat them instantly. Escalate your power only as needed."
+            f"You are {ai_char.name}, a formidable shinobi.", # Use character name
+            # --- MODIFIED: Use getattr for potential attributes --- #
+            f"Your core traits: {getattr(ai_char, 'core_traits', ['Unknown'])}", 
+            f"Your personality: {getattr(ai_char, 'personality_summary', 'Focused and calculating')}", 
+            f"Your combat directives: {getattr(ai_char, 'combat_directives', 'Test opponent capabilities, conserve resources.')}", 
+            # --- END MODIFIED --- #
+            f"Your goal is to test your opponent, {player_char.name}, efficiently."
         ]
         system_prompt = " ".join(system_prompt_lines)
 
         battle_state_summary = (
-            f"**Current Situation (Turn {battle.turn_number})**\n"
-            f"- Your Status: HP {ai_char.current_hp}/{ai_char.max_hp}, Chakra {ai_char.current_chakra}/{ai_char.max_chakra}, Effects: {ai_char.status_effects or 'None'}\n"
-            f"- Opponent ({player_char.character_id}) Status: HP {player_char.current_hp}/{player_char.max_hp}, Chakra {player_char.current_chakra}/{player_char.max_chakra}, Effects: {player_char.status_effects or 'None'}\n"
-            f"- Last Action Taken: {battle.last_action_description}\n"
+            f"**Current Situation (Turn {battle_state.turn_number})**\n"
+            f"- Your Status: HP {battle_state.defender_hp}/{ai_char.max_hp}, Chakra {ai_char.chakra}, Effects: {battle_state.defender_effects or 'None'}\n"	# Use state HP/Effects
+            f"- Opponent ({player_char.name}) Status: HP {battle_state.attacker_hp}/{player_char.max_hp}, Chakra {player_char.chakra}, Effects: {battle_state.attacker_effects or 'None'}\n"	# Use state HP/Effects
+            f"- Last Action Taken: {battle_state.battle_log[-1] if battle_state.battle_log else 'None'}\n"	# Use battle log
             f"**Your Available Actions:**\n[{action_list_str}]\n"
-            f"**Task:** Based on your personality, directives, and the current battle state, choose the most logical and tactical action from the list above. Consider chakra cost and your goal of testing the opponent. **Output ONLY the exact name of the chosen action.**"
+            f"**Task:** Based on your personality, directives, and the current battle state, choose the most logical action. Output ONLY the exact name."
         )
         prompt = battle_state_summary
-        logger.debug(f"[Battle {battle_id}] Sending prompt to Ollama:\nSystem: {system_prompt}\nPrompt: {prompt}")
-        # --- End Prompt Construction --- 
+        logger.debug(f"[Battle {battle_id}] Sending prompt to Ollama... Prompt length: {len(prompt)}")
 
-        # --- 3. Call Ollama --- 
-        ai_action_text = "Pass" # Default fallback
+        # --- 3. Call Ollama (Enhanced Logging) --- 
+        ai_action_name = "Pass" # Default fallback
+        chosen_action_details = next((a for a in available_actions if a['name'] == 'Pass'), None)
         try:
-            # Reduce temperature slightly for more predictable choices
+            if not self.ollama_client:
+                raise OllamaError("Ollama client not available in BattleManager.")
+
             ollama_response = await self.ollama_client.generate(
                 prompt=prompt,
                 system_message=system_prompt,
                 options={"temperature": 0.6} 
             )
             response_content = ollama_response.get('response', '').strip()
-            # Basic validation: Check if response is one of the available action names
-            chosen_action = next((a for a in available_actions if a['name'].lower() == response_content.lower()), None)
-            if chosen_action:
-                ai_action_text = chosen_action['name'] # Use the exact name with correct casing
-                logger.info(f"[Battle {battle_id}] Received AI action from Ollama: '{ai_action_text}'")
+            
+            matched_action = next((a for a in available_actions if a['name'].lower() == response_content.lower()), None)
+            
+            if matched_action:
+                ai_action_name = matched_action['name']
+                chosen_action_details = matched_action
+                logger.info(f"[Battle {battle_id}] Received AI action from Ollama: '{ai_action_name}'")
             else:
-                logger.warning(f"[Battle {battle_id}] Ollama response '{response_content}' not in available actions. Falling back to Pass.")
-                ai_action_text = "Pass"
-                battle.last_action_description = f"AI ({ai_char.character_id}) considered its options and passed." 
+                logger.warning(f"[Battle {battle_id}] Ollama response '{response_content}' invalid or not in available actions { [a['name'] for a in available_actions] }. Falling back to Pass.")
+                ai_action_name = "Pass"
+                chosen_action_details = next((a for a in available_actions if a['name'] == 'Pass'), None)
 
         except OllamaError as e:
-            logger.error(f"[Battle {battle_id}] Ollama API error during AI turn: {e}")
-            battle.last_action_description = f"AI ({ai_char.character_id}) encountered an error and passed." 
+            # --- MODIFIED: More specific logging --- #
+            logger.error(f"[Battle {battle_id}] Ollama API error during AI turn generation: {e}. Falling back to Pass.")
+            # --- END MODIFIED --- #
         except Exception as e:
-             logger.error(f"[Battle {battle_id}] Unexpected error during AI turn Ollama call: {e}", exc_info=True)
-             battle.last_action_description = f"AI ({ai_char.character_id}) encountered an unexpected error and passed."
-        # --- End Ollama Call --- 
-
-        # --- 4. Parse and Apply AI Action --- 
-        # TODO: Refine damage calculations, implement chakra costs accurately, handle more skills
-        action_cost = TECHNIQUE_COSTS.get(ai_action_text, 0)
+             # --- MODIFIED: More specific logging --- #
+             logger.error(f"[Battle {battle_id}] Unexpected error during Ollama call for AI turn: {e}. Falling back to Pass.", exc_info=True)
+             # --- END MODIFIED --- #
         
-        # Check if AI can afford the action (should be guaranteed by available action list, but double-check)
-        if ai_char.current_chakra < action_cost:
-             logger.warning(f"[Battle {battle_id}] AI cannot afford {ai_action_text} (Cost: {action_cost}, Current: {ai_char.current_chakra}). Forcing Pass.")
-             ai_action_text = "Pass"
-             action_cost = 0
-             battle.last_action_description = f"AI ({ai_char.character_id}) lacked the chakra for their intended action and passed."
-
-        # Deduct cost first
-        ai_char.current_chakra -= action_cost
-        logger.debug(f"[Battle {battle_id}] AI Chakra updated: {ai_char.current_chakra}/{ai_char.max_chakra} (-{action_cost})")
-
-        # Apply action effects
-        if ai_action_text.lower() == "attack":
-            damage = 30 # Placeholder - TODO: Calculate based on stats
-            player_char.current_hp -= damage
-            battle.last_action_description = f"AI ({ai_char.character_id}) attacked {player_char.character_id} with precise strikes for {damage} damage!"
-            logger.debug(f"[Battle {battle_id}] Player HP reduced to {player_char.current_hp}")
-        elif ai_action_text.lower() == "amaterasu":
-            damage = 50 # Placeholder
-            player_char.current_hp -= damage
-            # Add burning status? TODO: Implement status effect system
-            # if "Burning" not in player_char.status_effects:
-            #      player_char.status_effects.append("Burning")
-            battle.last_action_description = f"AI ({ai_char.character_id}) unleashed Amaterasu upon {player_char.character_id} for {damage} damage! The black flames burn fiercely."
-            logger.debug(f"[Battle {battle_id}] Player HP reduced to {player_char.current_hp}")
-        elif ai_action_text.lower() == "kamui phase":
-            # Apply phasing status to AI
-            if "Phasing" not in ai_char.status_effects:
-                 ai_char.status_effects.append("Phasing") # TODO: Add duration/removal logic
-            battle.last_action_description = f"AI ({ai_char.character_id}) used Kamui, becoming temporarily intangible."
-            logger.debug(f"[Battle {battle_id}] AI status effects: {ai_char.status_effects}")
-        elif ai_action_text.lower() == "defend":
-             # TODO: Implement defense logic (e.g., temp damage reduction status)
-             battle.last_action_description = f"AI ({ai_char.character_id}) took a defensive stance."
-        elif ai_action_text.lower() == "pass":
-            # Description was likely set during fallback, but set default if needed
-            if not battle.last_action_description.endswith("passed."):
-                battle.last_action_description = f"AI ({ai_char.character_id}) observed and passed its turn."
+        # --- 4. Format Action for BattleSystem --- #
+        if not chosen_action_details:
+             logger.error(f"[Battle {battle_id}] Could not determine AI action details, forcing Pass.")
+             ai_action = {'type': 'pass'}
         else:
-            # Handle other skills or fallback if parsing somehow failed earlier
-            battle.last_action_description = f"AI ({ai_char.character_id}) performed: {ai_action_text}. (Effect Logic TBD)"
-            logger.warning(f"[Battle {battle_id}] Unhandled AI action: {ai_action_text}")
-        # --- End Action Application ---
+             ai_action = {'type': chosen_action_details['type']}
+             if chosen_action_details['type'] == 'jutsu':
+                  ai_action['jutsu_name'] = chosen_action_details['name']
+        logger.debug(f"[Battle {battle_id}] Formatted AI action for BattleSystem: {ai_action}")
+        # --- END MODIFIED --- #
 
-        # --- 5. Post-Turn Checks & Cleanup --- 
-        # Example: Remove phasing after one turn?
-        if "Phasing" in ai_char.status_effects:
-             # TODO: Implement proper duration/trigger for removal
-             # ai_char.status_effects.remove("Phasing") 
-             pass # For now, let it persist until proper logic added
+        # --- 5. Delegate Action Processing to BattleSystem --- #
+        try:
+            result = await self.battle_system.process_turn(battle_id, ai_player_id, ai_action)
+            logger.info(f"[Battle {battle_id}] AI turn processed by BattleSystem.")
+            return result
+        except Exception as e:
+            logger.error(f"[Battle {battle_id}] Error calling BattleSystem.process_turn for AI action {ai_action}: {e}", exc_info=True)
+            # If processing fails, maybe just return current state?
+            return self.battle_system.get_battle_state(battle_id)
+        # --- END MODIFIED --- #
 
-        # Check for battle end condition (e.g., player defeated)
-        if player_char.current_hp <= 0:
-             logger.info(f"[Battle {battle_id}] Player defeated.")
-             # Handle player defeat (e.g., end battle, maybe different message for Solomon)
-             return self.end_battle(battle_id, f"{player_char.character_id} was overwhelmed by {ai_char.character_id}!") # Example end
-        
-        # It's now the player's turn again
-        battle.is_ai_turn = False
-
-        logger.debug(f"[Battle {battle_id}] AI turn complete. Player HP: {player_char.current_hp}, AI HP: {ai_char.current_hp}, AI Chakra: {ai_char.current_chakra}")
-        return battle
-
-    def end_battle(self, battle_id: str, reason: str = "Battle ended.") -> Optional[BattleState]:
-        """
-        Removes an active battle from the manager.
-
-        Args:
-            battle_id: The ID of the battle to end.
-            reason: A description of why the battle ended.
-
-        Returns:
-            The final battle state object if found, otherwise None.
-        """
-        logger.info(f"Ending battle {battle_id}. Reason: {reason}")
-        final_state = self.active_battles.pop(battle_id, None)
-        if final_state:
-             final_state.last_action_description = reason
-        else:
-             logger.warning(f"Attempted to end non-existent battle ID: {battle_id}")
-        return final_state 
+    # Removed end_battle as BattleSystem should handle this
+    # def end_battle(self, battle_id: str, reason: str = "Battle ended."):
+    #     ... 

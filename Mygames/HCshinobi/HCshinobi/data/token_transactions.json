@@ -1,0 +1,10 @@
+[
+  {
+    "timestamp": "2025-04-01T16:53:46.360742",
+    "player_id": "user1",
+    "type": "spend",
+    "amount": -15,
+    "reason": "unlock_feature:weapon_crafting",
+    "balance_after": 10
+  }
+]

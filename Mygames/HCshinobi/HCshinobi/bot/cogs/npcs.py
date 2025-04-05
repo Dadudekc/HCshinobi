@@ -128,11 +128,27 @@ class NPCCommands(commands.Cog):
 
         logger.info(f"/mark_death invoked by {interaction.user.name} for {player_name} ({player_id})")
 
+        # Fetch the player character to get clan info
+        character_system = self.bot.services.get("character_system") if hasattr(self.bot, 'services') else None
+        player_character = None
+        player_clan = "Unknown"
+        if character_system:
+            try:
+                player_character = await character_system.get_character(player_id)
+                if player_character:
+                    player_clan = player_character.clan if player_character.clan else "Clanless"
+                    logger.info(f"Retrieved clan '{player_clan}' for player {player_name} ({player_id})")
+                else:
+                    logger.warning(f"Could not find character for player {player_id} during mark_death.")
+            except Exception as char_err:
+                logger.error(f"Error fetching character for {player_id}: {char_err}", exc_info=True)
+        else:
+            logger.warning("CharacterSystem not available, cannot fetch player clan for mark_death.")
+
         generated_story = False
         if not death_story and self.openai_client and self.prompt_generator:
             try:
-                # Placeholder: Replace with actual logic to fetch player's clan
-                player_clan = "Unknown"
+                # Use the fetched player_clan
                 death_story = await self.prompt_generator.generate_death_story(player_name, player_clan)
                 generated_story = True
                 logger.info(f"AI-generated death story for {player_name}: {death_story[:100]}...")
@@ -142,8 +158,8 @@ class NPCCommands(commands.Cog):
         elif not death_story:
             death_story = "Fell in battle."
 
-        # Placeholder for player clan retrieval for conversion
-        player_clan_for_npc = "Unknown Clan"  # Replace with actual retrieval logic
+        # Use the fetched player_clan for conversion
+        player_clan_for_npc = player_clan # Use the value retrieved earlier
 
         try:
             npc_data = self.npc_manager.convert_player_to_npc(

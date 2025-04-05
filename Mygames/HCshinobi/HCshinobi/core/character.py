@@ -1,18 +1,21 @@
 """Character class for managing character data."""
 import uuid
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Any, Set
+from dataclasses import dataclass, field, fields
 
 @dataclass
 class Character:
     """Represents a character in the game."""
     
     # Basic Info
-    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    id: str
     name: str = ""
     clan: str = ""
     level: int = 1
     exp: int = 0
+    # ryo: int = 0  # REMOVED: Currency is handled by CurrencySystem
+    specialization: Optional[str] = None
+    rank: str = "Academy Student"
     
     # Core stats
     hp: int = 100
@@ -23,6 +26,8 @@ class Character:
     defense: int = 10
     willpower: int = 10
     chakra_control: int = 10
+    intelligence: int = 10
+    perception: int = 10
     
     # Combat stats
     ninjutsu: int = 10
@@ -37,16 +42,34 @@ class Character:
     # Status
     is_active: bool = True
     status_effects: List[str] = field(default_factory=list)
+    active_effects: Dict[str, Any] = field(default_factory=dict)
+    status_conditions: Dict[str, Any] = field(default_factory=dict)
+    buffs: Dict[str, Any] = field(default_factory=dict)
+    debuffs: Dict[str, Any] = field(default_factory=dict)
     
     # Battle stats
     wins: int = 0
     losses: int = 0
     draws: int = 0
+    wins_against_rank: Dict[str, int] = field(default_factory=dict)
+    
+    # --- NEW Progression Fields ---
+    achievements: Set[str] = field(default_factory=set)
+    titles: List[str] = field(default_factory=list)
+    # --- END Progression Fields ---
+    
+    # Mission tracking
+    completed_missions: Set[str] = field(default_factory=set)
     
     # Derived stats
     max_hp: int = field(init=True, default=100)
     max_chakra: int = field(init=True, default=100)
     max_stamina: int = field(init=True, default=100)
+    
+    # New attributes
+    jutsu_mastery: Dict[str, Dict[str, int]] = field(default_factory=dict)
+    last_daily_claim: Optional[str] = None
+    active_mission_id: Optional[str] = None
     
     def __post_init__(self):
         """Initialize derived attributes."""
@@ -59,6 +82,14 @@ class Character:
         self.hp = min(self.hp, self.max_hp)
         self.chakra = min(self.chakra, self.max_chakra)
         self.stamina = min(self.stamina, self.max_stamina)
+        
+        # Initialize jutsu_mastery, defaulting to empty dict if not loaded
+        self.jutsu_mastery = self.jutsu_mastery or {}
+        
+        # Ensure mastery exists for all known jutsu (for backward compatibility)
+        for jutsu_name in self.jutsu:
+            if jutsu_name not in self.jutsu_mastery:
+                self.jutsu_mastery[jutsu_name] = {"level": 1, "gauge": 0}
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'Character':
@@ -70,7 +101,18 @@ class Character:
         Returns:
             Character instance
         """
-        return cls(**data)
+        # Ensure sets are correctly initialized from lists in the data
+        data['achievements'] = set(data.get('achievements', []))
+        data['completed_missions'] = set(data.get('completed_missions', []))
+        # Titles are already a list
+        # Ensure wins_against_rank is initialized
+        data['wins_against_rank'] = data.get('wins_against_rank', {})
+        
+        # Filter data to only include fields defined in the dataclass
+        known_field_names = {f.name for f in fields(cls)}
+        filtered_data = {k: v for k, v in data.items() if k in known_field_names}
+        
+        return cls(**filtered_data)
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert character to dictionary.
@@ -78,12 +120,15 @@ class Character:
         Returns:
             Dictionary containing character data
         """
-        return {
+        data = {
             "id": self.id,
             "name": self.name,
             "clan": self.clan,
             "level": self.level,
             "exp": self.exp,
+            # "ryo": self.ryo, # REMOVED
+            "specialization": self.specialization,
+            "rank": self.rank,
             "hp": self.hp,
             "chakra": self.chakra,
             "stamina": self.stamina,
@@ -92,6 +137,8 @@ class Character:
             "defense": self.defense,
             "willpower": self.willpower,
             "chakra_control": self.chakra_control,
+            "intelligence": self.intelligence,
+            "perception": self.perception,
             "ninjutsu": self.ninjutsu,
             "taijutsu": self.taijutsu,
             "genjutsu": self.genjutsu,
@@ -99,8 +146,28 @@ class Character:
             "equipment": self.equipment,
             "inventory": self.inventory,
             "is_active": self.is_active,
-            "status_effects": self.status_effects
+            "status_effects": self.status_effects,
+            "active_effects": self.active_effects,
+            "status_conditions": self.status_conditions,
+            "buffs": self.buffs,
+            "debuffs": self.debuffs,
+            "wins": self.wins,
+            "losses": self.losses,
+            "draws": self.draws,
+            "wins_against_rank": self.wins_against_rank,
+            "max_hp": self.max_hp,
+            "max_chakra": self.max_chakra,
+            "max_stamina": self.max_stamina,
+            "completed_missions": list(self.completed_missions),
+            "jutsu_mastery": self.jutsu_mastery,
+            "last_daily_claim": self.last_daily_claim,
+            "active_mission_id": self.active_mission_id,
+            # --- ADD Progression Fields --- #
+            "achievements": sorted(list(self.achievements)), # Serialize set as sorted list
+            "titles": self.titles, # Already a list
+            # --- END Progression Fields --- #
         }
+        return data
     
     def add_exp(self, amount: int) -> bool:
         """Add experience points to the character.
@@ -109,12 +176,14 @@ class Character:
             amount: Amount of experience to add
             
         Returns:
-            True if character leveled up
+            True if character leveled up at least once
         """
         self.exp += amount
-        if self.exp >= self.level * 100:
-            return self.level_up()
-        return False
+        leveled_up = False
+        while self.exp >= self.level * 100:
+            if self.level_up():
+                leveled_up = True
+        return leveled_up
     
     def level_up(self) -> bool:
         """Level up the character.
@@ -333,15 +402,21 @@ class Character:
         self.status_effects.remove(effect)
         return True
     
-    def record_battle_result(self, result: str) -> None:
-        """Record the result of a battle.
+    def record_battle_result(self, result: str, opponent_rank: Optional[str] = None):
+        """Records the result of a battle (win, loss, draw).
         
         Args:
-            result: Battle result ('win', 'loss', or 'draw')
+            result: 'win', 'loss', or 'draw'.
+            opponent_rank: The rank of the opponent (used for win tracking).
         """
         if result == 'win':
             self.wins += 1
+            if opponent_rank:
+                current_count = self.wins_against_rank.get(opponent_rank, 0)
+                self.wins_against_rank[opponent_rank] = current_count + 1
         elif result == 'loss':
             self.losses += 1
         elif result == 'draw':
-            self.draws += 1 
+            self.draws += 1
+        else:
+            logger.warning(f"Unknown battle result '{result}' passed to record_battle_result for {self.id}") 

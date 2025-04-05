@@ -1,4 +1,7 @@
-"""Loot system for random Ryō drops."""
+"""
+System for generating random loot drops in chat.
+"""
+
 import random
 import time
 from typing import Dict, Optional, Tuple
@@ -9,6 +12,7 @@ from .character import Character
 from .character_system import CharacterSystem
 from .currency_system import CurrencySystem
 
+# Setup logger
 logger = logging.getLogger(__name__)
 
 class LootSystem:
@@ -25,23 +29,20 @@ class LootSystem:
     
     # Base rewards by rank
     RANK_REWARDS = {
-        "Genin": {"base": 100, "cooldown": 600},  # 10 minutes
-        "Chunin": {"base": 250, "cooldown": 480},  # 8 minutes
-        "Jonin": {"base": 500, "cooldown": 360},  # 6 minutes
-        "ANBU": {"base": 1000, "cooldown": 300},  # 5 minutes
-        "Kage": {"base": 2000, "cooldown": 240}  # 4 minutes
+        "Academy Student": {"base": 50, "cooldown": 10800},  # 3 hours
+        "Genin": {"base": 100, "cooldown": 7200},  # 2 hours
+        "Chunin": {"base": 200, "cooldown": 3600},  # 1 hour
+        "Jonin": {"base": 400, "cooldown": 1800},  # 30 minutes
+        "ANBU": {"base": 600, "cooldown": 900},  # 15 minutes
+        "Kage": {"base": 1000, "cooldown": 600}  # 10 minutes
     }
     
     def __init__(self, character_system: CharacterSystem, currency_system: CurrencySystem):
-        """Initialize the loot system.
-        
-        Args:
-            character_system: The character system instance
-            currency_system: The currency system instance
-        """
+        """Initialize the LootSystem."""
         self.character_system = character_system
         self.currency_system = currency_system
-        self.last_drop_time: Dict[str, datetime] = {}
+        self.last_drop_time = {}  # Store last drop time by player ID
+        self.logger = logging.getLogger(__name__)
         
     def can_drop_loot(self, player_id: str) -> Tuple[bool, Optional[str]]:
         """Check if a player can receive a loot drop.
@@ -117,8 +118,22 @@ class LootSystem:
         variation = random.uniform(-0.1, 0.1)
         final_reward = int(final_reward * (1 + variation))
         
-        # Award the Ryō
-        self.currency_system.add_ryo(player_id, final_reward)
+        # Award the Ryō using add_balance_and_save with fallback
+        if hasattr(self.currency_system, 'add_balance_and_save'):
+            self.currency_system.add_balance_and_save(player_id, final_reward)
+        else:
+            # Fall back to old method or alternative method
+            try:
+                if hasattr(self.currency_system, 'add_ryo'):
+                    self.currency_system.add_ryo(player_id, final_reward)
+                else:
+                    self.currency_system.add_to_balance(player_id, final_reward)
+                
+                # Save currency data manually if needed
+                if hasattr(self.currency_system, 'save_currency_data'):
+                    self.currency_system.save_currency_data()
+            except Exception as e:
+                logger.error(f"Error adding currency reward to player {player_id}: {e}")
         
         # Update last drop time
         self.last_drop_time[player_id] = datetime.now()

@@ -1,0 +1,94 @@
+{
+  "Kumogakure Clans": [
+    {
+      "name": "Yotsuki",
+      "village": "Kumogakure",
+      "kekkei_genkai": "Lightning Chakra Mastery (Storm Release in rare cases)",
+      "abilities": [
+        "Lightning Release: Lariat",
+        "Lightning Armor Cloak",
+        "Storm Release: Laser Circus",
+        "Thunder Wall Technique"
+      ],
+      "traits": [
+        "Muscular builds, dark skin, white or silver hair",
+        "High stamina, chakra output",
+        "Lightning bolt or beast-themed tattoos",
+        "Honor-bound, confident personalities"
+      ],
+      "role": "Frontline fighters, elite jōnin, Kage-level bodyguards"
+    },
+    {
+      "name": "Soragane",
+      "village": "Kumogakure",
+      "kekkei_genkai": "Sonar Release",
+      "abilities": [
+        "Sonar Pulse – Quiet Ring Technique",
+        "Harmonic Interference Field",
+        "Silent Message Technique",
+        "Sound Spike Disruption"
+      ],
+      "traits": [
+        "Sensitive chakra senses",
+        "Resonance-regulating gear (ear cuffs, bands)",
+        "Crystal or metal vibration tools",
+        "Tattoos with waveforms or cymatic patterns"
+      ],
+      "role": "Recon, communications, anti-sensory specialists"
+    },
+    {
+      "name": "Raiketsu",
+      "village": "Kumogakure",
+      "kekkei_genkai": "Pulse Release (Lightning + Yang)",
+      "abilities": [
+        "Pulse Step",
+        "Nerve Breaker Palm",
+        "Overpulse State",
+        "Bio-Tremor Sense"
+      ],
+      "traits": [
+        "Slender, twitchy builds",
+        "Visible chakra lines during Overpulse",
+        "Nerve and pulse-related tattoos",
+        "Cold, hyperfocused personalities"
+      ],
+      "role": "Assassins, interceptors, chakra surgeons"
+    },
+    {
+      "name": "Shumyakuro",
+      "village": "Kumogakure",
+      "kekkei_genkai": "Nimbus Veil Technique",
+      "abilities": [
+        "Nimbus Skin Cloak",
+        "Atmos Barrier Shift",
+        "Mirage Vault Technique",
+        "Still Thunder Field"
+      ],
+      "traits": [
+        "Quiet, observant behavior",
+        "Layered robes with copper/mesh threads",
+        "Symbols: storm eyes, static arcs",
+        "Altitude training for breath control"
+      ],
+      "role": "Anti-sensor operatives, battlefield control specialists"
+    },
+    {
+      "name": "Enraikō",
+      "village": "Kumogakure",
+      "kekkei_genkai": "Flashfire Release (Lightning + Fire)",
+      "abilities": [
+        "Flashbrand Fist",
+        "Whiteout Field",
+        "Lightning Flare Veil",
+        "Radiant Feint Step"
+      ],
+      "traits": [
+        "Pale irises, chakra shimmer",
+        "Short-tempered, sharp-witted",
+        "Reflective, conductive gear",
+        "Trained in darkness for sensory control"
+      ],
+      "role": "Shock vanguard, tactical saboteurs"
+    }
+  ]
+}

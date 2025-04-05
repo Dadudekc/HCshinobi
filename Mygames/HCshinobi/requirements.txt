@@ -3,6 +3,7 @@ discord.py>=2.0.0
 python-dotenv>=0.19.0
 aiohttp>=3.8.0
 dataclasses-json>=0.5.7
+aiofiles
 
 # Development dependencies
 pytest>=6.0.0
@@ -24,4 +25,25 @@ undetected-chromedriver>=3.1.0
 
 # Added from the code block
 openai
-setuptools 
+setuptools
+
+# Optional dependencies for features
+requests
+pillow
+psutil
+# Add other feature dependencies here
+
+# Optional: Type checking
+types-requests
+types-pillow
+types-psutil
+# Add other types-* packages as needed
+
+# Optional: Linting/Formatting
+flake8
+black
+isort
+
+# Project specific core dependencies
+aiosqlite  # Example if you were using async sqlite
+# Add other core dependencies here 

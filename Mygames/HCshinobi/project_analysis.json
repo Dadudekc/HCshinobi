@@ -151,16 +151,16 @@
         "language": ".py",
         "functions": [
             "__init__",
-            "setup_event_handlers",
+            "clan_data",
             "log_error"
         ],
         "classes": {
-            "HCShinobiBot": {
+            "HCBot": {
                 "methods": [
                     "__init__",
-                    "setup_event_handlers"
+                    "clan_data"
                 ],
-                "docstring": "Main bot class for HCShinobi.",
+                "docstring": "Main bot class.",
                 "base_classes": [
                     "commands.Bot"
                 ]
@@ -202,24 +202,27 @@
         "functions": [
             "find_env_file",
             "load_env_value",
+            "convert_to_int",
             "load_config",
-            "__init__",
-            "_initialize_data_structure",
-            "validate"
+            "__post_init__",
+            "_validate_config",
+            "_is_valid_url",
+            "from_env"
         ],
         "classes": {
             "BotConfig": {
                 "methods": [
-                    "__init__",
-                    "_initialize_data_structure",
-                    "validate"
+                    "__post_init__",
+                    "_validate_config",
+                    "_is_valid_url",
+                    "from_env"
                 ],
                 "docstring": "Configuration class for the bot.",
                 "base_classes": []
             }
         },
         "routes": [],
-        "complexity": 9
+        "complexity": 12
     },
     "HCshinobi\\bot\\events.py": {
         "language": ".py",
@@ -242,40 +245,64 @@
         "language": ".py",
         "functions": [
             "__init__",
-            "initialized",
             "clan_data",
-            "token_system",
             "personality_modifiers",
+            "character_system",
+            "clan_system",
+            "battle_system",
+            "token_system",
             "npc_manager",
-            "clan_engine",
+            "clan_assignment_engine",
             "character_manager",
             "battle_manager",
             "ollama_client",
             "openai_client",
-            "webhook"
+            "webhook",
+            "currency_system",
+            "training_system",
+            "quest_system",
+            "mission_system",
+            "clan_missions",
+            "loot_system",
+            "room_system",
+            "progression_engine",
+            "equipment_shop_system",
+            "_check_initialized"
         ],
         "classes": {
             "ServiceContainer": {
                 "methods": [
                     "__init__",
-                    "initialized",
                     "clan_data",
-                    "token_system",
                     "personality_modifiers",
+                    "character_system",
+                    "clan_system",
+                    "battle_system",
+                    "token_system",
                     "npc_manager",
-                    "clan_engine",
+                    "clan_assignment_engine",
                     "character_manager",
                     "battle_manager",
                     "ollama_client",
                     "openai_client",
-                    "webhook"
+                    "webhook",
+                    "currency_system",
+                    "training_system",
+                    "quest_system",
+                    "mission_system",
+                    "clan_missions",
+                    "loot_system",
+                    "room_system",
+                    "progression_engine",
+                    "equipment_shop_system",
+                    "_check_initialized"
                 ],
                 "docstring": "Container for all bot services.",
                 "base_classes": []
             }
         },
         "routes": [],
-        "complexity": 24
+        "complexity": 48
     },
     "HCshinobi\\bot\\setup.py": {
         "language": ".py",
@@ -665,6 +692,9 @@
     "HCshinobi\\bot\\core\\notifications\\templates.py": {
         "language": ".py",
         "functions": [
+            "_get_template",
+            "_format_string",
+            "_get_color",
             "battle_alert",
             "server_announcement",
             "lore_drop",
@@ -672,15 +702,9 @@
             "training_mission",
             "system_alert"
         ],
-        "classes": {
-            "Theme": {
-                "methods": [],
-                "docstring": "Color themes for different notification types.",
-                "base_classes": []
-            }
-        },
+        "classes": {},
         "routes": [],
-        "complexity": 6
+        "complexity": 9
     },
     "HCshinobi\\bot\\core\\notifications\\notification_dispatcher.py": {
         "language": ".py",
@@ -707,13 +731,47 @@
         "language": ".py",
         "functions": [
             "__init__",
-            "register_commands"
+            "__init__",
+            "__init__",
+            "create_embed",
+            "update_buttons",
+            "create_final_result_embed",
+            "__init__"
         ],
         "classes": {
-            "BattleCommands": {
+            "DuelConfirmationView": {
+                "methods": [
+                    "__init__"
+                ],
+                "docstring": null,
+                "base_classes": [
+                    "ui.View"
+                ]
+            },
+            "JutsuSelect": {
+                "methods": [
+                    "__init__"
+                ],
+                "docstring": null,
+                "base_classes": [
+                    "ui.Select"
+                ]
+            },
+            "BattleView": {
                 "methods": [
                     "__init__",
-                    "register_commands"
+                    "create_embed",
+                    "update_buttons",
+                    "create_final_result_embed"
+                ],
+                "docstring": null,
+                "base_classes": [
+                    "ui.View"
+                ]
+            },
+            "BattleCommands": {
+                "methods": [
+                    "__init__"
                 ],
                 "docstring": null,
                 "base_classes": [
@@ -722,7 +780,7 @@
             }
         },
         "routes": [],
-        "complexity": 4
+        "complexity": 14
     },
     "HCshinobi\\commands\\announcement_commands.py": {
         "language": ".py",
@@ -776,12 +834,9 @@
             "create_clan_selection_embed",
             "setup_select_options",
             "__init__",
-            "register_commands",
-            "_create_character_embed",
             "__init__",
             "__init__",
-            "check",
-            "check"
+            "__init__"
         ],
         "classes": {
             "CharacterNameModal": {
@@ -826,11 +881,9 @@
             },
             "CharacterCommands": {
                 "methods": [
-                    "__init__",
-                    "register_commands",
-                    "_create_character_embed"
+                    "__init__"
                 ],
-                "docstring": null,
+                "docstring": "Commands for managing characters.",
                 "base_classes": [
                     "commands.Cog"
                 ]
@@ -844,7 +897,7 @@
                     "ui.View"
                 ]
             },
-            "QuizOptionView": {
+            "TitleEquipView": {
                 "methods": [
                     "__init__"
                 ],
@@ -852,10 +905,19 @@
                 "base_classes": [
                     "ui.View"
                 ]
+            },
+            "TitleSelect": {
+                "methods": [
+                    "__init__"
+                ],
+                "docstring": null,
+                "base_classes": [
+                    "ui.Select"
+                ]
             }
         },
         "routes": [],
-        "complexity": 28
+        "complexity": 24
     },
     "HCshinobi\\commands\\clan_mission_commands.py": {
         "language": ".py",
@@ -1012,7 +1074,9 @@
                     "register_commands"
                 ],
                 "docstring": null,
-                "base_classes": []
+                "base_classes": [
+                    "commands.Cog"
+                ]
             }
         },
         "routes": [],
@@ -1073,9 +1137,21 @@
     "HCshinobi\\commands\\training_commands.py": {
         "language": ".py",
         "functions": [
+            "__init__",
+            "get_intensity_description",
             "__init__"
         ],
         "classes": {
+            "TrainingView": {
+                "methods": [
+                    "__init__",
+                    "get_intensity_description"
+                ],
+                "docstring": null,
+                "base_classes": [
+                    "ui.View"
+                ]
+            },
             "TrainingCommands": {
                 "methods": [
                     "__init__"
@@ -1087,7 +1163,7 @@
             }
         },
         "routes": [],
-        "complexity": 2
+        "complexity": 6
     },
     "HCshinobi\\core\\battle_manager.py": {
         "language": ".py",
@@ -1132,31 +1208,24 @@
     "HCshinobi\\core\\battle_system.py": {
         "language": ".py",
         "functions": [
+            "update_start_time",
+            "update_last_action",
+            "__hash__",
+            "__eq__",
+            "to_dict",
             "__init__",
-            "_roll_initiative",
-            "calculate_attack_power",
-            "calculate_defense",
-            "process_attack",
-            "switch_turns",
-            "get_battle_status",
-            "__init__",
-            "start_battle",
-            "end_battle",
-            "use_jutsu",
+            "_add_to_battle_log",
             "get_battle_state",
-            "_calculate_jutsu_damage",
-            "_calculate_battle_rewards"
+            "get_battle_id_for_player"
         ],
         "classes": {
             "BattleState": {
                 "methods": [
-                    "__init__",
-                    "_roll_initiative",
-                    "calculate_attack_power",
-                    "calculate_defense",
-                    "process_attack",
-                    "switch_turns",
-                    "get_battle_status"
+                    "update_start_time",
+                    "update_last_action",
+                    "__hash__",
+                    "__eq__",
+                    "to_dict"
                 ],
                 "docstring": "Represents the state of a battle.",
                 "base_classes": []
@@ -1164,19 +1233,16 @@
             "BattleSystem": {
                 "methods": [
                     "__init__",
-                    "start_battle",
-                    "end_battle",
-                    "use_jutsu",
+                    "_add_to_battle_log",
                     "get_battle_state",
-                    "_calculate_jutsu_damage",
-                    "_calculate_battle_rewards"
+                    "get_battle_id_for_player"
                 ],
-                "docstring": "Manages battles and battle-related operations.",
+                "docstring": "System for managing character battles.",
                 "base_classes": []
             }
         },
         "routes": [],
-        "complexity": 28
+        "complexity": 18
     },
     "HCshinobi\\core\\character_manager.py": {
         "language": ".py",
@@ -1209,100 +1275,83 @@
         "language": ".py",
         "functions": [
             "__post_init__",
-            "roll_initiative",
-            "roll_attack",
-            "roll_defense",
-            "calculate_damage",
+            "from_dict",
+            "to_dict",
+            "add_exp",
+            "level_up",
+            "heal",
+            "restore_chakra",
+            "restore_stamina",
             "take_damage",
             "use_chakra",
-            "restore_chakra",
-            "heal",
-            "gain_exp",
+            "use_stamina",
+            "add_jutsu",
+            "remove_jutsu",
             "add_item",
             "remove_item",
-            "add_effect",
-            "remove_effect",
-            "add_status_condition",
-            "remove_status_condition",
-            "add_buff",
-            "remove_buff",
-            "add_debuff",
-            "remove_debuff",
-            "learn_jutsu",
-            "use_jutsu"
+            "equip_item",
+            "unequip_item",
+            "add_status_effect",
+            "remove_status_effect",
+            "record_battle_result"
         ],
         "classes": {
             "Character": {
                 "methods": [
                     "__post_init__",
-                    "roll_initiative",
-                    "roll_attack",
-                    "roll_defense",
-                    "calculate_damage",
+                    "from_dict",
+                    "to_dict",
+                    "add_exp",
+                    "level_up",
+                    "heal",
+                    "restore_chakra",
+                    "restore_stamina",
                     "take_damage",
                     "use_chakra",
-                    "restore_chakra",
-                    "heal",
-                    "gain_exp",
+                    "use_stamina",
+                    "add_jutsu",
+                    "remove_jutsu",
                     "add_item",
                     "remove_item",
-                    "add_effect",
-                    "remove_effect",
-                    "add_status_condition",
-                    "remove_status_condition",
-                    "add_buff",
-                    "remove_buff",
-                    "add_debuff",
-                    "remove_debuff",
-                    "learn_jutsu",
-                    "use_jutsu"
+                    "equip_item",
+                    "unequip_item",
+                    "add_status_effect",
+                    "remove_status_effect",
+                    "record_battle_result"
                 ],
-                "docstring": "Represents a ninja character in the game.",
+                "docstring": "Represents a character in the game.",
                 "base_classes": []
             }
         },
         "routes": [],
-        "complexity": 44
+        "complexity": 40
     },
     "HCshinobi\\core\\character_system.py": {
         "language": ".py",
         "functions": [
             "__init__",
-            "_load_characters",
-            "create_character",
-            "get_character",
             "get_character_by_name",
-            "update_character",
-            "delete_character",
-            "save_character",
-            "character_exists",
             "get_all_characters"
         ],
         "classes": {
             "CharacterSystem": {
                 "methods": [
                     "__init__",
-                    "_load_characters",
-                    "create_character",
-                    "get_character",
                     "get_character_by_name",
-                    "update_character",
-                    "delete_character",
-                    "save_character",
-                    "character_exists",
                     "get_all_characters"
                 ],
-                "docstring": null,
+                "docstring": "Manages character data loading, saving, and retrieval.",
                 "base_classes": []
             }
         },
         "routes": [],
-        "complexity": 20
+        "complexity": 6
     },
     "HCshinobi\\core\\clan_data.py": {
         "language": ".py",
         "functions": [
             "__init__",
+            "initialize",
             "load_clans",
             "save_clans",
             "create_default_clans",
@@ -1317,6 +1366,7 @@
             "get_clans_by_rarity",
             "add_clan",
             "update_clan",
+            "remove_clan",
             "get_clan_base_weights",
             "__init__",
             "load_clans",
@@ -1328,6 +1378,7 @@
             "ClanData": {
                 "methods": [
                     "__init__",
+                    "initialize",
                     "load_clans",
                     "save_clans",
                     "create_default_clans",
@@ -1342,6 +1393,7 @@
                     "get_clans_by_rarity",
                     "add_clan",
                     "update_clan",
+                    "remove_clan",
                     "get_clan_base_weights"
                 ],
                 "docstring": "Manages data related to clans, loading from and saving to a file.\nProvides methods to access and manipulate clan information.",
@@ -1360,7 +1412,7 @@
             }
         },
         "routes": [],
-        "complexity": 42
+        "complexity": 46
     },
     "HCshinobi\\core\\clan_assignment_engine.py": {
         "language": ".py",
@@ -1436,37 +1488,19 @@
     "HCshinobi\\core\\clan_system.py": {
         "language": ".py",
         "functions": [
-            "__init__",
-            "_load_clan_assignments",
-            "_save_clan_assignments",
-            "get_player_clan",
-            "assign_clan",
-            "get_clan_info",
-            "get_clan_currency_bonus",
-            "get_clan_rarity",
-            "get_clan_special_bonus",
-            "get_rarity_color"
+            "__init__"
         ],
         "classes": {
             "ClanSystem": {
                 "methods": [
-                    "__init__",
-                    "_load_clan_assignments",
-                    "_save_clan_assignments",
-                    "get_player_clan",
-                    "assign_clan",
-                    "get_clan_info",
-                    "get_clan_currency_bonus",
-                    "get_clan_rarity",
-                    "get_clan_special_bonus",
-                    "get_rarity_color"
+                    "__init__"
                 ],
-                "docstring": "Manages clan data and functionality.",
+                "docstring": "System for managing clans.",
                 "base_classes": []
             }
         },
         "routes": [],
-        "complexity": 20
+        "complexity": 2
     },
     "HCshinobi\\core\\constants.py": {
         "language": ".py",
@@ -1474,7 +1508,7 @@
         "classes": {
             "RarityTier": {
                 "methods": [],
-                "docstring": "Enum for clan rarity tiers.",
+                "docstring": null,
                 "base_classes": [
                     "Enum"
                 ]
@@ -1487,42 +1521,34 @@
         "language": ".py",
         "functions": [
             "__init__",
-            "load_balances",
-            "save_balances",
-            "load_daily_rewards",
-            "save_daily_rewards",
-            "get_balance",
-            "add_ryo",
-            "remove_ryo",
-            "has_enough",
-            "award_chat_reward",
-            "award_daily_reward",
-            "award_battle_rewards",
-            "reset_daily_rewards"
+            "load_currency_data",
+            "save_currency_data",
+            "get_player_balance",
+            "set_player_balance",
+            "add_to_balance",
+            "deduct_from_balance",
+            "has_sufficient_funds",
+            "transfer_funds"
         ],
         "classes": {
             "CurrencySystem": {
                 "methods": [
                     "__init__",
-                    "load_balances",
-                    "save_balances",
-                    "load_daily_rewards",
-                    "save_daily_rewards",
-                    "get_balance",
-                    "add_ryo",
-                    "remove_ryo",
-                    "has_enough",
-                    "award_chat_reward",
-                    "award_daily_reward",
-                    "award_battle_rewards",
-                    "reset_daily_rewards"
+                    "load_currency_data",
+                    "save_currency_data",
+                    "get_player_balance",
+                    "set_player_balance",
+                    "add_to_balance",
+                    "deduct_from_balance",
+                    "has_sufficient_funds",
+                    "transfer_funds"
                 ],
-                "docstring": "Manages the game's currency (Ry\u014d).",
+                "docstring": "Manages in-game currency for players.",
                 "base_classes": []
             }
         },
         "routes": [],
-        "complexity": 26
+        "complexity": 18
     },
     "HCshinobi\\core\\engine.py": {
         "language": ".py",
@@ -1617,42 +1643,24 @@
         "language": ".py",
         "functions": [
             "__init__",
-            "__init__",
-            "_load_missions",
-            "_create_sample_missions",
-            "get_available_missions",
-            "accept_mission",
-            "complete_mission",
-            "get_active_missions",
+            "get_active_mission",
             "get_completed_missions",
-            "get_mission_progress"
+            "get_available_missions"
         ],
         "classes": {
-            "Mission": {
-                "methods": [
-                    "__init__"
-                ],
-                "docstring": "Represents a mission in the game.",
-                "base_classes": []
-            },
             "MissionSystem": {
                 "methods": [
                     "__init__",
-                    "_load_missions",
-                    "_create_sample_missions",
-                    "get_available_missions",
-                    "accept_mission",
-                    "complete_mission",
-                    "get_active_missions",
+                    "get_active_mission",
                     "get_completed_missions",
-                    "get_mission_progress"
+                    "get_available_missions"
                 ],
-                "docstring": "Manages missions and mission-related operations.",
+                "docstring": "Manages missions using a consolidated data structure.",
                 "base_classes": []
             }
         },
         "routes": [],
-        "complexity": 20
+        "complexity": 8
     },
     "HCshinobi\\core\\npc_manager.py": {
         "language": ".py",
@@ -1710,6 +1718,7 @@
         "language": ".py",
         "functions": [
             "__init__",
+            "initialize",
             "_load_or_create_modifiers",
             "_save_modifiers",
             "_create_default_modifiers",
@@ -1724,6 +1733,7 @@
             "PersonalityModifiers": {
                 "methods": [
                     "__init__",
+                    "initialize",
                     "_load_or_create_modifiers",
                     "_save_modifiers",
                     "_create_default_modifiers",
@@ -1739,7 +1749,7 @@
             }
         },
         "routes": [],
-        "complexity": 20
+        "complexity": 22
     },
     "HCshinobi\\core\\quest_system.py": {
         "language": ".py",
@@ -1817,49 +1827,38 @@
         "language": ".py",
         "functions": [
             "__init__",
+            "initialize",
             "_load_tokens",
             "_save_tokens",
-            "_log_transaction",
+            "_load_log",
+            "_save_log",
             "get_player_tokens",
-            "ensure_player_exists",
-            "add_tokens",
-            "use_tokens",
             "use_tokens_for_clan_boost",
             "use_tokens_for_reroll",
             "get_player_unlocks",
-            "has_unlock",
-            "unlock_feature"
+            "has_unlock"
         ],
         "classes": {
-            "TokenError": {
-                "methods": [],
-                "docstring": "Exception raised for token-related errors (e.g., insufficient funds).",
-                "base_classes": [
-                    "Exception"
-                ]
-            },
             "TokenSystem": {
                 "methods": [
                     "__init__",
+                    "initialize",
                     "_load_tokens",
                     "_save_tokens",
-                    "_log_transaction",
+                    "_load_log",
+                    "_save_log",
                     "get_player_tokens",
-                    "ensure_player_exists",
-                    "add_tokens",
-                    "use_tokens",
                     "use_tokens_for_clan_boost",
                     "use_tokens_for_reroll",
                     "get_player_unlocks",
-                    "has_unlock",
-                    "unlock_feature"
+                    "has_unlock"
                 ],
                 "docstring": "Manages tokens for players: balances, unlocks, spending, logging.\nUses TOKEN_FILE for state and TOKEN_LOG_FILE for history.",
                 "base_classes": []
             }
         },
         "routes": [],
-        "complexity": 26
+        "complexity": 22
     },
     "HCshinobi\\core\\__init__.py": {
         "language": ".py",
@@ -1874,6 +1873,8 @@
             "__init__",
             "get_multipliers",
             "__init__",
+            "to_dict",
+            "from_dict",
             "__init__",
             "_initialize_achievements",
             "_load_training_data",
@@ -1882,18 +1883,16 @@
             "save_achievements",
             "check_achievements",
             "load_sessions",
-            "save_sessions",
             "load_history",
             "save_history",
-            "get_training_cost",
-            "is_on_cooldown",
-            "start_training",
-            "end_training",
             "_get_training_cost",
-            "_calculate_training_results",
-            "_apply_training_results",
+            "is_on_cooldown",
             "get_training_status",
-            "get_training_history"
+            "get_training_history",
+            "_get_base_gain",
+            "_get_injury_params",
+            "_get_cooldown_duration",
+            "_format_timedelta"
         ],
         "classes": {
             "TrainingAchievement": {
@@ -1912,7 +1911,9 @@
             },
             "TrainingSession": {
                 "methods": [
-                    "__init__"
+                    "__init__",
+                    "to_dict",
+                    "from_dict"
                 ],
                 "docstring": "Represents an active training session.",
                 "base_classes": []
@@ -1927,18 +1928,16 @@
                     "save_achievements",
                     "check_achievements",
                     "load_sessions",
-                    "save_sessions",
                     "load_history",
                     "save_history",
-                    "get_training_cost",
-                    "is_on_cooldown",
-                    "start_training",
-                    "end_training",
                     "_get_training_cost",
-                    "_calculate_training_results",
-                    "_apply_training_results",
+                    "is_on_cooldown",
                     "get_training_status",
-                    "get_training_history"
+                    "get_training_history",
+                    "_get_base_gain",
+                    "_get_injury_params",
+                    "_get_cooldown_duration",
+                    "_format_timedelta"
                 ],
                 "docstring": "Manages character training sessions.",
                 "base_classes": []
@@ -1950,54 +1949,34 @@
     "HCshinobi\\tests\\test_battle_system.py": {
         "language": ".py",
         "functions": [
+            "mock_character_system",
             "battle_system",
-            "test_characters",
-            "test_initialization",
-            "test_start_battle",
-            "test_calculate_damage",
-            "test_apply_damage",
-            "test_check_battle_end",
-            "test_end_battle",
-            "test_get_battle_status",
-            "test_use_jutsu",
-            "test_battle_timeout"
+            "test_characters"
         ],
         "classes": {},
         "routes": [],
-        "complexity": 11
+        "complexity": 3
     },
     "HCshinobi\\tests\\test_bot.py": {
         "language": ".py",
         "functions": [
             "mock_config",
             "mock_services",
-            "bot",
-            "test_bot_initialization",
-            "test_bot_setup"
+            "mock_bot"
         ],
         "classes": {},
         "routes": [],
-        "complexity": 5
+        "complexity": 3
     },
     "HCshinobi\\tests\\test_character_system.py": {
         "language": ".py",
         "functions": [
-            "character_system",
-            "test_character",
-            "test_initialization",
-            "test_create_character",
-            "test_get_character",
-            "test_get_character_by_name",
-            "test_update_character",
-            "test_delete_character",
-            "test_load_characters",
-            "test_save_character",
-            "test_character_exists",
-            "test_get_all_characters"
+            "character_system_instance",
+            "test_character_data"
         ],
         "classes": {},
         "routes": [],
-        "complexity": 12
+        "complexity": 2
     },
     "HCshinobi\\tests\\test_bot_init.py": {
         "language": ".py",
@@ -2013,14 +1992,15 @@
     "HCshinobi\\tests\\test_config.py": {
         "language": ".py",
         "functions": [
-            "test_load_config_with_all_settings",
-            "test_load_config_with_defaults",
-            "test_load_config_missing_required",
-            "test_load_config_invalid_values"
+            "mock_env",
+            "test_config_initialization",
+            "test_config_from_env",
+            "test_config_missing_required",
+            "test_config_invalid_values"
         ],
         "classes": {},
         "routes": [],
-        "complexity": 4
+        "complexity": 5
     },
     "HCshinobi\\tests\\test_currency_system.py": {
         "language": ".py",
@@ -2073,39 +2053,48 @@
     "HCshinobi\\tests\\core\\test_clan_data.py": {
         "language": ".py",
         "functions": [
-            "mock_clan_data"
+            "mock_logger",
+            "mock_clan_data_content",
+            "clan_data_instance",
+            "test_initialization",
+            "test_load_existing_clans",
+            "test_load_invalid_data",
+            "test_get_all_clans",
+            "test_get_clan_by_name",
+            "test_get_clans_by_rarity",
+            "test_get_clan_base_weights",
+            "selective_load"
         ],
         "classes": {},
         "routes": [],
-        "complexity": 1
+        "complexity": 11
     },
     "HCshinobi\\tests\\core\\test_token_system.py": {
         "language": ".py",
         "functions": [
-            "mock_token_data"
+            "mock_token_data",
+            "token_system",
+            "selective_load"
         ],
         "classes": {},
         "routes": [],
-        "complexity": 1
+        "complexity": 3
     },
     "HCshinobi\\tests\\core\\test_personality_modifiers.py": {
         "language": ".py",
         "functions": [
             "mock_modifier_data",
-            "personality_modifiers",
+            "personality_modifiers_instance",
             "test_initialization",
             "test_load_existing_modifiers",
             "test_load_invalid_data",
             "test_get_clan_modifiers",
             "test_get_all_personalities",
-            "test_add_personality",
-            "test_update_personality",
-            "test_remove_personality",
-            "test_get_suggested_personalities_for_clan"
+            "selective_load"
         ],
         "classes": {},
         "routes": [],
-        "complexity": 11
+        "complexity": 8
     },
     "HCshinobi\\tests\\extensions\\test_announcements.py": {
         "language": ".py",
@@ -2123,20 +2112,15 @@
     "HCshinobi\\tests\\extensions\\test_clans.py": {
         "language": ".py",
         "functions": [
-            "mock_config",
-            "mock_services",
-            "mock_bot",
-            "mock_logger",
-            "mock_clan_data",
-            "mock_services",
             "mock_bot",
             "mock_interaction",
+            "mock_character",
             "cog",
             "test_get_rarity_color"
         ],
         "classes": {},
         "routes": [],
-        "complexity": 10
+        "complexity": 5
     },
     "HCshinobi\\tests\\extensions\\test_rolling.py": {
         "language": ".py",
@@ -2275,21 +2259,17 @@
     "tests\\test_commands.py": {
         "language": ".py",
         "functions": [
-            "mock_interaction",
             "mock_client",
             "character_system",
             "clan_data",
             "character_commands",
-            "announcement_commands",
-            "test_assign_clan_random",
-            "test_assign_clan_specific",
-            "test_assign_clan_no_character",
-            "test_assign_clan_already_has_clan",
-            "test_countdown_command"
+            "mock_bot",
+            "mock_interaction",
+            "announcement_commands"
         ],
         "classes": {},
         "routes": [],
-        "complexity": 11
+        "complexity": 7
     },
     "tests\\test_bot_commands.py": {
         "language": ".py",
@@ -2810,6 +2790,402 @@
                     "__init__"
                 ],
                 "docstring": "Test invoker for Discord slash commands.",
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 10
+    },
+    "fix_character_ids.py": {
+        "language": ".py",
+        "functions": [
+            "fix_character_files"
+        ],
+        "classes": {},
+        "routes": [],
+        "complexity": 1
+    },
+    "fix_character_files.py": {
+        "language": ".py",
+        "functions": [
+            "fix_character_files"
+        ],
+        "classes": {},
+        "routes": [],
+        "complexity": 1
+    },
+    "temp_jutsu_data_generator.py": {
+        "language": ".py",
+        "functions": [],
+        "classes": {},
+        "routes": [],
+        "complexity": 0
+    },
+    "HCshinobi\\__main__.py": {
+        "language": ".py",
+        "functions": [],
+        "classes": {},
+        "routes": [],
+        "complexity": 0
+    },
+    "HCshinobi\\commands\\shop_commands.py": {
+        "language": ".py",
+        "functions": [
+            "__init__",
+            "_load_item_shop_data"
+        ],
+        "classes": {
+            "ShopType": {
+                "methods": [],
+                "docstring": null,
+                "base_classes": [
+                    "Enum"
+                ]
+            },
+            "ShopCommands": {
+                "methods": [
+                    "__init__",
+                    "_load_item_shop_data"
+                ],
+                "docstring": null,
+                "base_classes": [
+                    "commands.Cog"
+                ]
+            }
+        },
+        "routes": [],
+        "complexity": 4
+    },
+    "HCshinobi\\core\\clan.py": {
+        "language": ".py",
+        "functions": [
+            "to_dict",
+            "from_dict"
+        ],
+        "classes": {
+            "Clan": {
+                "methods": [
+                    "to_dict",
+                    "from_dict"
+                ],
+                "docstring": "Clan model class.",
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 4
+    },
+    "HCshinobi\\core\\jutsu_shop_system.py": {
+        "language": ".py",
+        "functions": [
+            "__init__",
+            "_needs_refresh",
+            "get_current_shop_inventory_details"
+        ],
+        "classes": {
+            "JutsuShopSystem": {
+                "methods": [
+                    "__init__",
+                    "_needs_refresh",
+                    "get_current_shop_inventory_details"
+                ],
+                "docstring": "Manages the rotating Jutsu shop inventory and posts updates.",
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 6
+    },
+    "HCshinobi\\extensions\\clans.py": {
+        "language": ".py",
+        "functions": [
+            "__init__",
+            "_get_rarity_color"
+        ],
+        "classes": {
+            "ClanCommands": {
+                "methods": [
+                    "__init__",
+                    "_get_rarity_color"
+                ],
+                "docstring": "Clan related commands.",
+                "base_classes": [
+                    "commands.Cog"
+                ]
+            }
+        },
+        "routes": [],
+        "complexity": 4
+    },
+    "HCshinobi\\core\\views.py": {
+        "language": ".py",
+        "functions": [
+            "__init__",
+            "__init__",
+            "update_buttons"
+        ],
+        "classes": {
+            "ConfirmView": {
+                "methods": [
+                    "__init__"
+                ],
+                "docstring": "A view for confirming or canceling an action.",
+                "base_classes": [
+                    "discord.ui.View"
+                ]
+            },
+            "PaginationView": {
+                "methods": [
+                    "__init__",
+                    "update_buttons"
+                ],
+                "docstring": "A view for paginating through content.",
+                "base_classes": [
+                    "discord.ui.View"
+                ]
+            }
+        },
+        "routes": [],
+        "complexity": 6
+    },
+    "HCshinobi\\extensions\\clan_commands.py": {
+        "language": ".py",
+        "functions": [
+            "__init__",
+            "_get_rarity_color"
+        ],
+        "classes": {
+            "ClanCommands": {
+                "methods": [
+                    "__init__",
+                    "_get_rarity_color"
+                ],
+                "docstring": "Commands for clan management.",
+                "base_classes": [
+                    "commands.Cog"
+                ]
+            }
+        },
+        "routes": [],
+        "complexity": 4
+    },
+    "HCshinobi\\tests\\conftest.py": {
+        "language": ".py",
+        "functions": [
+            "setup_test_environment",
+            "mock_config",
+            "mock_bot",
+            "mock_author",
+            "mock_recipient",
+            "mock_ctx",
+            "mock_currency_system",
+            "mock_clan_system",
+            "mock_config_file",
+            "temp_data_dir",
+            "mock_token_data",
+            "load_side_effect"
+        ],
+        "classes": {},
+        "routes": [],
+        "complexity": 12
+    },
+    "HCshinobi\\tests\\test_currency_commands.py": {
+        "language": ".py",
+        "functions": [],
+        "classes": {},
+        "routes": [],
+        "complexity": 0
+    },
+    "HCshinobi\\tests\\commands\\test_mission_commands.py": {
+        "language": ".py",
+        "functions": [
+            "mission_system",
+            "character_system",
+            "mission_commands"
+        ],
+        "classes": {},
+        "routes": [],
+        "complexity": 3
+    },
+    "HCshinobi\\tests\\core\\test_character_mission_integration.py": {
+        "language": ".py",
+        "functions": [
+            "temp_data_dir",
+            "mission_system",
+            "setup_missions"
+        ],
+        "classes": {},
+        "routes": [],
+        "complexity": 3
+    },
+    "HCshinobi\\tests\\core\\test_mission_system.py": {
+        "language": ".py",
+        "functions": [
+            "character_system",
+            "mission_system",
+            "test_mission_initialization",
+            "test_get_available_missions",
+            "test_accept_mission",
+            "test_get_mission_progress",
+            "test_mission_requirements",
+            "test_load_multiple_mission_files"
+        ],
+        "classes": {},
+        "routes": [],
+        "complexity": 8
+    },
+    "HCshinobi\\utils\\config.py": {
+        "language": ".py",
+        "functions": [
+            "load_env",
+            "load_config",
+            "save_config",
+            "get_required_env",
+            "get_optional_env",
+            "load_clans",
+            "load_modifiers",
+            "save_modifiers",
+            "get_character_path",
+            "load_character",
+            "save_character",
+            "get_data_dir"
+        ],
+        "classes": {},
+        "routes": [],
+        "complexity": 12
+    },
+    "HCshinobi\\utils\\embeds.py": {
+        "language": ".py",
+        "functions": [
+            "create_error_embed",
+            "create_success_embed",
+            "create_info_embed",
+            "create_warning_embed",
+            "create_loading_embed",
+            "create_character_embed",
+            "create_clan_embed"
+        ],
+        "classes": {},
+        "routes": [],
+        "complexity": 7
+    },
+    "htmlcov\\coverage_html_cb_497bf287.js": {
+        "language": ".js",
+        "functions": [],
+        "classes": {},
+        "routes": [],
+        "complexity": 0
+    },
+    "HCshinobi\\core\\progression_engine.py": {
+        "language": ".py",
+        "functions": [
+            "__init__",
+            "_load_progression_data",
+            "_generate_rank_order",
+            "_check_wins_vs_rank",
+            "_check_mission_completions",
+            "_check_known_jutsu",
+            "_check_first_mission",
+            "_check_stat_threshold",
+            "_check_rank",
+            "_check_battle_wins"
+        ],
+        "classes": {
+            "ShinobiProgressionEngine": {
+                "methods": [
+                    "__init__",
+                    "_load_progression_data",
+                    "_generate_rank_order",
+                    "_check_wins_vs_rank",
+                    "_check_mission_completions",
+                    "_check_known_jutsu",
+                    "_check_first_mission",
+                    "_check_stat_threshold",
+                    "_check_rank",
+                    "_check_battle_wins"
+                ],
+                "docstring": "Handles EXP gain, rank progression, achievements, and titles.",
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 20
+    },
+    "HCshinobi\\core\\equipment_shop_system.py": {
+        "language": ".py",
+        "functions": [
+            "__init__",
+            "get_shop_inventory"
+        ],
+        "classes": {
+            "EquipmentShopSystem": {
+                "methods": [
+                    "__init__",
+                    "get_shop_inventory"
+                ],
+                "docstring": "Manages loading, displaying, buying, and selling of equipment.",
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 4
+    },
+    "HCshinobi\\core\\battle_actions.py": {
+        "language": ".py",
+        "functions": [
+            "get_effective_stat",
+            "resolve_attack",
+            "resolve_basic_attack",
+            "resolve_jutsu_action",
+            "resolve_flee_action"
+        ],
+        "classes": {},
+        "routes": [],
+        "complexity": 5
+    },
+    "HCshinobi\\core\\battle_effects.py": {
+        "language": ".py",
+        "functions": [
+            "tick_status_durations",
+            "apply_status_effects",
+            "_apply_effects_to_target",
+            "can_player_act",
+            "add_status_effect",
+            "to_dict",
+            "from_dict"
+        ],
+        "classes": {
+            "StatusEffect": {
+                "methods": [
+                    "to_dict",
+                    "from_dict"
+                ],
+                "docstring": "Represents a temporary status effect active during battle.\n\nAttributes:\n    name (str): The name of the effect.\n    effect_type (str): Type of effect (e.g., 'dot', 'hot', 'stat_mod', 'stun').\n    magnitude (float): The strength of the effect (damage, healing, etc.).\n    duration (int): The number of turns remaining.\n    source_player_id (Optional[str]): Who applied the effect.\n    target_stat (Optional[str]): Stat to modify for 'stat_mod' effects.\n    tick_timing (str): When the effect ticks ('start_turn' or 'end_turn').\n    applied_turn (Optional[int]): Turn when effect was applied.",
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 9
+    },
+    "HCshinobi\\database\\loot_history.py": {
+        "language": ".py",
+        "functions": [
+            "__init__",
+            "_ensure_dir_exists",
+            "_init_db",
+            "log_loot",
+            "get_loot_history"
+        ],
+        "classes": {
+            "LootHistoryDB": {
+                "methods": [
+                    "__init__",
+                    "_ensure_dir_exists",
+                    "_init_db",
+                    "log_loot",
+                    "get_loot_history"
+                ],
+                "docstring": null,
                 "base_classes": []
             }
         },

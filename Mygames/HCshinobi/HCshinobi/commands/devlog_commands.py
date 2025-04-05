@@ -393,21 +393,20 @@ class DevLogCommands(commands.Cog):
             bot: The bot instance
         """
         self.bot = bot
-        self.log_entries: List[DevLogEntry] = []
+        self.logs: List[DevLogEntry] = []
         self.log_file = LOG_FILE
+        self.logger = logging.getLogger(__name__) # Initialize logger for the cog instance
         
         # Make sure the data directory exists
         os.makedirs(os.path.dirname(self.log_file), exist_ok=True)
         
         # Load existing log entries
         self.load_logs()
-        
-        # Start the summary posting task
-        self.weekly_summary.start()
+        logger.info("DevLogCommands cog initialized")
     
     def cog_unload(self):
         """Clean up when the cog is unloaded."""
-        self.weekly_summary.cancel()
+        pass
     
     def load_logs(self):
         """Load log entries from the log file."""
@@ -416,21 +415,21 @@ class DevLogCommands(commands.Cog):
                 with open(self.log_file, 'r') as f:
                     data = json.load(f)
                 
-                self.log_entries = [DevLogEntry.from_dict(entry) for entry in data]
-                logger.info(f"Loaded {len(self.log_entries)} development log entries")
+                self.logs = [DevLogEntry.from_dict(entry) for entry in data]
+                logger.info(f"Loaded {len(self.logs)} development log entries")
             except Exception as e:
                 logger.error(f"Error loading development logs: {e}", exc_info=True)
-                self.log_entries = []
+                self.logs = []
         else:
             logger.info("No existing development log file found, starting fresh")
-            self.log_entries = []
+            self.logs = []
     
     def save_logs(self):
         """Save log entries to the log file."""
         try:
             with open(self.log_file, 'w') as f:
-                json.dump([entry.to_dict() for entry in self.log_entries], f, indent=2)
-            logger.info(f"Saved {len(self.log_entries)} development log entries")
+                json.dump([entry.to_dict() for entry in self.logs], f, indent=2)
+            logger.info(f"Saved {len(self.logs)} development log entries")
         except Exception as e:
             logger.error(f"Error saving development logs: {e}", exc_info=True)
     
@@ -453,7 +452,7 @@ class DevLogCommands(commands.Cog):
             entry.message_id = message.id
             
             # Store the entry
-            self.log_entries.append(entry)
+            self.logs.append(entry)
             self.save_logs()
             
             logger.info(f"Added and posted dev log entry: {entry.title}")
@@ -533,89 +532,6 @@ class DevLogCommands(commands.Cog):
             logger.error(f"Error generating content with Ollama: {e}")
             return None
     
-    @tasks.loop(hours=168)  # Weekly (7 days * 24 hours)
-    async def weekly_summary(self):
-        """Post a weekly summary of development logs."""
-        # Skip if no entries exist
-        if not self.log_entries:
-            return
-        
-        # Get the dev log channel
-        channel = self.bot.get_channel(DEVLOG_CHANNEL_ID)
-        if not channel:
-            logger.error(f"Could not find devlog channel with ID {DEVLOG_CHANNEL_ID}")
-            return
-        
-        # Calculate the start of the summary period (7 days ago)
-        now = datetime.datetime.utcnow()
-        start_date = now - datetime.timedelta(days=7)
-        
-        # Filter entries from the last week
-        recent_entries = [e for e in self.log_entries if e.timestamp >= start_date]
-        
-        # Skip if no recent entries
-        if not recent_entries:
-            return
-        
-        # Create the summary embed
-        embed = discord.Embed(
-            title="📋 Weekly Development Summary",
-            description=f"Here's what happened in Shinobi Chronicles development over the past week:",
-            color=discord.Color.teal(),
-            timestamp=now
-        )
-        
-        # Group entries by category
-        categories = {}
-        for entry in recent_entries:
-            if entry.category not in categories:
-                categories[entry.category] = []
-            categories[entry.category].append(entry)
-        
-        # Add a field for each category
-        for category, entries in categories.items():
-            category_info = DEV_CATEGORIES.get(category, DEV_CATEGORIES["announcement"])
-            
-            # Create a list of entries in this category
-            entry_list = "\n".join(f"• **{e.title}**" for e in entries[:5])
-            
-            # Add ellipsis if there are more entries
-            if len(entries) > 5:
-                entry_list += f"\n• *...and {len(entries) - 5} more*"
-            
-            embed.add_field(
-                name=f"{category_info['emoji']} {category_info['name']} ({len(entries)})",
-                value=entry_list,
-                inline=False
-            )
-        
-        # Add a count of total entries
-        embed.set_footer(text=f"Total updates: {len(recent_entries)}")
-        
-        # Post the summary
-        try:
-            await channel.send(embed=embed)
-            logger.info(f"Posted weekly development summary with {len(recent_entries)} entries")
-        except Exception as e:
-            logger.error(f"Error posting weekly development summary: {e}", exc_info=True)
-    
-    @weekly_summary.before_loop
-    async def before_weekly_summary(self):
-        """Wait until the bot is ready before starting the weekly summary task."""
-        await self.bot.wait_until_ready()
-        
-        # Wait until next Sunday at midnight to post the first summary
-        now = datetime.datetime.utcnow()
-        days_until_sunday = (6 - now.weekday()) % 7  # 0 = Monday, 6 = Sunday
-        if days_until_sunday == 0 and now.hour >= 0:  # It's already Sunday after midnight
-            days_until_sunday = 7  # Wait until next Sunday
-            
-        target_datetime = now.replace(hour=0, minute=0, second=0, microsecond=0) + datetime.timedelta(days=days_until_sunday)
-        seconds_to_wait = (target_datetime - now).total_seconds()
-        
-        logger.info(f"Weekly summary will start in {seconds_to_wait / 3600:.1f} hours")
-        await asyncio.sleep(seconds_to_wait)
-    
     @commands.command(
         name="devlog",
         aliases=["dev_log", "dev"],
@@ -653,9 +569,6 @@ class DevLogCommands(commands.Cog):
     async def on_ready(self):
         """Handle the on_ready event."""
         logger.info("DevLog commands cog is ready")
-        
-        # Register slash commands
-        self.register_app_commands()
     
     def register_app_commands(self):
         """Register application commands for slash command support."""
@@ -731,26 +644,121 @@ class DevLogCommands(commands.Cog):
         Args:
             ctx: The command context
         """
-        # Post a themed entry right away
-        entry = DevLogEntry(
-            category="bug",
-            title="Jutsu Malfunction Report",
-            description=(
-                "Esteemed shinobi of the village, this is an urgent report from the Debugging Division. "
-                "Our jutsu scrolls are experiencing a chakra disruption.\n\n"
-                "**Mission Status**: Our ninja commands are unable to flow chakra properly through the "
-                "Discord channels. The forbidden error '403' has been cast upon our techniques.\n\n"
-                "**Investigation**: Our elite ANBU debugging squad suspects that our bot requires additional "
-                "permissions to channel its chakra. We are analyzing the chakra pathways now.\n\n"
-                "**Next Steps**: The Hokage has assigned a team of jōnin developers to resolve this issue. "
-                "Please stand by as we perform the necessary hand signs to restore functionality."
-            ),
-            author_id=ctx.author.id
-        )
+        try:
+            if not self.is_ollama_available():
+                await ctx.send("Ollama service is not available. Cannot generate themed content.")
+                return
+            
+            themed_content = await self.generate_themed_content("announcement", "a routine system check")
+            if not themed_content:
+                await ctx.send("Failed to generate themed content.")
+                return
+                
+            entry = DevLogEntry(
+                category="announcement",
+                title="System Check Complete",
+                description=themed_content,
+                author_id=self.bot.user.id  # Bot is the author
+            )
+            await self.add_log_entry(entry)
+            await ctx.send("Test dev log entry posted successfully.")
+        except Exception as e:
+            logger.error(f"Error in devlog_test command: {e}", exc_info=True)
+            await ctx.send(f"An error occurred during the test: {e}")
+
+    # --- New Command: Sync Application Commands --- #
+    @discord.app_commands.command(name="sync", description="Sync application commands with Discord (Owner Only)")
+    @commands.is_owner()
+    async def sync_commands(self, interaction: discord.Interaction):
+        """Synchronizes the bot's command tree with Discord."""
+        await interaction.response.defer(ephemeral=True)
+        logger.info(f"Command sync initiated by {interaction.user} ({interaction.user.id})")
+        synced_commands = []
+        try:
+            # Sync global commands
+            synced_global = await self.bot.tree.sync()
+            synced_commands.extend(synced_global)
+            logger.info(f"Synced {len(synced_global)} global commands.")
+
+            # # If you use guild-specific commands, sync them too:
+            # guild = discord.Object(id=interaction.guild_id) # Or your specific test guild ID
+            # self.bot.tree.copy_global_to(guild=guild)
+            # synced_guild = await self.bot.tree.sync(guild=guild)
+            # synced_commands.extend(synced_guild)
+            # logger.info(f"Synced {len(synced_guild)} commands to guild {interaction.guild_id}.")
+            
+            command_list = "\n".join([f"- `/{cmd.name}`" for cmd in synced_commands])
+            if not command_list:
+                 command_list = "No commands were synced."
+            else:
+                 command_list = f"Synced commands:\n{command_list}"
+            
+            await interaction.followup.send(
+                f"✅ Command tree synchronized successfully!\n{command_list}",
+                ephemeral=True
+            )
+
+        except discord.errors.HTTPException as e:
+            logger.error(f"HTTP error during command sync: {e}", exc_info=True)
+            await interaction.followup.send(
+                f"❌ Failed to sync commands due to a Discord API error: {e}", 
+                ephemeral=True
+            )
+        except Exception as e:
+            logger.error(f"Unexpected error during command sync: {e}", exc_info=True)
+            await interaction.followup.send(
+                f"❌ An unexpected error occurred during synchronization: {e}", 
+                ephemeral=True
+            )
+    # --- End Sync Command --- #
+
+    # --- New Command: Clear Character Cache Entry --- #
+    @discord.app_commands.command(name="admin_clear_char_cache", description="Removes a user character from memory cache (Owner Only)")
+    @discord.app_commands.describe(user="The user whose character cache entry should be cleared.")
+    @commands.is_owner()
+    async def clear_character_cache(self, interaction: discord.Interaction, user: discord.User):
+        """Removes a specific user's character entry from the in-memory cache."""
+        await interaction.response.defer(ephemeral=True)
+        target_user_id = str(user.id)
+        log_prefix = f"[Admin Cache Clear | User: {interaction.user.id}]"
         
-        await self.add_log_entry(entry)
-        await ctx.send("✅ Test entry posted to the devlog channel!")
+        # --- Get CharacterSystem --- #
+        # Assuming it's stored in bot.services
+        char_system = getattr(self.bot.services, 'character_system', None)
+        if not char_system:
+            self.logger.error(f"{log_prefix} CharacterSystem service not found.")
+            await interaction.followup.send("❌ Internal Error: CharacterSystem service is unavailable.", ephemeral=True)
+            return
+        # --- End Get --- #
+            
+        self.logger.info(f"{log_prefix} Attempting to clear cache for user {target_user_id} ('{user.display_name}').")
+        
+        # Check if character is in the cache
+        if target_user_id in char_system.characters:
+            try:
+                del char_system.characters[target_user_id]
+                self.logger.info(f"{log_prefix} Successfully removed character {target_user_id} from memory cache.")
+                await interaction.followup.send(
+                    f"✅ Successfully removed character entry for **{user.display_name}** (`{target_user_id}`) from the in-memory cache.", 
+                    ephemeral=True
+                )
+            except Exception as e:
+                self.logger.error(f"{log_prefix} Error removing character {target_user_id} from cache: {e}", exc_info=True)
+                await interaction.followup.send(
+                    f"❌ An unexpected error occurred while removing **{user.display_name}** from the cache.", 
+                    ephemeral=True
+                )
+        else:
+            self.logger.warning(f"{log_prefix} Character {target_user_id} ('{user.display_name}') was not found in the memory cache. No action taken.")
+            await interaction.followup.send(
+                f"ℹ️ Character **{user.display_name}** (`{target_user_id}`) was not found in the active memory cache.", 
+                ephemeral=True
+            )
+    # --- End Clear Character Cache Command --- #
 
 async def setup(bot):
     """Set up the DevLog commands cog."""
-    await bot.add_cog(DevLogCommands(bot)) 
+    cog = DevLogCommands(bot)
+    cog.register_app_commands() # Ensure slash command is registered
+    await bot.add_cog(cog)
+    logger.info("DevLogCommands Cog added.") 

@@ -1,7 +1,7 @@
 """Tests for the TokenSystem core service."""
 import pytest
 import pytest_asyncio
-from unittest.mock import patch, AsyncMock, MagicMock
+from unittest.mock import patch, AsyncMock, MagicMock, Mock
 from datetime import datetime
 from HCshinobi.core.token_system import TokenSystem, TokenError
 from HCshinobi.core.constants import TOKEN_START_AMOUNT, TOKEN_COSTS, MAX_CLAN_BOOST_TOKENS, TOKEN_FILE
@@ -24,62 +24,82 @@ def mock_token_data():
         }
     }
 
-@pytest_asyncio.fixture
-async def token_system(tmp_path, mock_token_data):
+@pytest.fixture
+def token_system(tmp_path, mock_token_data):
     """Fixture to create a TokenSystem instance for testing."""
-    data_dir = str(tmp_path)
     token_file_path = tmp_path / TOKEN_FILE
+    log_file_path = tmp_path / "token_transactions.log"
     token_file_path.parent.mkdir(parents=True, exist_ok=True)
+    log_file_path.parent.mkdir(parents=True, exist_ok=True)
     
-    # Mock logger and file IO directly
     mock_logger = MagicMock()
-    # Mock load_json to return specific data for the token file
-    mock_load_json = AsyncMock(return_value=mock_token_data)
-    mock_save_json = AsyncMock()
+    mock_save_json = MagicMock()
     
-    # Ensure the mock load_json only returns data for the expected file
-    async def selective_load(path):
-        if Path(path) == token_file_path:
+    # Ensure the mock load_json only returns data for the expected file paths
+    def selective_load(path):
+        resolved_path = Path(path).resolve()
+        if resolved_path == token_file_path.resolve():
+            print(f"DEBUG: Mock load_json returning mock_token_data for {path}")
             return mock_token_data
-        # Handle log file loading if needed, return empty list
-        if Path(path).name == "token_transactions.log": 
+        if resolved_path == log_file_path.resolve(): 
+             print(f"DEBUG: Mock load_json returning [] for {path}")
              return []
+        print(f"DEBUG: Mock load_json called with unexpected path: {path}")
         return None
-    mock_load_json = AsyncMock(side_effect=selective_load)
-    mock_save_json = AsyncMock()
+    mock_load_json = MagicMock(side_effect=selective_load)
     
+    # Patch load/save/logger/log_event *before* initializing TokenSystem
     with patch('HCshinobi.core.token_system.load_json', mock_load_json), \
          patch('HCshinobi.core.token_system.save_json', mock_save_json), \
          patch('HCshinobi.core.token_system.get_logger', return_value=mock_logger), \
          patch('HCshinobi.core.token_system.log_event'):
-        # TokenSystem.__init__ takes no args, uses constants for file paths
-        instance = TokenSystem()
-        # Patch the file paths used internally if they differ from constants
-        instance.TOKEN_FILE = str(token_file_path) # Ensure instance uses the temp path
-        instance.TOKEN_LOG_FILE = str(tmp_path / "token_transactions.log")
-        # Reload data after patching path, if _load_tokens is not async or called later
-        # Assuming _load_tokens is called in __init__ and uses the patched load_json
-        return instance
+        # Initialize the instance with the correct paths
+        instance = TokenSystem(token_file=str(token_file_path), log_file=str(log_file_path))
+        # Explicitly call initialize() so it uses the mocked load_json
+        instance.initialize() 
+        yield instance # Use yield if fixture needs cleanup later
 
 @pytest.mark.asyncio
 async def test_load_existing_tokens(token_system):
     """Test loading data from an existing token file."""
-    # The fixture `token_system` should have loaded the mock data
-    assert token_system.player_tokens == {"user1": 100, "user2": 50}
+    # The fixture should now correctly load data via instance.initialize()
+    assert token_system.player_tokens == {"user1": 100, "user2": 50, "user3": 0}
+    assert token_system.player_unlocks == {"user1": ["weapon_crafting", "elemental_affinity"], "user2": ["weapon_crafting"]}
 
 @pytest.mark.asyncio
 async def test_load_invalid_data(tmp_path):
     """Test handling of invalid (non-dict) token file."""
     token_file_path = tmp_path / TOKEN_FILE
+    log_file_path = tmp_path / "token_transactions.log"
+    token_file_path.parent.mkdir(parents=True, exist_ok=True)
+    log_file_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(token_file_path, 'w') as f:
+        f.write("invalid data") # Write non-JSON data
+        
+    mock_logger = MagicMock()
+    mock_load_json_invalid = MagicMock(return_value=None) # Simulate load failure
+    mock_save_json = MagicMock()
+
+    # Patch load/save/logger
+    with patch('HCshinobi.core.token_system.load_json', mock_load_json_invalid), \
+         patch('HCshinobi.core.token_system.save_json', mock_save_json), \
+         patch('HCshinobi.core.token_system.logger', mock_logger), \
+         patch('HCshinobi.core.token_system.log_event'): 
+        # Initialize with the invalid file path
+        instance = TokenSystem(token_file=str(token_file_path), log_file=str(log_file_path))
+        # initialize() is called explicitly in __init__ for TokenSystem, so it runs here
+        instance.initialize()
+        assert instance.player_tokens == {}
+        assert instance.player_unlocks == {}
+        # Check that a warning or error was logged
+        assert mock_logger.warning.called or mock_logger.error.called
 
 @pytest.mark.asyncio
 async def test_get_player_tokens(token_system, mock_token_data):
     """Test retrieving player token balances."""
-    token_system.player_tokens = mock_token_data["tokens"]
-    
-    # Test existing player
+    # Fixture should have loaded the data correctly
     assert token_system.get_player_tokens("user1") == 100
-    
+    assert token_system.get_player_tokens("user3") == 0
     # Test new player (should return TOKEN_START_AMOUNT)
     assert token_system.get_player_tokens("new_user") == TOKEN_START_AMOUNT
 
@@ -153,19 +173,22 @@ async def test_use_tokens(token_system):
 async def test_use_tokens_for_clan_boost(token_system):
     """Test using tokens for clan boost."""
     token_system.player_tokens = {"user1": 100}
+    cost_per_token = TOKEN_COSTS.get("clan_boost", 1)
+    valid_boost_amount = 2
+    valid_cost = cost_per_token * valid_boost_amount
     
-    # Test valid boost
-    remaining = await token_system.use_tokens("user1", 2, "clan_boost_TestClan")
-    assert remaining == 98  # Assuming cost is 1 token per boost
+    # Test valid boost by calling the correct method
+    remaining = await token_system.use_tokens_for_clan_boost("user1", "TestClan", valid_boost_amount)
+    assert remaining == 100 - valid_cost 
     
-    # Test maximum token limit
+    # Test maximum token limit violation by calling the correct method
     with pytest.raises(ValueError):
-        await token_system.use_tokens("user1", MAX_CLAN_BOOST_TOKENS + 1, "clan_boost_TestClan")
+        await token_system.use_tokens_for_clan_boost("user1", "TestClan", MAX_CLAN_BOOST_TOKENS + 1)
     
     # Test insufficient funds
-    token_system.player_tokens["user2"] = 0
+    token_system.player_tokens["user2"] = valid_cost - 1 # Set insufficient funds
     with pytest.raises(TokenError):
-        await token_system.use_tokens("user2", 1, "clan_boost_TestClan")
+        await token_system.use_tokens_for_clan_boost("user2", "TestClan", valid_boost_amount)
 
 @pytest.mark.asyncio
 async def test_use_tokens_for_reroll(token_system):
@@ -217,9 +240,8 @@ async def test_transaction_logging(token_system):
 
     mock_now = datetime(2024, 1, 1, 12, 0)
 
-    # Patch save_json specifically for *this test* to intercept the log save call.
-    # The fixture already handles mocking for the instance's internal operations.
-    with patch('HCshinobi.core.token_system.save_json', new_callable=AsyncMock) as mock_save_json_for_test, \
+    # Patch save_json with a regular Mock, as it's synchronous
+    with patch('HCshinobi.core.token_system.save_json', new_callable=Mock) as mock_save_json_for_test, \
          patch('HCshinobi.core.token_system.datetime') as mock_datetime:
 
         mock_datetime.now.return_value = mock_now
@@ -227,15 +249,22 @@ async def test_transaction_logging(token_system):
         # Use the fixture-provided, initialized token_system instance
         await token_system.add_tokens("user1", 50, "test_transaction_log")
 
-        # Verify save_json was called for the log file path
+        # Verify save_json was called (not awaited)
         log_call = None
+        save_calls = 0 # Count calls relevant to log/token files
         for call_args in mock_save_json_for_test.call_args_list:
-            # Ensure the first argument (path) matches the instance's log file path
-            if len(call_args[0]) > 0 and Path(call_args[0][0]).resolve() == Path(token_system.log_file).resolve():
-                log_call = call_args
-                break
+            # First arg is path, second is data
+            if len(call_args[0]) > 0:
+                call_path = Path(call_args[0][0]).resolve()
+                # Check if it saved the token file or the log file
+                if call_path == Path(token_system.token_file).resolve():
+                    save_calls += 1
+                elif call_path == Path(token_system.log_file).resolve():
+                    save_calls += 1
+                    log_call = call_args # Store the log call specifically
 
-        assert log_call is not None, "save_json was not called for the log file"
+        assert save_calls >= 1, "save_json was not called for token or log file"
+        assert log_call is not None, "save_json was not called specifically for the log file"
 
         # Verify the data saved in the log call
         saved_log_data = log_call[0][1]

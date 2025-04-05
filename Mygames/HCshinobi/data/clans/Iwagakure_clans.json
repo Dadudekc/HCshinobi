@@ -1,0 +1,94 @@
+{
+  "Iwagakure Clans": [
+    {
+      "name": "Gansho",
+      "village": "Iwagakure",
+      "kekkei_genkai": "Explosion Release (Earth + Lightning)",
+      "abilities": [
+        "Blasting Palm",
+        "Landmine Clone",
+        "Detonation Dash",
+        "Crater Fang Descent"
+      ],
+      "traits": [
+        "Burn scars, glove seals, chakra-dampening gear",
+        "High-stakes personalities",
+        "Pressure armor or chakra-regulating gauntlets",
+        "Cracked boulder or explosion sigils"
+      ],
+      "role": "Shock troopers, demolition experts, frontline devastation"
+    },
+    {
+      "name": "Kamizuru",
+      "village": "Iwagakure",
+      "specialization": "Insect-Based Ninjutsu – Chakra Bees",
+      "abilities": [
+        "Bee Clone Technique",
+        "Chakra Bee Bomb",
+        "Hivebind Swarm",
+        "Queen’s Scent Seal"
+      ],
+      "traits": [
+        "Tattooed hive markings",
+        "Beekeeping robes, scroll belts",
+        "Silent, scent-based communication",
+        "Bee bonding from youth"
+      ],
+      "role": "Recon, attrition warfare, sealing and sabotage"
+    },
+    {
+      "name": "Shinkan",
+      "village": "Iwagakure",
+      "kekkei_genkai": "Chōjūgan – Gravity Core Technique",
+      "abilities": [
+        "Destruction Tide",
+        "Pillar of Ruin",
+        "Weightless Mobility",
+        "Density Shell Armor",
+        "Gravity Shift Field"
+      ],
+      "traits": [
+        "Imposing or calm presence",
+        "Tremor-step, pressure eyes",
+        "Stone-like skin texture",
+        "Gravity training rituals"
+      ],
+      "role": "Strategists, siege-breakers, battlefield architects"
+    },
+    {
+      "name": "Sekkan",
+      "village": "Iwagakure",
+      "kekkei_tota": "Particle Release – Jinton (Dust Style)",
+      "abilities": [
+        "Detachment of the Primitive World Technique",
+        "Severing Lattice Array",
+        "Gravity Drift Technique",
+        "Dust Binding Seal"
+      ],
+      "traits": [
+        "Ash-toned hair, solemn speech",
+        "Limiter gloves, gravity-nullifying gear",
+        "Interlocking geometric clan sigils"
+      ],
+      "role": "Ultimate deterrents, precision erasers, last-resort weapons"
+    },
+    {
+      "name": "Kozame",
+      "village": "Iwagakure",
+      "kekkei_genkai": "Crystal Release – Shōton",
+      "abilities": [
+        "Jade Pillar Coffin",
+        "Shard Bloom Assault",
+        "Mirror Blade Armor",
+        "Crystal Garden Field"
+      ],
+      "traits": [
+        "Gem-like eyes, reflective irises",
+        "Crystal cores in gear",
+        "Perfectionist crafters",
+        "Fractal, lotus, mirrored crest motifs"
+      ],
+      "role": "Terrain controllers, sealers, crystal engineers"
+    }
+  ]
+}

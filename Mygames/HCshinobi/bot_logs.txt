@@ -1,0 +1,127 @@
+Base directory: D:\Mygames\HCshinobi
+2025-04-03 17:46:35,481 - HCshinobi.discord_bot - INFO - Starting bot...
+2025-04-03 17:46:35,481 - discord.client - INFO - logging in using static token
+2025-04-03 17:46:35,752 - HCshinobi.bot.bot - INFO - Running setup_hook...
+2025-04-03 17:46:35,752 - HCshinobi.bot.services - INFO - Initializing services...
+2025-04-03 17:46:35,753 - HCshinobi.core.clan_data - INFO - ClanData initialized. Data dir: ./data\clans
+2025-04-03 17:46:35,753 - HCshinobi.core.token_system - INFO - TokenSystem initialized. Data dir: ./data\tokens, Expiry: 1 day, 0:00:00
+2025-04-03 17:46:35,753 - HCshinobi.core.currency_system - INFO - CurrencySystem initialized. Data file path: ./data\currency.json
+2025-04-03 17:46:35,754 - HCshinobi.core.character_system - INFO - CharacterSystem initialized. Character data directory: ./data\characters
+2025-04-03 17:46:35,754 - HCshinobi.core.progression_engine - INFO - ShinobiProgressionEngine initialized.
+2025-04-03 17:46:35,755 - HCshinobi.bot.services - INFO - Attempting to load master jutsu data from ./data\jutsu\master_jutsu_list.json
+2025-04-03 17:46:35,757 - HCshinobi.bot.services - INFO - Loaded 120 jutsu definitions into master_jutsu_data.
+2025-04-03 17:46:35,757 - HCshinobi.core.battle_system - INFO - BattleSystem initialized. Data dir: ./data\battles
+2025-04-03 17:46:35,757 - HCshinobi.core.mission_system - INFO - MissionSystem initialized. Data dir: ./data\missions
+2025-04-03 17:46:35,758 - HCshinobi.core.jutsu_shop_system - INFO - JutsuShopSystem initialized.
+2025-04-03 17:46:35,758 - HCshinobi.core.equipment_shop_system - INFO - EquipmentShopSystem initialized. Loading deferred.
+2025-04-03 17:46:35,758 - HCshinobi.utils.ollama_client - INFO - OllamaClient initialized. API endpoint: http://localhost:11434/api/generate, Default model: deepseek-coder
+2025-04-03 17:46:35,758 - HCshinobi.bot.services - INFO - OllamaClient initialized.
+2025-04-03 17:46:35,758 - HCshinobi.bot.services - INFO - Calling ready hooks for initialized services...
+2025-04-03 17:46:35,758 - HCshinobi.core.character_system - INFO - Starting character loading process...
+2025-04-03 17:46:35,759 - HCshinobi.core.character_system - INFO - Loading characters from: ./data\characters
+2025-04-03 17:46:35,759 - HCshinobi.core.clan_data - INFO - Processed 10 clans from list format in ./data\clans\clans.json
+2025-04-03 17:46:35,760 - HCshinobi.core.clan_data - INFO - ClanData ready. Loaded data for 10 clans.
+2025-04-03 17:46:35,760 - HCshinobi.utils.file_io - WARNING - File not found: ./data\tokens\tokens.json
+2025-04-03 17:46:35,760 - HCshinobi.core.token_system - INFO - Tokens file not found or invalid: ./data\tokens\tokens.json. Starting with no tokens.
+2025-04-03 17:46:35,760 - HCshinobi.core.token_system - INFO - TokenSystem ready. Loaded 0 valid tokens.
+2025-04-03 17:46:35,760 - HCshinobi.core.progression_engine - INFO - ProgressionEngine ready hook: Loading data...
+2025-04-03 17:46:35,760 - HCshinobi.core.progression_engine - WARNING - ranks data file not found: ./data\progression\ranks.json. Using empty defaults.
+2025-04-03 17:46:35,760 - HCshinobi.core.progression_engine - WARNING - achievements data file not found: ./data\progression\achievements.json. Using empty defaults.
+2025-04-03 17:46:35,760 - HCshinobi.core.progression_engine - WARNING - titles data file not found: ./data\progression\titles.json. Using empty defaults.
+2025-04-03 17:46:35,761 - HCshinobi.core.progression_engine - WARNING - ranks_data is empty (likely missing ranks.json). Using default rank order.
+2025-04-03 17:46:35,761 - HCshinobi.core.progression_engine - INFO - Generated default rank order mapping: {'Academy Student': 0, 'Genin': 1, 'Chunin': 2, 'Special Jonin': 3, 'Jonin': 4, 'Anbu': 5, 'Kage': 6}
+2025-04-03 17:46:35,761 - HCshinobi.core.progression_engine - INFO - ProgressionEngine ready hook completed.
+2025-04-03 17:46:35,761 - HCshinobi.utils.file_io - WARNING - File not found: ./data\battles\active_battles.json
+2025-04-03 17:46:35,761 - HCshinobi.core.battle_system - INFO - Loaded 0 active battles from ./data\battles\active_battles.json.
+2025-04-03 17:46:35,762 - HCshinobi.utils.file_io - WARNING - File not found: ./data\battles\battle_history.json
+2025-04-03 17:46:35,762 - HCshinobi.core.battle_system - INFO - Battle history file not found or invalid: ./data\battles\battle_history.json. Starting with empty history.
+2025-04-03 17:46:35,891 - HCshinobi.core.battle_system - INFO - BattleSystem ready. 0 active battles loaded, 0 histories loaded.
+2025-04-03 17:46:35,892 - HCshinobi.core.mission_system - INFO - Loaded 1 mission definitions.
+2025-04-03 17:46:35,892 - HCshinobi.utils.file_io - WARNING - File not found: ./data\missions\active_missions.json
+2025-04-03 17:46:35,892 - HCshinobi.core.mission_system - INFO - Active missions file not found or invalid: ./data\missions\active_missions.json. Starting fresh.
+2025-04-03 17:46:35,892 - HCshinobi.core.mission_system - INFO - Loaded active missions for 0 users.
+2025-04-03 17:46:35,892 - HCshinobi.utils.file_io - WARNING - File not found: ./data\missions\completed_missions.json
+2025-04-03 17:46:35,893 - HCshinobi.core.mission_system - INFO - Completed missions file not found or invalid: ./data\missions\completed_missions.json. Starting fresh.
+2025-04-03 17:46:35,893 - HCshinobi.core.mission_system - INFO - Loaded completed missions for 0 users.
+2025-04-03 17:46:35,893 - HCshinobi.core.mission_system - INFO - MissionSystem ready. Loaded 1 definitions, 0 active, 0 users with completed missions.
+2025-04-03 17:46:35,893 - HCshinobi.core.jutsu_shop_system - INFO - Loaded Jutsu shop state: Channel=None, Message=None, LastRefresh=2025-04-03 22:13:23.305609+00:00
+2025-04-03 17:46:35,893 - HCshinobi.core.jutsu_shop_system - INFO - JutsuShopSystem ready. State loaded.
+2025-04-03 17:46:35,894 - HCshinobi.core.equipment_shop_system - WARNING - Invalid equipment data format in ./data\shops\equipment_shop.json, expected dict. Resetting.
+2025-04-03 17:46:35,894 - HCshinobi.core.equipment_shop_system - INFO - Loaded 0 equipment items from ./data\shops\equipment_shop.json
+2025-04-03 17:46:35,894 - HCshinobi.utils.file_io - WARNING - File not found: ./data\shops\equipment_shop_state.json
+2025-04-03 17:46:35,894 - HCshinobi.core.equipment_shop_system - INFO - Equipment shop state file not found or invalid: ./data\shops\equipment_shop_state.json. Will create on save.
+2025-04-03 17:46:35,894 - HCshinobi.core.equipment_shop_system - INFO - Loaded equipment shop state: Channel=None, Message=None
+2025-04-03 17:46:35,894 - HCshinobi.core.equipment_shop_system - INFO - EquipmentShopSystem ready. Data loaded.
+2025-04-03 17:46:35,895 - HCshinobi.HCshinobi.core.personality_modifiers - INFO - PersonalityModifiers ready hook: Loading/Creating modifiers...
+2025-04-03 17:46:35,896 - HCshinobi.HCshinobi.core.personality_modifiers - INFO - Loaded and validated 20 personalities from ./data\modifiers.json
+2025-04-03 17:46:35,896 - HCshinobi.HCshinobi.core.personality_modifiers - INFO - PersonalityModifiers ready hook completed.
+2025-04-03 17:46:35,896 - HCshinobi.core.currency_system - INFO - CurrencySystem ready hook: Loading currency data...
+2025-04-03 17:46:35,896 - HCshinobi.core.currency_system - INFO - Loaded currency data from ./data\currency.json
+2025-04-03 17:46:35,896 - HCshinobi.core.currency_system - INFO - CurrencySystem ready hook completed.
+2025-04-03 17:46:35,896 - clan_assignment_engine - INFO - ClanAssignmentEngine ready_hook starting...
+2025-04-03 17:46:35,897 - clan_assignment_engine - INFO - Successfully loaded 10 clans from ClanData
+2025-04-03 17:46:35,897 - clan_assignment_engine - ERROR - Error loading clans from ClanData: string indices must be integers, not 'str'
+2025-04-03 17:46:35,898 - clan_assignment_engine - INFO - Added missing clan 'Hy┼½ga' to population data with count 0.
+2025-04-03 17:46:35,898 - clan_assignment_engine - WARNING - Loaded population data contained clans not currently defined: {'Hyuga'}. Filtered count: 10. Consider cleaning data\clan_populations.json
+2025-04-03 17:46:35,899 - clan_assignment_engine - INFO - Ensured log directory exists: data\logs
+2025-04-03 17:46:35,899 - clan_assignment_engine - INFO - ClanAssignmentEngine ready_hook finished. Initialized populations for 10 clans.
+2025-04-03 17:46:35,899 - HCshinobi.core.clan_missions - INFO - ClanMissions ready_hook starting...
+2025-04-03 17:46:35,899 - HCshinobi.core.clan_missions - INFO - ClanMissions ready_hook finished. Loaded active missions for 0 users.
+2025-04-03 17:46:35,899 - HCshinobi.core.quest_system - INFO - QuestSystem ready_hook starting...
+2025-04-03 17:46:35,900 - HCshinobi.core.quest_system - INFO - QuestSystem ready_hook finished. Loaded 0 quests, 0 active quest users, 0 completed quest users.
+2025-04-03 17:46:35,900 - HCshinobi.HCshinobi.core.npc_manager - INFO - NPCManager ready_hook starting...
+2025-04-03 17:46:35,901 - HCshinobi.utils.file_io - WARNING - File not found: ./data\npcs.json
+2025-04-03 17:46:35,901 - HCshinobi.HCshinobi.core.npc_manager - INFO - NPC file ./data\npcs.json not found. Starting with empty NPC list.
+2025-04-03 17:46:35,901 - HCshinobi.HCshinobi.core.npc_manager - INFO - NPCManager ready_hook finished. Loaded 0 NPCs.
+2025-04-03 17:46:35,903 - HCshinobi.core.clan_system - INFO - Found list format in clans.json, processing clan list...
+2025-04-03 17:46:35,903 - HCshinobi.core.clan_system - ERROR - Error creating Clan from data in clans.json: Clan.__init__() got an unexpected keyword argument 'starting_bonuses'
+2025-04-03 17:46:35,903 - HCshinobi.core.clan_system - ERROR - Error creating Clan from data in clans.json: Clan.__init__() got an unexpected keyword argument 'starting_bonuses'
+2025-04-03 17:46:35,903 - HCshinobi.core.clan_system - ERROR - Error creating Clan from data in clans.json: Clan.__init__() got an unexpected keyword argument 'starting_bonuses'
+2025-04-03 17:46:35,904 - HCshinobi.core.clan_system - ERROR - Error creating Clan from data in clans.json: Clan.__init__() got an unexpected keyword argument 'starting_bonuses'
+2025-04-03 17:46:35,904 - HCshinobi.core.clan_system - ERROR - Error creating Clan from data in clans.json: Clan.__init__() got an unexpected keyword argument 'starting_bonuses'
+2025-04-03 17:46:35,904 - HCshinobi.core.clan_system - ERROR - Error creating Clan from data in clans.json: Clan.__init__() got an unexpected keyword argument 'starting_bonuses'
+2025-04-03 17:46:35,904 - HCshinobi.core.clan_system - ERROR - Error creating Clan from data in clans.json: Clan.__init__() got an unexpected keyword argument 'starting_bonuses'
+2025-04-03 17:46:35,904 - HCshinobi.core.clan_system - ERROR - Error creating Clan from data in clans.json: Clan.__init__() got an unexpected keyword argument 'starting_bonuses'
+2025-04-03 17:46:35,904 - HCshinobi.core.clan_system - ERROR - Error creating Clan from data in clans.json: Clan.__init__() got an unexpected keyword argument 'starting_bonuses'
+2025-04-03 17:46:35,904 - HCshinobi.core.clan_system - ERROR - Error creating Clan from data in clans.json: Clan.__init__() got an unexpected keyword argument 'starting_bonuses'
+2025-04-03 17:46:35,904 - HCshinobi.core.clan_system - INFO - Loaded 0 clans
+2025-04-03 17:46:35,907 - HCshinobi.core.character_system - INFO - Character loading complete. Loaded: 3 characters into memory.
+2025-04-03 17:46:35,907 - HCshinobi.bot.services - INFO - Finished awaiting 15 ready hooks/load tasks.
+2025-04-03 17:46:35,907 - HCshinobi.core.battle_manager - INFO - BattleManager initialized.
+2025-04-03 17:46:35,907 - HCshinobi.bot.services - INFO - BattleManager initialized.
+2025-04-03 17:46:35,907 - HCshinobi.bot.services - INFO - All services initialized successfully.
+2025-04-03 17:46:35,907 - HCshinobi.bot.bot - INFO - Service container initialized successfully.
+2025-04-03 17:46:35,908 - HCshinobi.bot.bot - INFO - Jutsu migration flag file found. Skipping migration.
+2025-04-03 17:46:35,908 - HCshinobi.core.item_registry - INFO - Loaded 0 items into the registry.
+2025-04-03 17:46:35,909 - HCshinobi.core.jutsu_system - INFO - Processed 120 jutsu from list format in data\jutsu\master_jutsu_list.json
+2025-04-03 17:46:35,909 - HCshinobi.core.jutsu_system - INFO - Loaded 120 jutsu into the system.
+2025-04-03 17:46:35,911 - HCshinobi.database.loot_history - INFO - Initializing LootHistoryDB. Database path: data\database\loot_history.db
+2025-04-03 17:46:35,911 - HCshinobi.database.loot_history - INFO - Loot history database table initialized successfully.
+2025-04-03 17:46:35,912 - HCshinobi.commands.loot_commands - INFO - LootHistoryDB initialized successfully within LootCommands.
+2025-04-03 17:46:35,912 - HCshinobi.commands.devlog_commands - INFO - No existing development log file found, starting fresh
+2025-04-03 17:46:35,912 - HCshinobi.commands.devlog_commands - INFO - DevLogCommands cog initialized
+2025-04-03 17:46:35,913 - HCshinobi.commands.character_commands - INFO - CharacterCommands Cog loaded.
+2025-04-03 17:46:35,913 - HCshinobi.bot.bot - INFO - Successfully added cog: CharacterCommands
+2025-04-03 17:46:35,913 - HCshinobi.bot.bot - INFO - Successfully added cog: CurrencyCommands
+2025-04-03 17:46:35,913 - HCshinobi.bot.bot - INFO - Successfully added cog: ShopCommands
+2025-04-03 17:46:35,913 - HCshinobi.bot.bot - INFO - Successfully added cog: BattleCommands
+2025-04-03 17:46:35,913 - HCshinobi.bot.bot - INFO - Successfully added cog: ClanCommands
+2025-04-03 17:46:35,913 - HCshinobi.bot.bot - INFO - Successfully added cog: MissionCommands
+2025-04-03 17:46:35,913 - HCshinobi.bot.bot - INFO - Successfully added cog: TrainingCommands
+2025-04-03 17:46:35,913 - HCshinobi.bot.bot - INFO - Successfully added cog: QuestCommands
+2025-04-03 17:46:35,913 - HCshinobi.bot.bot - INFO - Successfully added cog: LootCommands
+2025-04-03 17:46:35,913 - HCshinobi.bot.bot - INFO - Successfully added cog: RoomCommands
+2025-04-03 17:46:35,913 - HCshinobi.commands.announcement_commands - INFO - AnnouncementCommands cog loaded
+2025-04-03 17:46:35,914 - HCshinobi.commands.announcement_commands - INFO - Announcement commands registered successfully
+2025-04-03 17:46:35,914 - HCshinobi.bot.bot - INFO - Successfully added cog: AnnouncementCommands
+2025-04-03 17:46:35,914 - HCshinobi.bot.bot - INFO - Successfully added cog: DevLogCommands
+2025-04-03 17:46:35,914 - HCshinobi.bot.bot - INFO - Loaded 12/12 cogs.
+2025-04-03 17:46:36,044 - HCshinobi.bot.bot - INFO - Synced 31 application commands to guild 1356227865838092469.
+2025-04-03 17:46:36,044 - HCshinobi.bot.bot - INFO - setup_hook end: services=<class 'HCshinobi.bot.services.ServiceContainer'>, jutsu_shop_system=<class 'HCshinobi.core.jutsu_shop_system.JutsuShopSystem'>
+2025-04-03 17:46:36,526 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 951e05e6dc7820fc8e0e8be0de68dc0d).
+2025-04-03 17:46:38,535 - HCshinobi.bot.bot - INFO - Logged in as Shinobi Chronicles#7490 (ID: 1356279482201411705)
+2025-04-03 17:46:38,535 - HCshinobi.bot.bot - INFO - ------
+2025-04-03 17:46:38,535 - HCshinobi.bot.bot - INFO - Silent start: Skipping online status announcement.
+2025-04-03 17:46:38,535 - HCshinobi.bot.bot - INFO - on_ready start: services=<class 'HCshinobi.bot.services.ServiceContainer'>, jutsu_shop_system=<class 'HCshinobi.core.jutsu_shop_system.JutsuShopSystem'>
+2025-04-03 17:46:38,535 - HCshinobi.bot.bot - INFO - Silent start: Skipping initial Jutsu shop post.
+2025-04-03 17:46:38,535 - HCshinobi.commands.devlog_commands - INFO - DevLog commands cog is ready

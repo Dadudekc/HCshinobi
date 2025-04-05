@@ -9,7 +9,7 @@ import discord # Use standard import
 from discord import app_commands
 from discord.ext import commands
 from discord.ui import View, Button, button # Import UI components
-from typing import Optional, TYPE_CHECKING, List
+from typing import Optional, TYPE_CHECKING, List, Any, Dict
 import logging
 import asyncio # For sleep in animations
 
@@ -79,6 +79,12 @@ class BattleView(View):
         self.battle_id = battle_id
         self.last_interaction: Optional[discord.Interaction] = None
         self.battle_message: Optional[discord.Message] = None
+
+        # Add battle action buttons
+        self.add_item(AttackButton(battle_id, battle_cog))
+        self.add_item(DefendButton(battle_id, battle_cog))
+        self.add_item(SkillButton(battle_id, battle_cog))
+        self.add_item(FleeButton(battle_id, battle_cog))
 
     async def update_view(self, interaction: Optional[discord.Interaction] = None, battle_state: Optional[BattleState] = None):
         """Updates the view's message with the current battle state."""
@@ -219,37 +225,159 @@ class BattleView(View):
     async def pass_button(self, interaction: discord.Interaction, button: Button):
         await self.handle_action(interaction, "pass_turn") # Ensure manager uses this action key
         
-    # TODO: Add buttons for Defend, Use Skill, Flee etc. later
-    # Example:
-    # @button(label="Defend", style=discord.ButtonStyle.success, custom_id="battle_defend")
-    # async def defend_button(self, interaction: discord.Interaction, button: Button):
-    #     await self.handle_action(interaction, "defend")
-
     async def on_timeout(self):
         """Called when the view times out."""
         logger.info(f"Battle view for {self.battle_id} timed out.")
         if self.last_interaction:
              await self.disable_and_edit(self.last_interaction, "Battle timed out due to inactivity.")
         # Optionally, tell the battle manager the battle ended due to timeout
-        # if self.battle_cog and self.battle_cog.battle_manager:
-        #    self.battle_cog.battle_manager.end_battle(self.battle_id, reason="Timeout")
+        if self.battle_cog and self.battle_cog.battle_manager:
+             self.battle_cog.battle_manager.end_battle(self.battle_id, reason="Timeout")
+
+class AttackButton(discord.ui.Button):
+    def __init__(self, battle_id: str, battle_system: Any):
+        super().__init__(
+            label="⚔️ Attack",
+            style=discord.ButtonStyle.primary,
+            custom_id=f"attack_{battle_id}"
+        )
+        self.battle_id = battle_id
+        self.battle_system = battle_system
+        
+    async def callback(self, interaction: discord.Interaction):
+        try:
+            result = await self.battle_system.process_action(self.battle_id, "attack")
+            await self._handle_battle_result(interaction, result)
+        except Exception as e:
+            await interaction.response.send_message(f"❌ Error processing attack: {e}", ephemeral=True)
+
+class DefendButton(discord.ui.Button):
+    def __init__(self, battle_id: str, battle_system: Any):
+        super().__init__(
+            label="🛡️ Defend",
+            style=discord.ButtonStyle.secondary,
+            custom_id=f"defend_{battle_id}"
+        )
+        self.battle_id = battle_id
+        self.battle_system = battle_system
+        
+    async def callback(self, interaction: discord.Interaction):
+        try:
+            result = await self.battle_system.process_action(self.battle_id, "defend")
+            await self._handle_battle_result(interaction, result)
+        except Exception as e:
+            await interaction.response.send_message(f"❌ Error processing defense: {e}", ephemeral=True)
+
+class SkillButton(discord.ui.Button):
+    def __init__(self, battle_id: str, battle_system: Any):
+        super().__init__(
+            label="✨ Use Skill",
+            style=discord.ButtonStyle.success,
+            custom_id=f"skill_{battle_id}"
+        )
+        self.battle_id = battle_id
+        self.battle_system = battle_system
+        
+    async def callback(self, interaction: discord.Interaction):
+        try:
+            # Show skill selection modal
+            modal = SkillSelectionModal(self.battle_id, self.battle_system)
+            await interaction.response.send_modal(modal)
+        except Exception as e:
+            await interaction.response.send_message(f"❌ Error selecting skill: {e}", ephemeral=True)
+
+class FleeButton(discord.ui.Button):
+    def __init__(self, battle_id: str, battle_system: Any):
+        super().__init__(
+            label="🏃 Flee",
+            style=discord.ButtonStyle.danger,
+            custom_id=f"flee_{battle_id}"
+        )
+        self.battle_id = battle_id
+        self.battle_system = battle_system
+        
+    async def callback(self, interaction: discord.Interaction):
+        try:
+            result = await self.battle_system.process_action(self.battle_id, "flee")
+            await self._handle_battle_result(interaction, result)
+        except Exception as e:
+            await interaction.response.send_message(f"❌ Error processing flee: {e}", ephemeral=True)
+
+class SkillSelectionModal(discord.ui.Modal):
+    def __init__(self, battle_id: str, battle_system: Any):
+        super().__init__(title="Select Skill")
+        self.battle_id = battle_id
+        self.battle_system = battle_system
+        
+        # Add skill selection dropdown
+        self.skill_select = discord.ui.Select(
+            placeholder="Choose a skill to use",
+            options=self._get_skill_options()
+        )
+        self.add_item(self.skill_select)
+        
+    def _get_skill_options(self) -> List[discord.SelectOption]:
+        """Get available skills for the current battle."""
+        battle_state = self.battle_system.get_battle_state(self.battle_id)
+        if not battle_state:
+            return []
+            
+        player_skills = battle_state.get("player_skills", [])
+        return [
+            discord.SelectOption(
+                label=skill["name"],
+                value=skill["id"],
+                description=f"Cost: {skill.get('chakra_cost', 0)} Chakra"
+            )
+            for skill in player_skills
+            if skill.get("chakra_cost", 0) <= battle_state.get("player_chakra", 0)
+        ]
+        
+    async def on_submit(self, interaction: discord.Interaction):
+        try:
+            skill_id = self.skill_select.values[0]
+            result = await self.battle_system.process_action(self.battle_id, "skill", skill_id=skill_id)
+            await self._handle_battle_result(interaction, result)
+        except Exception as e:
+            await interaction.response.send_message(f"❌ Error using skill: {e}", ephemeral=True)
+
+async def _handle_battle_result(interaction: discord.Interaction, result: Dict[str, Any]):
+    """Handle the result of a battle action."""
+    if result.get("battle_ended", False):
+        # Battle is over, show final result
+        embed = discord.Embed(
+            title="Battle Ended",
+            description=result.get("message", "Battle has concluded."),
+            color=discord.Color.green() if result.get("victory", False) else discord.Color.red()
+        )
+        await interaction.response.send_message(embed=embed)
+    else:
+        # Battle continues, update the view
+        view = BattleView(result["battle_id"], interaction.client.battle_system)
+        await interaction.response.edit_message(
+            content=result.get("message", "Battle continues..."),
+            view=view
+        )
 
 # --- Battle Cog --- #
 
 class BattleSystemCommands(commands.Cog):
-    """Handles the interactive battle UI and actions (separate from initial challenge)."""
+    """Commands for using the battle system."""
+
     def __init__(self, bot: 'HCShinobiBot'):
         self.bot = bot
-        # Access the actual BattleManager instance from the bot
-        # Ensure BattleManager is initialized and attached to the bot instance first
-        if hasattr(bot, 'battle_manager') and isinstance(bot.battle_manager, BattleManager):
-             self.battle_manager: BattleManager = bot.battle_manager
-             logger.info("BattleSystemCommands Cog initialized with injected BattleManager.")
-        else:
-             logger.error("BattleManager not found or invalid type on bot instance for BattleSystemCommands. Functionality disabled.")
-             # Use the dummy class if the real one isn't available
-             self.battle_manager = BattleManager() # type: ignore [assignment] 
-
+        self.logger = logging.getLogger(__name__)
+        # Instantiate BattleManager using the actual CharacterManager
+        self.battle_manager = BattleManager(
+            character_system=bot.get_character_system(),
+            progression_engine=bot.get_progression_engine()
+        )
+        self.logger.info("BattleSystemCommands cog loaded successfully.")
+        
+    def get_battle_system(self):
+        """Returns the battle system for use by other cogs."""
+        return self.battle_manager
+    
     # Player Character Autocomplete
     async def character_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
         """Autocomplete for player characters owned by the user."""

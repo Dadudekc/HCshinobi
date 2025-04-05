@@ -320,19 +320,20 @@ class AnnouncementCommands(commands.Cog):
             return
             
         bot_member = guild.me
-        required_permissions = [
-            discord.Permissions.send_messages,
-            discord.Permissions.embed_links,
-            discord.Permissions.use_slash_commands,
-            discord.Permissions.manage_webhooks,
-            discord.Permissions.manage_messages
+        # List of required permission attribute names (strings)
+        required_permission_names = [
+            "send_messages",
+            "embed_links",
+            "manage_webhooks",
+            "manage_messages"
         ]
-        
+
         missing_permissions = []
-        for perm in required_permissions:
-            if not getattr(bot_member.guild_permissions, perm.name):
-                missing_permissions.append(perm.name)
-        
+        # Iterate through the names and check the attributes
+        for perm_name in required_permission_names:
+            if not getattr(bot_member.guild_permissions, perm_name, False): # Use getattr with name
+                missing_permissions.append(f"`{perm_name}`")
+
         embed = discord.Embed(
             title="Bot Permissions Check",
             color=discord.Color.green() if not missing_permissions else discord.Color.red()
@@ -440,62 +441,64 @@ class AnnouncementCommands(commands.Cog):
 
     @app_commands.command(
         name="announce",
-        description="Send an announcement message"
+        description="[Admin] Send a general server announcement."
     )
     @app_commands.describe(
-        message="The announcement message to send",
-        embed="Whether to send the message as an embed",
-        ping_everyone="Whether to ping @everyone"
+        title="The title of the announcement.",
+        message="The main content of the announcement (supports Markdown)."
+        # ping_role="Optional role to ping with the announcement." # Example: could add optional pinging
     )
-    async def announce_message(
-        self,
-        interaction: discord.Interaction,
+    @app_commands.checks.has_permissions(administrator=True)
+    async def announce(
+        self, 
+        interaction: discord.Interaction, 
+        title: str, 
         message: str,
-        embed: bool = False,
-        ping_everyone: bool = False
-    ):
-        """Send an announcement message."""
-        if not interaction.user.guild_permissions.administrator:
-            await interaction.response.send_message(
-                "You need administrator permissions to use this command.",
-                ephemeral=True
-            )
+        # ping_role: Optional[discord.Role] = None # Example optional role
+    ) -> None:
+        """Sends a general server announcement using the configured template."""
+        logger.info(f"announce command triggered by {interaction.user.name} (ID: {interaction.user.id})")
+        await interaction.response.defer(ephemeral=True)
+
+        if self.maintenance_mode:
+            await interaction.followup.send("❌ Cannot send announcements while in maintenance mode.", ephemeral=True)
+            return
+            
+        if self.no_announcement:
+            await interaction.followup.send("❌ Announcements are currently disabled.", ephemeral=True)
             return
 
-        if not self.announcements_enabled:
-            await interaction.response.send_message(
-                "Announcements are currently disabled. Use `/toggle_announcements` to enable them.",
-                ephemeral=True
-            )
-            return
-
-        # Check for duplicate announcements
-        if self._is_duplicate_announcement(message):
-            await interaction.response.send_message(
-                "This announcement is too similar to a recent one. Please wait a few minutes before posting a similar announcement.",
-                ephemeral=True
-            )
-            return
+        # Optional: Prevent duplicate generic announcements if needed
+        # combined_message = f"{title}:{message}"
+        # if self._is_duplicate_announcement(combined_message):
+        #     await interaction.followup.send(
+        #         "This announcement is too similar to a recent one. Please wait.",
+        #         ephemeral=True
+        #     )
+        #     return
 
         try:
-            content = f"@everyone {message}" if ping_everyone else message
-            if embed:
-                embed = discord.Embed(
-                    title="Announcement",
-                    description=message,
-                    color=discord.Color.blue()
-                )
-                await interaction.response.send_message(content=content if ping_everyone else None, embed=embed)
-            else:
-                await interaction.response.send_message(content=content)
-        except discord.Forbidden:
-            await interaction.response.send_message(
-                "I don't have permission to send announcements in this channel.",
-                ephemeral=True
+            # Create server announcement embed using the template
+            embed = server_announcement(
+                title=title,
+                message=message
             )
+            
+            # Prepare optional content for pinging
+            content = None
+            # if ping_role:
+            #     content = ping_role.mention
+
+            # Send notification (decide on ping_everyone based on command parameters or default)
+            # Using ping_everyone=False for general announcements unless explicitly requested
+            await self.dispatcher.dispatch(embed, content=content, ping_everyone=False) 
+            
+            logger.info(f"General announcement sent: {title}")
+            await interaction.followup.send("✅ Announcement sent successfully!", ephemeral=True)
+            
         except Exception as e:
-            logger.error(f"Error in announce_message: {e}", exc_info=True)
-            raise  # Re-raise the error for global handling or test assertions
+            logger.error(f"Error sending general announcement: {e}", exc_info=True)
+            await interaction.followup.send("❌ Failed to send the announcement. Check the logs for details.", ephemeral=True)
 
     @app_commands.command(
         name="send_system_alert",
