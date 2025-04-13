@@ -68,17 +68,17 @@ logger.info(f"Logging initialized. Log file: {log_file_path}") # Log confirmatio
 
 # Import TRINITY components using the corrected package path
 try:
-    # TODO: The following command imports are broken as the 'commands' module is missing
-    # from trinity.commands.scan_cmd import configure_scan_command, run_scan_command # Original, broken
-    from trinity.commands.process_cmd import configure_process_command, run_process_command # TODO: Refactor needed
-    from trinity.commands.validate_cmd import configure_validate_command, run_validate_command # TODO: Refactor needed
-    from trinity.commands.inject_cmd import configure_inject_command, run_inject_command # TODO: Refactor needed
+    # Import command functions from their respective modules
+    from trinity.commands.scan_cmd import configure_scan_command, run_scan_command # Placeholder exists
+    from trinity.commands.process_cmd import configure_process_command, run_process_command # Placeholder exists
+    from trinity.commands.validate_cmd import configure_validate_command, run_validate_command # Placeholder exists
+    from trinity.commands.inject_cmd import configure_inject_command, run_inject_command # Placeholder exists
     # Import core components
-    # from trinity.core.validation import validate_system # TODO: Cannot find validation.py or validate_system function
+    from trinity.core.validation import validate_system # Placeholder exists
     # Import SubconsciousEngine and run function directly if possible
-    # from trinity.core.subconscious.engine import SubconsciousEngine, get_subconscious_engine, run_subconscious_engine # TODO: Cannot find subconscious/engine.py
-    # Import ProjectScanner for refactored scan command
-    from trinity.core.project.ProjectScanner import ProjectScanner # Corrected location
+    from trinity.core.subconscious.engine import SubconsciousEngine, get_subconscious_engine, run_subconscious_engine # Placeholders exist
+    # Import ProjectScanner - Not needed if using run_scan_command placeholder
+    # from trinity.core.project.ProjectScanner import ProjectScanner
 
 except ImportError as e:
     logger.critical(f"Error importing TRINITY components: {e}")
@@ -129,8 +129,7 @@ def configure_parser() -> argparse.ArgumentParser:
 
     # Scan command
     scan_parser = subparsers.add_parser("scan", help="Scan for TODOs")
-    # configure_scan_command(scan_parser) # Original call removed
-    # Add scan-specific args directly here if needed, or rely on ProjectScanner's needs
+    configure_scan_command(scan_parser) # Placeholder exists
     scan_parser.add_argument(
         "target_directory",
         nargs='?', # Make optional if ProjectScanner handles default
@@ -155,16 +154,16 @@ def configure_parser() -> argparse.ArgumentParser:
     )
 
     # Inject command
-    inject_parser = subparsers.add_parser("inject", help="Inject memory data (TODO: Broken Import)")
-    # configure_inject_command(inject_parser)
+    inject_parser = subparsers.add_parser("inject", help="Inject memory data")
+    configure_inject_command(inject_parser) # Placeholder exists
 
     # Process command
-    process_parser = subparsers.add_parser("process", help="Process TODOs (TODO: Broken Import)")
-    # configure_process_command(process_parser)
+    process_parser = subparsers.add_parser("process", help="Process TODOs")
+    configure_process_command(process_parser) # Placeholder exists
 
     # Validate command
-    validate_parser = subparsers.add_parser("validate", help="Validate system (TODO: Broken Import)")
-    # configure_validate_command(validate_parser)
+    validate_parser = subparsers.add_parser("validate", help="Validate system")
+    configure_validate_command(validate_parser) # Placeholder exists
 
     return parser
 
@@ -238,84 +237,52 @@ def main() -> Optional[int]:
         config = load_config(args.config)
 
         # Validate system (consider passing config if needed)
-        # TODO: validate_system function is missing.
-        # if not validate_system():
-        #     logger.error("System validation failed. Exiting.")
-        #     return 1
-        logger.warning("System validation skipped: validate_system function not found.")
+        if not validate_system(): # Placeholder exists
+            logger.error("System validation failed (Placeholder Implementation).")
+            # return 1 # Don't exit for placeholder
+        else:
+             logger.info("System validation passed (Placeholder Implementation).")
 
         # Execute command based on subparser chosen
         # Ensure the run_* functions are imported correctly at the top
         if args.command == "scan":
-            # Call the refactored scan function
-            return execute_scan(args, config)
-        # elif args.command == "inject":
-        #     return run_inject_command(args, config)
-        # elif args.command == "process":
-        #     return run_process_command(args, config)
-        # elif args.command == "validate":
-        #     return run_validate_command(args, config)
+             # Call placeholder scan command
+             logger.info("Calling run_scan_command (Placeholder)...")
+             # NOTE: Subconscious/Loop logic is inside the placeholder if needed,
+             # or would need external orchestration if placeholders are basic.
+             # We also need to handle the subconscious arg if the placeholder doesn't.
+             if args.subconscious:
+                 logger.info("Subconscious processing requested...")
+                 try:
+                     run_subconscious_engine(args, config) # Placeholder exists
+                     logger.info("Subconscious engine finished (Placeholder Implementation).")
+                 except Exception as sub_e:
+                     logger.error(f"Error during subconscious processing: {sub_e}")
+             result = run_scan_command(args, config)
+             if args.loop:
+                 logger.warning("Loop mode not implemented around placeholder scan command.")
+             return result
+        elif args.command == "inject":
+            # Placeholder exists
+            logger.info("Calling run_inject_command (Placeholder)...")
+            return run_inject_command(args, config)
+        elif args.command == "process":
+            # Placeholder exists
+            logger.info("Calling run_process_command (Placeholder)...")
+            return run_process_command(args, config)
+        elif args.command == "validate":
+            # Placeholder exists
+            logger.info("Calling run_validate_command (Placeholder)...")
+            return run_validate_command(args, config)
         else:
-            logger.error(f"Command '{args.command}' is not currently implemented or its import is broken.")
+            # This case should not be reached due to `required=True` in subparsers
+            logger.error(f"Unknown command: {args.command}")
             parser.print_help()
             return 1
 
-    except KeyboardInterrupt:
-        logger.info("Interrupted by user. Exiting gracefully.")
-        return 0
-    except ImportError as e:
-         # This error should ideally be caught at the top-level import
-         logger.critical(f"Late Import Error: {e}. Dependency issue?")
-         return 1
     except Exception as e:
-        logger.exception(f"An unexpected error occurred during command execution: {e}")
+        logger.critical(f"An unexpected error occurred: {e}", exc_info=True)
         return 1
-
-# NOTE: The actual run_*_command functions MUST reside in their respective
-# command modules (e.g., trinity/trinity/commands/scan_cmd.py) and be imported above.
-# Having placeholder definitions here will cause issues if not removed.
-
-# --- Helper Function for Scan --- (Refactored from original run_scan_command logic)
-def execute_scan(args, config):
-    logger.info("Starting scan execution...")
-    # Use ProjectScanner instance
-    scanner = ProjectScanner(config)
-    scan_results = scanner.scan_project(args.target_directory)
-    logger.info(f"Scan complete. Found {len(scan_results)} potential TODOs.")
-
-    # Process results (e.g., save to file, print summary)
-    output_file = project_root / '.trinity' / 'scan_results.json'
-    try:
-        with open(output_file, 'w') as f:
-            json.dump(scan_results, f, indent=4)
-        logger.info(f"Scan results saved to {output_file}")
-    except Exception as write_e:
-        logger.error(f"Failed to write scan results: {write_e}")
-
-    # Handle subconscious processing
-    if args.subconscious:
-        logger.info("Subconscious processing requested...")
-        # try:
-        #     # run_subconscious_engine should be imported at the top
-        #     # Assuming it needs args and config, adjust if necessary
-        #     run_subconscious_engine(args, config)
-        #     logger.info("Subconscious engine finished.")
-        # except NameError:
-        #      logger.error("run_subconscious_engine function not found (check imports).")
-        # except Exception as sub_e:
-        #     logger.error(f"Error during subconscious processing: {sub_e}")
-        logger.warning("Subconscious processing skipped: run_subconscious_engine function not found.")
-
-    # Handle loop mode (Placeholder)
-    if args.loop:
-        if args.interval:
-            logger.info(f"Loop mode active. Next scan in {args.interval} seconds.")
-            time.sleep(args.interval)
-        else:
-            logger.warning("Loop mode active but no interval specified. Exiting loop.")
-            return 0 # Or handle as needed
-    else:
-        return 0 # Indicate successful single run
 
 if __name__ == '__main__':
     sys.exit(main()) 

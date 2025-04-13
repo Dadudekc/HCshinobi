@@ -1,0 +1,34 @@
+[
+  {
+    "id": "2",
+    "type": "TEXT",
+    "content": "Message 2",
+    "sender": "user",
+    "timestamp": "2025-04-07T21:35:21.458564",
+    "metadata": {}
+  },
+  {
+    "id": "3",
+    "type": "TEXT",
+    "content": "Message 3",
+    "sender": "user",
+    "timestamp": "2025-04-07T21:35:21.459566",
+    "metadata": {}
+  },
+  {
+    "id": "3",
+    "type": "TEXT",
+    "content": "WebSocket test",
+    "sender": "user",
+    "timestamp": "2025-04-07T21:35:21.528628",
+    "metadata": {}
+  },
+  {
+    "id": "4",
+    "type": "TEXT",
+    "content": "Test message",
+    "sender": "user",
+    "timestamp": "2025-04-07T21:35:21.905980",
+    "metadata": {}
+  }
+]

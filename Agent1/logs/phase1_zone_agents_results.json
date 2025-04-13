@@ -1,0 +1,29 @@
+{
+  "duplicates": {
+    "2227de2a7ade671b862c0a8b73decea9efc847185f561282e16289efc247977e": [
+      "src\\test1.py",
+      "agents\\test1.py"
+    ]
+  },
+  "metadata": {
+    "src\\test1.py": {
+      "path": "src\\test1.py",
+      "size": 96,
+      "modified": 1744257806.1699786,
+      "created": 1744257803.3528159,
+      "permissions": "666",
+      "owner": 0,
+      "group": 0
+    },
+    "agents\\test1.py": {
+      "path": "agents\\test1.py",
+      "size": 96,
+      "modified": 1744257815.5931723,
+      "created": 1744257812.5943959,
+      "permissions": "666",
+      "owner": 0,
+      "group": 0
+    }
+  },
+  "scan_time": "2025-04-09 23:06:06.233693"
+}

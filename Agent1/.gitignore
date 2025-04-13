@@ -1,0 +1,23 @@
+# Cache and temporary files
+.trinity/
+
+# Python Virtual Environment
+venv*/
+venv*/*
+/venv311/
+
+# Python bytecode/cache
+*.pyc
+__pycache__/
+.pytest_cache/
+
+# Log files
+*.log
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# IDE specific files
+.vscode/
+.idea/ 

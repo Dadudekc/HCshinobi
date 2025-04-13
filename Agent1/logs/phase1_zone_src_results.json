@@ -1,0 +1,15 @@
+{
+  "duplicates": {},
+  "metadata": {
+    "src\\test1.py": {
+      "path": "src\\test1.py",
+      "size": 96,
+      "modified": 1744257806.1699786,
+      "created": 1744257803.3528159,
+      "permissions": "666",
+      "owner": 0,
+      "group": 0
+    }
+  },
+  "scan_time": "2025-04-09 23:06:05.587594"
+}

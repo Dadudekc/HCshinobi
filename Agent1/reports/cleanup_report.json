@@ -1,0 +1,16 @@
+{
+  "stats": {
+    "total_files_scanned": 65419,
+    "total_size_scanned": 2655977310,
+    "duplicate_sets": 0,
+    "total_duplicates": 0,
+    "unnecessary_files": 1,
+    "space_saved": 0,
+    "errors": 1
+  },
+  "kept_files": [],
+  "removed_duplicates": [],
+  "removed_unnecessary": [
+    "cleanup.log"
+  ]
+}

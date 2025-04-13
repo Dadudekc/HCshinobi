@@ -1,0 +1,76 @@
+{
+  "timestamp": "2025-04-12T19:59:22.111351",
+  "archived_reports": [
+    "archived_reports\\20250412_195902\\report_consolidation.log",
+    "archived_reports\\20250412_195902\\temp_files",
+    "archived_reports\\20250412_195902\\temp_files\\f_0009d8",
+    "archived_reports\\20250412_195902\\temp_files\\f_0009d9",
+    "archived_reports\\20250412_195902\\temp_files\\f_0009da",
+    "archived_reports\\20250412_195902\\temp_files\\f_0009db",
+    "archived_reports\\20250412_195902\\temp_files\\openai",
+    "archived_reports\\20250412_195902\\temp_files\\overnight_scripts",
+    "archived_reports\\20250412_195902\\temp_files\\openai\\Default",
+    "archived_reports\\20250412_195902\\temp_files\\openai\\Default\\Cache",
+    "archived_reports\\20250412_195902\\temp_files\\openai\\Default\\Cache\\Cache_Data",
+    "archived_reports\\20250412_195902\\temp_files\\openai\\Default\\Cache\\Cache_Data\\f_0002ca",
+    "archived_reports\\20250412_195902\\temp_files\\overnight_scripts\\chat_mate",
+    "archived_reports\\20250412_195902\\temp_files\\overnight_scripts\\chat_mate\\chrome_profile",
+    "archived_reports\\20250412_195902\\temp_files\\overnight_scripts\\chat_mate\\chrome_profile\\default",
+    "archived_reports\\20250412_195902\\temp_files\\overnight_scripts\\chat_mate\\chrome_profile\\openai",
+    "archived_reports\\20250412_195902\\temp_files\\overnight_scripts\\chat_mate\\chrome_profile\\default\\Default",
+    "archived_reports\\20250412_195902\\temp_files\\overnight_scripts\\chat_mate\\chrome_profile\\default\\Default\\Cache",
+    "archived_reports\\20250412_195902\\temp_files\\overnight_scripts\\chat_mate\\chrome_profile\\default\\Default\\Cache\\Cache_Data",
+    "archived_reports\\20250412_195902\\temp_files\\overnight_scripts\\chat_mate\\chrome_profile\\default\\Default\\Cache\\Cache_Data\\f_000a98",
+    "archived_reports\\20250412_195902\\temp_files\\overnight_scripts\\chat_mate\\chrome_profile\\default\\Default\\Cache\\Cache_Data\\f_000a99",
+    "archived_reports\\20250412_195902\\temp_files\\overnight_scripts\\chat_mate\\chrome_profile\\default\\Default\\Cache\\Cache_Data\\f_000ce6",
+    "archived_reports\\20250412_195902\\temp_files\\overnight_scripts\\chat_mate\\chrome_profile\\default\\Default\\Cache\\Cache_Data\\f_000cf2",
+    "archived_reports\\20250412_195902\\temp_files\\overnight_scripts\\chat_mate\\chrome_profile\\default\\Default\\Cache\\Cache_Data\\f_000d34",
+    "archived_reports\\20250412_195902\\temp_files\\overnight_scripts\\chat_mate\\chrome_profile\\default\\Default\\Cache\\Cache_Data\\f_000e5b",
+    "archived_reports\\20250412_195902\\temp_files\\overnight_scripts\\chat_mate\\chrome_profile\\default\\Default\\Cache\\Cache_Data\\f_000e86",
+    "archived_reports\\20250412_195902\\temp_files\\overnight_scripts\\chat_mate\\chrome_profile\\default\\Default\\Cache\\Cache_Data\\f_000f0f",
+    "archived_reports\\20250412_195902\\temp_files\\overnight_scripts\\chat_mate\\chrome_profile\\openai\\Default",
+    "archived_reports\\20250412_195902\\temp_files\\overnight_scripts\\chat_mate\\chrome_profile\\openai\\Default\\Cache",
+    "archived_reports\\20250412_195902\\temp_files\\overnight_scripts\\chat_mate\\chrome_profile\\openai\\Default\\Cache\\Cache_Data",
+    "archived_reports\\20250412_195902\\temp_files\\overnight_scripts\\chat_mate\\chrome_profile\\openai\\Default\\Cache\\Cache_Data\\f_00043a"
+  ],
+  "retained_reports": [
+    "chatgpt_project_context_merged.json",
+    "cleanup_report.json",
+    "consolidated_deduplication_report.json",
+    "consolidation_report.json",
+    "deduplication_report.json",
+    "dependency_cache.json",
+    "report_consolidation_summary.json"
+  ],
+  "archive_location": "archived_reports\\20250412_195902",
+  "cleaned_cache_dirs": [
+    ".pytest_cache",
+    "__pycache__",
+    ".cache"
+  ],
+  "consolidated_dirs": [
+    "backup_before_consolidation",
+    "archive",
+    "old",
+    "legacy",
+    ".cache",
+    "chrome_profile",
+    "chat_mate.egg-info",
+    "__pycache__"
+  ],
+  "archived_logs": [
+    "archived_reports\\20250412_195902\\report_consolidation.log"
+  ],
+  "temp_file_patterns": [
+    "f_[0-9a-f]*",
+    "*_backup_*",
+    "*.pyc",
+    "*.pyo",
+    "*.pyd",
+    "*.egg-info",
+    "*.bak",
+    "*.tmp",
+    "*.temp",
+    "*.cache"
+  ]
+}
