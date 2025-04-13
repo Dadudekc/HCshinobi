@@ -83,7 +83,7 @@ try:
     # Import SubconsciousEngine and run function directly if possible
     from trinity.core.subconscious.engine import SubconsciousEngine, get_subconscious_engine, run_subconscious_engine
     # Import ProjectScanner for refactored scan command
-    from trinity.scripts.project_scanner import ProjectScanner # Added for scan refactor
+    from trinity.core.project.ProjectScanner import ProjectScanner # Corrected location
 
 except ImportError as e:
     # Log specific missing module/class if possible
