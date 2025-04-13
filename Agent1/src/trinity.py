@@ -14,6 +14,7 @@ import logging
 import json
 import yaml
 import datetime
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -66,15 +67,9 @@ logger = logging.getLogger("TRINITY")
 logger.info(f"Logging initialized. Log file: {log_file_path}") # Log confirmation
 
 # Import TRINITY components using the corrected package path
-# TODO: The following imports reference a 'trinity.commands' module,
-#       but the source code for this module cannot be located in the workspace,
-#       the PYTHONPATH, or the editable install path found via pip list.
-#       The application likely relies on an external source or non-standard loading.
-#       These imports/commands need to be resolved or refactored.
 try:
-    # Import command functions from their respective modules
-    # Scan command is refactored below
-    # from trinity.commands.scan_cmd import configure_scan_command, run_scan_command
+    # TODO: The following command imports are broken as the 'commands' module is missing
+    # from trinity.commands.scan_cmd import configure_scan_command, run_scan_command # Original, broken
     from trinity.commands.process_cmd import configure_process_command, run_process_command # TODO: Refactor needed
     from trinity.commands.validate_cmd import configure_validate_command, run_validate_command # TODO: Refactor needed
     from trinity.commands.inject_cmd import configure_inject_command, run_inject_command # TODO: Refactor needed
@@ -86,8 +81,7 @@ try:
     from trinity.core.project.ProjectScanner import ProjectScanner # Corrected location
 
 except ImportError as e:
-    # Log specific missing module/class if possible
-    logger.critical(f"Error importing TRINITY components: {e}") # Use critical for import errors
+    logger.critical(f"Error importing TRINITY components: {e}")
     logger.critical("Make sure TRINITY is properly installed or check module paths.")
     sys.exit(1)
 
@@ -135,8 +129,14 @@ def configure_parser() -> argparse.ArgumentParser:
 
     # Scan command
     scan_parser = subparsers.add_parser("scan", help="Scan for TODOs")
-    # configure_scan_command(scan_parser) # Removed - Args configured below directly
-    # Add scan-specific args back here
+    # configure_scan_command(scan_parser) # Original call removed
+    # Add scan-specific args directly here if needed, or rely on ProjectScanner's needs
+    scan_parser.add_argument(
+        "target_directory",
+        nargs='?', # Make optional if ProjectScanner handles default
+        default='.', # Default to current directory
+        help="Directory to scan (defaults to current directory)"
+    )
     scan_parser.add_argument(
         "--loop",
         action="store_true",
@@ -151,20 +151,20 @@ def configure_parser() -> argparse.ArgumentParser:
     scan_parser.add_argument(
         "--subconscious",
         action="store_true",
-        help="Enable subconscious processing during scan"
+        help="Enable subconscious processing during scan (Currently non-functional)"
     )
 
     # Inject command
-    inject_parser = subparsers.add_parser("inject", help="Inject memory data")
-    configure_inject_command(inject_parser) # TODO: Refactor needed
+    inject_parser = subparsers.add_parser("inject", help="Inject memory data (TODO: Broken Import)")
+    # configure_inject_command(inject_parser)
 
     # Process command
-    process_parser = subparsers.add_parser("process", help="Process TODOs")
-    configure_process_command(process_parser) # TODO: Refactor needed
+    process_parser = subparsers.add_parser("process", help="Process TODOs (TODO: Broken Import)")
+    # configure_process_command(process_parser)
 
     # Validate command
-    validate_parser = subparsers.add_parser("validate", help="Validate system")
-    configure_validate_command(validate_parser) # TODO: Refactor needed
+    validate_parser = subparsers.add_parser("validate", help="Validate system (TODO: Broken Import)")
+    # configure_validate_command(validate_parser)
 
     return parser
 
@@ -246,68 +246,17 @@ def main() -> Optional[int]:
 
         # Execute command based on subparser chosen
         # Ensure the run_* functions are imported correctly at the top
-        # TODO: This block will fail until the command imports above are resolved.
         if args.command == "scan":
-            # Refactored scan command logic
-            logger.info("Initiating project scan...")
-            try:
-                # Assuming ProjectScanner uses the current directory if not specified
-                scanner = ProjectScanner(project_root='.')
-                analysis_results = scanner.scan_project()
-
-                if analysis_results:
-                    # Use logger instead of print
-                    files_analyzed = len(analysis_results.get('files', []))
-                    logger.info(f"Project scan completed successfully. Analyzed {files_analyzed} files.")
-                    # Check if cache_path attribute exists before logging
-                    if hasattr(scanner, 'cache_path') and scanner.cache_path:
-                         logger.info(f"Analysis saved to {scanner.cache_path}")
-                    else:
-                         logger.info("Analysis results generated (cache path not available).")
-                else:
-                    logger.warning("Project scan failed or produced no results.")
-
-                # Handle subconscious processing
-                if args.subconscious:
-                    logger.info("Subconscious processing requested...")
-                    # try:
-                    #     # run_subconscious_engine should be imported at the top
-                    #     # Assuming it needs args and config, adjust if necessary
-                    #     run_subconscious_engine(args, config)
-                    #     logger.info("Subconscious engine finished.")
-                    # except NameError:
-                    #      logger.error("run_subconscious_engine function not found (check imports).")
-                    # except Exception as sub_e:
-                    #     logger.error(f"Error during subconscious processing: {sub_e}")
-                    logger.warning("Subconscious processing skipped: run_subconscious_engine not found.")
-
-                # Handle loop mode (Placeholder)
-                if args.loop:
-                    logger.warning("Continuous loop mode (--loop) is not fully implemented for the refactored scan command.")
-                    # Future implementation would involve sleeping for args.interval
-                    # and re-running the scan and subconscious logic.
-
-                return 0 # Indicate success
-
-            except NameError as ne:
-                logger.critical(f"Failed to run scan: Required class/function 'ProjectScanner' not found. Check imports. {ne}")
-                return 1
-            except Exception as e:
-                logger.critical(f"An error occurred during the scan process: {e}", exc_info=True)
-                return 1
-            # End of refactored scan block
-        elif args.command == "inject":
-            # TODO: Refactor needed - run_inject_command likely missing
-            return run_inject_command(args, config)
-        elif args.command == "process":
-            # TODO: Refactor needed - run_process_command likely missing
-            return run_process_command(args, config)
-        elif args.command == "validate":
-            # TODO: Refactor needed - run_validate_command likely missing
-            return run_validate_command(args, config)
+            # Call the refactored scan function
+            return execute_scan(args, config)
+        # elif args.command == "inject":
+        #     return run_inject_command(args, config)
+        # elif args.command == "process":
+        #     return run_process_command(args, config)
+        # elif args.command == "validate":
+        #     return run_validate_command(args, config)
         else:
-            # This case should not be reached due to `required=True` in subparsers
-            logger.error(f"Unknown command: {args.command}")
+            logger.error(f"Command '{args.command}' is not currently implemented or its import is broken.")
             parser.print_help()
             return 1
 
@@ -325,6 +274,48 @@ def main() -> Optional[int]:
 # NOTE: The actual run_*_command functions MUST reside in their respective
 # command modules (e.g., trinity/trinity/commands/scan_cmd.py) and be imported above.
 # Having placeholder definitions here will cause issues if not removed.
+
+# --- Helper Function for Scan --- (Refactored from original run_scan_command logic)
+def execute_scan(args, config):
+    logger.info("Starting scan execution...")
+    # Use ProjectScanner instance
+    scanner = ProjectScanner(config)
+    scan_results = scanner.scan_project(args.target_directory)
+    logger.info(f"Scan complete. Found {len(scan_results)} potential TODOs.")
+
+    # Process results (e.g., save to file, print summary)
+    output_file = project_root / '.trinity' / 'scan_results.json'
+    try:
+        with open(output_file, 'w') as f:
+            json.dump(scan_results, f, indent=4)
+        logger.info(f"Scan results saved to {output_file}")
+    except Exception as write_e:
+        logger.error(f"Failed to write scan results: {write_e}")
+
+    # Handle subconscious processing
+    if args.subconscious:
+        logger.info("Subconscious processing requested...")
+        # try:
+        #     # run_subconscious_engine should be imported at the top
+        #     # Assuming it needs args and config, adjust if necessary
+        #     run_subconscious_engine(args, config)
+        #     logger.info("Subconscious engine finished.")
+        # except NameError:
+        #      logger.error("run_subconscious_engine function not found (check imports).")
+        # except Exception as sub_e:
+        #     logger.error(f"Error during subconscious processing: {sub_e}")
+        logger.warning("Subconscious processing skipped: run_subconscious_engine function not found.")
+
+    # Handle loop mode (Placeholder)
+    if args.loop:
+        if args.interval:
+            logger.info(f"Loop mode active. Next scan in {args.interval} seconds.")
+            time.sleep(args.interval)
+        else:
+            logger.warning("Loop mode active but no interval specified. Exiting loop.")
+            return 0 # Or handle as needed
+    else:
+        return 0 # Indicate successful single run
 
 if __name__ == '__main__':
     sys.exit(main()) 
