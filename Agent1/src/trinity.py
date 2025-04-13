@@ -79,9 +79,9 @@ try:
     from trinity.commands.validate_cmd import configure_validate_command, run_validate_command # TODO: Refactor needed
     from trinity.commands.inject_cmd import configure_inject_command, run_inject_command # TODO: Refactor needed
     # Import core components
-    from trinity.core.validation import validate_system
+    # from trinity.core.validation import validate_system # TODO: Cannot find validation.py or validate_system function
     # Import SubconsciousEngine and run function directly if possible
-    from trinity.core.subconscious.engine import SubconsciousEngine, get_subconscious_engine, run_subconscious_engine
+    # from trinity.core.subconscious.engine import SubconsciousEngine, get_subconscious_engine, run_subconscious_engine # TODO: Cannot find subconscious/engine.py
     # Import ProjectScanner for refactored scan command
     from trinity.core.project.ProjectScanner import ProjectScanner # Corrected location
 
@@ -238,9 +238,11 @@ def main() -> Optional[int]:
         config = load_config(args.config)
 
         # Validate system (consider passing config if needed)
-        if not validate_system():
-            logger.error("System validation failed. Exiting.")
-            return 1
+        # TODO: validate_system function is missing.
+        # if not validate_system():
+        #     logger.error("System validation failed. Exiting.")
+        #     return 1
+        logger.warning("System validation skipped: validate_system function not found.")
 
         # Execute command based on subparser chosen
         # Ensure the run_* functions are imported correctly at the top
@@ -268,15 +270,16 @@ def main() -> Optional[int]:
                 # Handle subconscious processing
                 if args.subconscious:
                     logger.info("Subconscious processing requested...")
-                    try:
-                        # run_subconscious_engine should be imported at the top
-                        # Assuming it needs args and config, adjust if necessary
-                        run_subconscious_engine(args, config)
-                        logger.info("Subconscious engine finished.")
-                    except NameError:
-                         logger.error("run_subconscious_engine function not found (check imports).")
-                    except Exception as sub_e:
-                        logger.error(f"Error during subconscious processing: {sub_e}")
+                    # try:
+                    #     # run_subconscious_engine should be imported at the top
+                    #     # Assuming it needs args and config, adjust if necessary
+                    #     run_subconscious_engine(args, config)
+                    #     logger.info("Subconscious engine finished.")
+                    # except NameError:
+                    #      logger.error("run_subconscious_engine function not found (check imports).")
+                    # except Exception as sub_e:
+                    #     logger.error(f"Error during subconscious processing: {sub_e}")
+                    logger.warning("Subconscious processing skipped: run_subconscious_engine not found.")
 
                 # Handle loop mode (Placeholder)
                 if args.loop:
