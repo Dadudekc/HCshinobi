@@ -1,0 +1,12 @@
+# Core dependencies
+pandas>=2.0.0
+numpy>=1.24.0
+aiohttp>=3.9.0
+asyncio>=3.4.3
+
+# Database
+sqlite3  # Usually included with Python
+
+# Optional dependencies for visualization
+matplotlib>=3.7.0  # For basic plotting
+plotly>=5.18.0    # For interactive visualizations 
