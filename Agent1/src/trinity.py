@@ -68,17 +68,17 @@ logger.info(f"Logging initialized. Log file: {log_file_path}") # Log confirmatio
 
 # Import TRINITY components using the corrected package path
 try:
-    # Import command functions from their respective modules
-    from trinity.commands.scan_cmd import configure_scan_command, run_scan_command # Placeholder exists
-    from trinity.commands.process_cmd import configure_process_command, run_process_command # Placeholder exists
-    from trinity.commands.validate_cmd import configure_validate_command, run_validate_command # Placeholder exists
-    from trinity.commands.inject_cmd import configure_inject_command, run_inject_command # Placeholder exists
+    # Command functions from their respective modules (Placeholders found)
+    from trinity.commands.scan_cmd import configure_scan_command, run_scan_command # Refactored, but import kept for consistency
+    from trinity.commands.process_cmd import configure_process_command, run_process_command # Placeholder
+    from trinity.commands.validate_cmd import configure_validate_command, run_validate_command # Placeholder
+    from trinity.commands.inject_cmd import configure_inject_command, run_inject_command # Placeholder
     # Import core components
-    from trinity.core.validation import validate_system # Placeholder exists
+    from trinity.core.validation import validate_system # Placeholder found
     # Import SubconsciousEngine and run function directly if possible
-    from trinity.core.subconscious.engine import SubconsciousEngine, get_subconscious_engine, run_subconscious_engine # Placeholders exist
-    # Import ProjectScanner - Not needed if using run_scan_command placeholder
-    # from trinity.core.project.ProjectScanner import ProjectScanner
+    from trinity.core.subconscious.engine import SubconsciousEngine, get_subconscious_engine, run_subconscious_engine # Placeholder found
+    # Import ProjectScanner for refactored scan command
+    from trinity.core.project.ProjectScanner import ProjectScanner # Corrected location
 
 except ImportError as e:
     logger.critical(f"Error importing TRINITY components: {e}")
