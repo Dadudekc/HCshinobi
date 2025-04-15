@@ -134,41 +134,82 @@ class PromptFeedbackLoopAgent:
         return found
 
     def _create_diagnostic_task(self, failed_task: Dict[str, Any]) -> Dict[str, Any]:
-        """Generates a standard diagnostic task definition."""
+        """Generates a diagnostic task tailored to the type of failure."""
         original_task_id = failed_task.get("task_id", "unknown_original")
+        original_action = failed_task.get("action")
+        original_params = failed_task.get("params", {})
         failure_reason = f"Task failed with status {failed_task.get('status')}. Last response: {failed_task.get('last_response')}"
         
         new_task_id = f"repair_{original_task_id}_{uuid.uuid4().hex[:6]}"
+        diag_commands = [
+            f"echo \"[Agent Repair] Task {original_task_id} (Action: {original_action}) failed. Diagnosing...\"",
+            f"echo \"Failure Reason: {failure_reason[:150]}...\""
+        ]
+        target_agent = "CursorControlAgent" # Default target
+        diag_action = "RUN_TERMINAL_COMMAND" # Default action
+
+        # --- Context-Specific Diagnostics ---
+        if original_action == "RUN_TERMINAL_COMMAND":
+            # Check CWD and list files
+            diag_commands.append("pwd")
+            diag_commands.append("ls -alh")
+            # If original command might have logs, try to tail them (example)
+            original_command = original_params.get("command", "")
+            if "build" in original_command or ".py" in original_command:
+                 # Very basic log file guessing - needs improvement
+                 diag_commands.append("echo \"Attempting to check recent logs...\"" )
+                 diag_commands.append("ls -lt *.log | head -n 5") # List recent log files
+                 # diag_commands.append("tail -n 20 latest.log") # Requires knowing log name
         
-        # Basic diagnostic command - could be made more context-aware
-        diag_command = (
-            f"echo \"[Agent Repair] Task {original_task_id} failed. Reviewing environment...\" && "
-            f"echo \"Failure Reason: {failure_reason[:100]}...\" && " # Limit reason length
-            f"pwd && "
-            f"ls -alh"
-            # Future: Add commands to get logs, check resource usage, etc.
-        )
+        elif original_action == "OPEN_FILE":
+            file_path = original_params.get("file_path")
+            if file_path:
+                # Check if file exists and its permissions
+                diag_commands.append(f"echo \"Checking file status for: {file_path}\"" )
+                diag_commands.append(f"ls -ld \"{file_path}\"" ) # Use quotes for paths with spaces
+            else:
+                 diag_commands.append("echo \"Original OPEN_FILE task missing file_path parameter.\"" )
+                 diag_commands.append("pwd")
+                 diag_commands.append("ls -alh")
+
+        elif original_action in ["GET_EDITOR_CONTENT", "SET_EDITOR_CONTENT", "INSERT_EDITOR_TEXT", "FIND_ELEMENT", "ENSURE_CURSOR_FOCUSED"]:
+             # Likely indicates an issue with Cursor interaction or the instance itself
+             diag_commands.append("echo \"Checking Cursor process status...\"" )
+             if sys.platform == "win32":
+                 diag_commands.append("tasklist | findstr Cursor")
+             else: # Linux/macOS
+                 diag_commands.append("ps aux | grep -i [C]ursor") # [C] prevents grep finding itself
+             # Could also inject a task to explicitly refocus?
+             # diag_action = "ENSURE_CURSOR_FOCUSED" # Requires CursorControlAgent to handle this action
+
+        else:
+             # Default diagnostics for unknown actions
+             diag_commands.append("echo \"Running default diagnostics (pwd, ls)...\"" )
+             diag_commands.append("pwd")
+             diag_commands.append("ls -alh")
+
+        # Combine commands into a single string for shell execution
+        full_diag_command = " && ".join(diag_commands)
 
         repair_task = {
             "task_id": new_task_id,
             "status": TaskStatus.PENDING,
-            "task_type": "diagnose_task_failure", # Categorize the task
-            "action": "RUN_TERMINAL_COMMAND",
+            "task_type": f"diagnose_{original_action}_failure", # More specific type
+            "action": diag_action, # Could be different if not RUN_TERMINAL_COMMAND
             "params": {
-                "command": diag_command,
+                "command": full_diag_command,
                 "related_task_id": original_task_id,
                 "failure_reason": failure_reason,
-                # Include original task details for context?
-                "original_task_action": failed_task.get("action"),
-                "original_task_params": failed_task.get("params") 
+                "original_task_action": original_action,
+                "original_task_params": original_params 
             },
-            "depends_on": [original_task_id], # Ensure original task is no longer PENDING/DISPATCHED
-            "priority": 1, # High priority for repair tasks
+            "depends_on": [original_task_id],
+            "priority": 1, 
             "retry_count": 0,
-            "repair_attempts": 0, # Initialize for the repair task itself
-            "target_agent": "CursorControlAgent" # Assuming terminal diagnostics for now
+            "repair_attempts": 0,
+            "target_agent": target_agent
         }
-        logger.info(f"Generated diagnostic task {new_task_id} for failed task {original_task_id}.")
+        logger.info(f"Generated diagnostic task {new_task_id} for failed task {original_task_id} (Action: {original_action}).")
         return repair_task
 
     def _log_injection_event(self, failed_task_id: str, new_task_id: str):
