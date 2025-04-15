@@ -1,0 +1,20 @@
+[
+  {
+    "task_id": "dev_create_echo_agent_001",
+    "status": "PENDING",
+    "task_type": "generate_code",
+    "action": "Create a new agent named EchoAgent in agents/echo_agent.py.",
+    "params": {
+      "target_file": "agents/echo_agent.py",
+      "description": "Create a simple agent named EchoAgent. It should have an AGENT_NAME constant set to 'EchoAgent'. It needs an __init__ method that sets up mailbox paths (inbox, processed, error) under mailboxes/EchoAgent/. It requires a start_listening method using mailbox_utils.process_directory_loop to monitor its inbox. The core logic should be in a _process_mailbox_message method which reads a message, logs its content (e.g., using logger.info), and returns True for success.",
+      "requirements": [
+        "Basic agent structure (class, __init__, start_listening, stop)",
+        "Mailbox monitoring using process_directory_loop",
+        "Message processing that logs message content",
+        "Import necessary modules (json, logging, time, threading, Path, mailbox_utils)"
+      ]
+    },
+    "target_agent": "CursorControlAgent",
+    "timestamp_created": "2024-07-26T10:00:00Z"
+  }
+] 

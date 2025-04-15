@@ -124,21 +124,21 @@ class CursorControlAgent:
         }
         logger.info(f"{self.AGENT_NAME} initialized. Monitoring inbox: {self.inbox_dir}. Using: {type(self.cursor_controller).__name__}. Task List: {self.task_list_path}")
 
-    # --- Command Handlers (Updated for Real Controller & Tools) ---
+    # --- Command Handlers (Updated for Real Controller & Strict Compliance) ---
     def _handle_resume_operation(self, message_payload: dict) -> bool:
-        """Attempt to resume by running a status check or default command."""
+        """Attempt to resume by running a *real* status check or default command."""
         params = message_payload.get("params", {})
         logger.info(f"Handling 'resume_operation'. Params: {params}")
-        # Example: Run a simple command like 'pwd' or a specific status script
-        command = params.get("resume_command", "pwd") # Allow command override via params
-        success = self.cursor_controller.run_command(command, wait_for_completion=True)
-        output = self.cursor_controller.get_output(max_lines=10)
-        logger.info(f"Resume command '{command}' success: {success}. Output: {output}")
-        return success
+        # Requires a REAL resume command/script. Using 'pwd' is a simulation.
+        # command = params.get("resume_command", "path/to/real/resume_script.py") 
+        # success = self.cursor_controller.run_command(command, wait_for_completion=True)
+        logger.error(f"Cannot execute 'resume_operation': No real resume command/script defined. Task failed as per Rule ONB-001.")
+        return False # Fail because 'pwd' is not a real resume action
 
     def _handle_generate_task(self, message_payload: dict) -> bool:
-        """Generates a placeholder task and appends it to task_list.json."""
-        # (Logic remains the same as it doesn't use the terminal controller directly)
+        # This handler *creates* a real task in task_list.json.
+        # It doesn't simulate or use placeholders internally, so it's compliant.
+        # (Existing implementation is okay)
         params = message_payload.get("params", {})
         logger.info(f"Handling 'generate_task'. Hint: {params.get('instruction_hint')}")
         new_task_id = f"generated_{int(time.time())}"
@@ -173,105 +173,98 @@ class CursorControlAgent:
             return False
         
     def _handle_diagnose_loop(self, message_payload: dict) -> bool:
-        """Runs a command to retrieve logs for loop diagnosis."""
+        """Runs a command to retrieve logs, but cannot act on them without real analysis/prompting."""
         params = message_payload.get("params", {})
         logger.info(f"Handling 'diagnose_loop'. Params: {params}")
-        # Example: Tail the main agent log file
-        log_file_path = params.get("log_file", "logs/agent_main.log") # Parameterize log file
+        log_file_path = params.get("log_file", "logs/agent_main.log") 
         num_lines = params.get("lines", 50)
-        command = f"tail -n {num_lines} {log_file_path}" # Adjust command for OS if needed
+        command = f"tail -n {num_lines} {log_file_path}" 
         
         success = self.cursor_controller.run_command(command, wait_for_completion=True)
-        output_lines = self.cursor_controller.get_output(max_lines=num_lines + 5) # Get command + output
+        output_lines = self.cursor_controller.get_output(max_lines=num_lines + 5)
         logger.info(f"Log retrieval command '{command}' success: {success}")
-        # Instead of sending prompt (not supported by controller), log the findings
         if success:
              logger.info(f"Retrieved Logs for Loop Diagnosis:\n---\n" + "\n".join(output_lines) + "\n---")
-             # Could potentially write output_lines to a diagnostic file
+             # PROBLEM: Cannot analyze or send prompt for resolution. Task incomplete.
+             logger.error("Successfully retrieved logs, but cannot analyze or act on them. Task failed as per Rule ONB-001 (incomplete action).")
+             return False # Fail because we cannot complete the *purpose* of diagnosis
         else:
              logger.error(f"Failed to retrieve logs using command: {command}")
-
-        return success # Return success of the command execution
+             return False
 
     def _handle_confirmation_check(self, message_payload: dict) -> bool:
         params = message_payload.get('params', {})
         logger.info(f"Handling 'confirmation_check'. Params: {params}")
-        # Execute the dedicated tool script
-        command = "python tools/check_confirmation_state.py" 
-        # Add params from message if needed by script, e.g.:
-        # context_file = params.get('context_file')
-        # if context_file: command += f" --context-file {context_file}" 
-        
-        success = self.cursor_controller.run_command(command, wait_for_completion=True)
-        output = self.cursor_controller.get_output(max_lines=10) # Get output/result from script
-        logger.info(f"Confirmation check command '{command}' success (script exited 0?): {success}. Output: {output}")
-        # Script uses exit code 0 for safe, 1 for needs confirmation (which run_command treats as success=False)
-        return success # True if safe, False if confirmation needed
+        # Cannot run placeholder script tools/check_confirmation_state.py
+        logger.error(f"Cannot execute 'confirmation_check': Relies on unimplemented tool 'tools/check_confirmation_state.py'. Task failed as per Rule ONB-001.")
+        # command = "python tools/check_confirmation_state.py" 
+        # success = self.cursor_controller.run_command(command, wait_for_completion=True)
+        # output = self.cursor_controller.get_output(max_lines=10) 
+        # logger.info(f"Confirmation check command '{command}' success (script exited 0?): {success}. Output: {output}")
+        # return success 
+        return False # Fail due to reliance on placeholder
         
     def _handle_context_reload(self, message_payload: dict) -> bool:
         params = message_payload.get('params', {})
         logger.info(f"Handling 'context_reload'. Params: {params}")
-        # Execute the dedicated tool script, passing target agent name
-        target = params.get("target_agent", self.AGENT_NAME) # Default to self if not specified?
-        command = f"python tools/reload_agent_context.py --target {target}" 
-        
-        success = self.cursor_controller.run_command(command, wait_for_completion=True)
-        output = self.cursor_controller.get_output(max_lines=10)
-        logger.info(f"Context reload command '{command}' success: {success}. Output: {output}")
-        return success
+        # Cannot run placeholder script tools/reload_agent_context.py
+        logger.error(f"Cannot execute 'context_reload': Relies on unimplemented tool 'tools/reload_agent_context.py'. Task failed as per Rule ONB-001.")
+        # target = params.get("target_agent", self.AGENT_NAME) 
+        # command = f"python tools/reload_agent_context.py --target {target}" 
+        # success = self.cursor_controller.run_command(command, wait_for_completion=True)
+        # output = self.cursor_controller.get_output(max_lines=10)
+        # logger.info(f"Context reload command '{command}' success: {success}. Output: {output}")
+        # return success
+        return False # Fail due to reliance on placeholder
         
     def _handle_clarify_objective(self, message_payload: dict) -> bool:
-        """Generates and attempts to send a clarification prompt via UI automation."""
+        """Attempts to send prompt, fails if UI automation fails or is disabled."""
         params = message_payload.get("params", {})
-        logger.info(f"Handling 'clarify_objective'. Params: {params}")
+        original_task_id = message_payload.get("original_task_id", "unknown_task")
+        logger.info(f"Handling 'clarify_objective' for task {original_task_id}. Params: {params}")
         hint = params.get("instruction_hint", "Objective unclear.")
         relevant_files = params.get("relevant_files", [])
         context_str = f"Relevant files: {relevant_files}. " if relevant_files else ""
-        prompt = f"Agent stalled due to unclear objective. {context_str}Instruction hint: {hint}. Please provide a clearer next step or goal."
+        prompt = f"Agent stalled due to unclear objective (Task: {original_task_id}). {context_str}Instruction hint: {hint}. Please provide a clearer next step or goal."
         
         logger.info(f"Attempting to send clarification prompt via UI controller...")
-        # Use the prompt controller to send the prompt
         success = self.prompt_controller.send_prompt_to_chat(prompt)
         
         if success:
-            logger.info("Clarification prompt sent successfully via UI controller.")
+            logger.info("Clarification prompt sent successfully via UI controller. Task considered complete (prompt sent).")
+            # Note: We consider sending the prompt as completing *this* specific task.
+            # Whether the clarification *succeeds* is a separate feedback loop.
+            return True 
         else:
-            logger.error("Failed to send clarification prompt via UI controller.")
-            # Consider fallback? Log to file? For now, just report failure.
-
-        # Return success/failure of the UI automation attempt
-        return success 
+            logger.error("Failed to send clarification prompt via UI controller. Task failed.")
+            return False 
         
     def _handle_generic_recovery(self, message_payload: dict) -> bool:
-        """Runs the diagnostics script as the generic recovery action."""
+        """Attempts to run a REAL diagnostics script."""
         params = message_payload.get("params", {})
         action_keyword = message_payload.get("action_keyword", "Perform general diagnostics.")
         logger.warning(f"Handling 'generic_recovery'. Action: {action_keyword}. Params: {params}")
         
-        # Run the diagnostics script in auto mode
-        command = "python tools/diagnostics.py --auto"
-        success = self.cursor_controller.run_command(command, wait_for_completion=True)
-        output = self.cursor_controller.get_output(max_lines=20)
-        logger.info(f"Generic recovery command '{command}' success: {success}. Output: {output}")
-        # Success here means the script ran without error, not necessarily that it found no issues.
-        # The script's output should be logged/analyzed if further action is needed.
-        return success
+        # Cannot run placeholder script tools/diagnostics.py
+        logger.error(f"Cannot execute 'generic_recovery': Relies on unimplemented tool 'tools/diagnostics.py'. Task failed as per Rule ONB-001.")
+        # command = "python tools/diagnostics.py --auto"
+        # success = self.cursor_controller.run_command(command, wait_for_completion=True)
+        # output = self.cursor_controller.get_output(max_lines=20)
+        # logger.info(f"Generic recovery command '{command}' success: {success}. Output: {output}")
+        # return success
+        return False # Fail due to reliance on placeholder
 
     def _handle_generate_code(self, message_payload: dict) -> bool:
-        """Constructs and attempts to send a prompt for code generation via UI."""
+        """Attempts to send prompt for code gen, fails if UI automation fails or is disabled."""
         params = message_payload.get("params", {})
         original_task_id = message_payload.get("original_task_id", "unknown_task")
         logger.info(f"Handling 'generate_code' for task {original_task_id}. Params: {params}")
-
         target_file = params.get("target_file")
         description = params.get("description")
         requirements = params.get("requirements", [])
-
         if not target_file or not description:
             logger.error("'generate_code' task missing required params: target_file or description.")
-            return False # Cannot proceed
-
-        # Construct the prompt
+            return False
         prompt = f"Please generate the code for the following file:\n\n"
         prompt += f"Target File Path: {target_file}\n\n"
         prompt += f"Description:\n{description}\n\n"
@@ -280,27 +273,22 @@ class CursorControlAgent:
             for req in requirements:
                 prompt += f"- {req}\n"
         prompt += f"\nPlease provide only the complete code for the file '{target_file}'."
-
-        # Log the prompt - for debugging
         logger.info(f"--- CODE GENERATION PROMPT (Task: {original_task_id}) ---")
         logger.info(prompt)
         logger.info(f"--- END PROMPT ---")
-        
-        # Attempt to send the prompt via UI automation
         logger.info("Attempting to send code generation prompt via UI controller...")
         success = self.prompt_controller.send_prompt_to_chat(prompt)
-        
         if success:
             logger.info("Code generation prompt sent successfully via UI controller.")
-            # NOTE: This only sends the prompt. It doesn't guarantee generation
-            # or application of the code. Further steps would be needed for that.
+            # NOTE: This only sends the prompt. It doesn't guarantee generation or application.
+            # Under strict ONB-001, sending the prompt is not *full* completion.
+            logger.error("Prompt sent, but code application is not implemented. Task failed as per Rule ONB-001 (incomplete action).")
+            return False # Fail because the full task (generate AND apply) is not complete
         else:
-             logger.error("Failed to send code generation prompt via UI controller.")
+             logger.error("Failed to send code generation prompt via UI controller. Task failed.")
+             return False 
 
-        # Return success/failure of the *prompt sending attempt*
-        return success 
-
-    # --- Mailbox Processing Logic --- (No changes needed here)
+    # --- Mailbox Processing Logic --- 
     def _process_mailbox_message(self, message_path: Path) -> bool:
         """Processes a single message file from the inbox and updates task status."""
         logger.debug(f"Processing message file: {message_path.name}")
@@ -308,64 +296,57 @@ class CursorControlAgent:
         original_task_id = None
         execution_success = False
         error_msg = None
-        result_summary = None # Optional summary for successful tasks
+        result_summary = None 
 
         try:
             with message_path.open("r", encoding="utf-8") as f:
                 message_payload = json.load(f)
-            
             command = message_payload.get("command")
-            # Get the ID of the task that generated this message
             original_task_id = message_payload.get("original_task_id")
-
-            if not command:
-                logger.error(f"Message {message_path.name} missing 'command'. Moving to error.")
-                error_msg = "Message missing 'command' field"
-                execution_success = False
-            elif not original_task_id:
-                 logger.error(f"Message {message_path.name} missing 'original_task_id'. Cannot update status. Moving to error.")
-                 error_msg = "Message missing 'original_task_id' field"
-                 execution_success = False # Cannot update status, treat as failure
+            if not command or not original_task_id:
+                 error_msg = "Message missing 'command' or 'original_task_id' field"
+                 logger.error(f"Message {message_path.name}: {error_msg}")
+                 execution_success = False
             else:
                 handler = self.command_handlers.get(command)
                 if handler:
-                    logger.info(f"Found handler for command '{command}' from task {original_task_id}. Executing...")
-                    # Execute the handler
+                    logger.info(f"Executing handler for command '{command}' from task {original_task_id}...")
+                    # Execute the handler - it now returns True ONLY if fully completed
                     execution_success = handler(message_payload)
                     if execution_success:
-                        logger.info(f"Handler for command '{command}' from task {original_task_id} completed successfully.")
+                        logger.info(f"Handler for command '{command}' from task {original_task_id} COMPLETED successfully.")
                         result_summary = f"Handler '{command}' executed successfully."
-                        # Optionally capture more specific results from handlers if they return it
                     else:
-                        logger.error(f"Handler for command '{command}' from task {original_task_id} failed.")
-                        error_msg = f"Handler for command '{command}' reported failure."
+                        # Error/block reason should be logged within the handler itself
+                        logger.error(f"Handler for command '{command}' from task {original_task_id} FAILED or BLOCKED.")
+                        error_msg = f"Handler for command '{command}' failed, blocked, or was incomplete (See logs for details)."
                 else:
-                    logger.warning(f"No handler found for command '{command}' (from task {original_task_id}) in message {message_path.name}. Moving to error.")
                     error_msg = f"No handler found for command '{command}'"
+                    logger.warning(f"{error_msg} (from task {original_task_id}) in message {message_path.name}. Moving to error.")
                     execution_success = False 
-
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to decode JSON from {message_path.name}: {e}. Moving to error.")
-            error_msg = f"JSONDecodeError: {e}"
-            execution_success = False
         except Exception as e:
             logger.error(f"Unexpected error processing message {message_path.name}: {e}", exc_info=True)
-            error_msg = f"Unexpected error: {e}"
+            error_msg = f"Unexpected error during message processing: {e}"
             execution_success = False
         
         # --- Update Task Status --- 
         if original_task_id:
-            final_status = "COMPLETED" if execution_success else "FAILED"
+            # Use FAILED status for any non-completion according to ONB-001
+            final_status = "COMPLETED" if execution_success else "FAILED" 
             logger.info(f"Updating status for original task '{original_task_id}' to '{final_status}'")
+            # Use a more specific error message if the handler failed
+            final_error_message = error_msg if error_msg else "Task handler reported failure or incomplete execution."
             update_task_status(
                 self.task_list_path, 
                 original_task_id, 
                 final_status, 
-                result_summary=result_summary, 
-                error_message=error_msg
+                result_summary=result_summary if execution_success else None, 
+                error_message=final_error_message if not execution_success else None
             )
         else:
              logger.error("Cannot update task status because original_task_id was not found in the message.")
+             # If we couldn't get task ID, processing essentially failed
+             execution_success = False 
 
         # Return execution_success to determine if file moves to processed/error
         return execution_success
