@@ -21,6 +21,7 @@ if os.path.basename(script_dir) == "core" and os.path.dirname(script_dir) not in
 from coordination.agent_bus import AgentBus
 from agents.cursor_control_agent import CursorControlAgent
 from agents.task_executor_agent import TaskExecutorAgent, DEFAULT_TASK_LIST_PATH, TaskStatus
+from agents.agent_monitor_agent import AgentMonitorAgent, DEFAULT_LOG_PATH
 
 # Setup Logging
 log_format = '%(asctime)s - %(threadName)s - %(levelname)s - %(name)s - %(message)s'
@@ -106,10 +107,14 @@ def main():
     # Use absolute paths for reliability
     base_dir = os.path.dirname(os.path.abspath(__file__)) # core directory
     project_root = os.path.dirname(base_dir) # Project root directory
-    mailbox_dir = os.path.join(project_root, "run", "mailboxes")
+    run_dir = os.path.join(project_root, "run")
+    mailbox_dir = os.path.join(run_dir, "mailboxes")
     task_list_path = os.path.join(project_root, DEFAULT_TASK_LIST_PATH)
-    status_dir = os.path.join(project_root, "run", "status") # For status files
+    log_dir = os.path.join(run_dir, "logs")
+    monitor_log_path = os.path.join(log_dir, os.path.basename(DEFAULT_LOG_PATH))
+    status_dir = os.path.join(run_dir, "status") # For status files
     os.makedirs(mailbox_dir, exist_ok=True)
+    os.makedirs(log_dir, exist_ok=True) # Ensure log dir exists
     os.makedirs(status_dir, exist_ok=True)
 
     # Setup task list
@@ -131,6 +136,11 @@ def main():
              logger.error("CursorControlAgent failed to initialize coordinator. System cannot function.")
              return 1
         global_agents.append(cursor_agent)
+
+        logger.info("Initializing AgentMonitorAgent...")
+        monitor_agent = AgentMonitorAgent(agent_bus=bus, log_file_path=monitor_log_path)
+        global_agents.append(monitor_agent)
+        # Monitor agent currently has no background thread, processes messages via main loop polling
 
         logger.info("Initializing TaskExecutorAgent...")
         task_executor = TaskExecutorAgent(agent_bus=bus, task_list_path=task_list_path)
@@ -157,7 +167,8 @@ def main():
             # (like TaskExecutorAgent currently) to handle responses.
             # We process messages for the TaskExecutorAgent to handle responses
             # and CursorControlAgent to handle direct commands if any were sent outside the task list.
-            agents_to_poll = [TaskExecutorAgent.AGENT_NAME, CursorControlAgent.AGENT_NAME]
+            # Add AgentMonitorAgent to the polling list to process events it subscribes to
+            agents_to_poll = [TaskExecutorAgent.AGENT_NAME, CursorControlAgent.AGENT_NAME, AgentMonitorAgent.AGENT_NAME]
             total_processed = 0
             for agent_name in agents_to_poll:
                 processed_count = bus.process_messages(agent_name, max_messages=5) # Process up to 5 per agent per cycle
@@ -186,8 +197,12 @@ def main():
         task_executor.stop()
     
     # Call shutdown on cursor_agent to potentially close the app
-    if cursor_agent in global_agents:
+    if 'cursor_agent' in locals() and cursor_agent in global_agents:
          cursor_agent.shutdown()
+    
+    # Call shutdown on monitor_agent
+    if 'monitor_agent' in locals() and monitor_agent in global_agents:
+        monitor_agent.shutdown()
     
     # Shutdown the bus
     if global_bus:
