@@ -46,9 +46,11 @@ def setup_task_list(task_list_path):
                 "task_id": "main_demo_task_1",
                 "status": TaskStatus.PENDING,
                 "action": "RUN_TERMINAL_COMMAND",
-                "params": {"command": "echo 'Hello from Autonomous Agent!'"},
+                "params": {"command": "echo 'Task 1: Hello from Autonomous Agent!'"},
                 "target_agent": "CursorControlAgent",
-                "priority": 1
+                "priority": 2, # Lower priority
+                "depends_on": [], # No dependencies
+                "retry_count": 0
             },
             {
                 "task_id": "main_demo_task_2",
@@ -56,7 +58,19 @@ def setup_task_list(task_list_path):
                 "action": "GET_EDITOR_CONTENT",
                 "params": {},
                 "target_agent": "CursorControlAgent",
-                "priority": 2
+                "priority": 1, # Higher priority
+                "depends_on": [], # No dependencies
+                "retry_count": 0
+            },
+            {
+                "task_id": "main_demo_task_3",
+                "status": TaskStatus.PENDING,
+                "action": "RUN_TERMINAL_COMMAND",
+                "params": {"command": "echo 'Task 3: Running after Task 1 completes.'"},
+                "target_agent": "CursorControlAgent",
+                "priority": 3,
+                "depends_on": ["main_demo_task_1"], # Depends on task 1
+                "retry_count": 0
             }
         ]
         try:

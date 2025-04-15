@@ -185,19 +185,51 @@ class TaskExecutorAgent:
         else:
             logger.warning(f"Task '{task_id}' referenced in response from {message.sender} not found in task list.")
 
+    def _check_dependencies(self, task_to_check: Dict[str, Any], all_tasks_map: Dict[str, Dict[str, Any]]) -> bool:
+        """Checks if all dependencies for a given task are met (status is COMPLETED)."""
+        dependencies = task_to_check.get("depends_on", [])
+        if not dependencies:
+            return True # No dependencies
+        
+        for dep_id in dependencies:
+            dep_task = all_tasks_map.get(dep_id)
+            if not dep_task:
+                logger.warning(f"Task '{task_to_check.get('task_id')}' has unmet dependency: Task '{dep_id}' not found.")
+                # Treat missing dependency as unmet for safety
+                return False
+            if dep_task.get("status") != TaskStatus.COMPLETED:
+                 logger.debug(f"Task '{task_to_check.get('task_id')}' dependency '{dep_id}' not met (Status: {dep_task.get('status')}).")
+                 return False # Dependency not complete
+        
+        logger.debug(f"All dependencies met for task '{task_to_check.get('task_id')}'.")
+        return True
+
     def run_cycle(self):
-        """Loads tasks, finds pending ones, and dispatches them."""
+        """Loads tasks, sorts by priority, checks dependencies, finds pending ones, and dispatches them."""
         logger.debug(f"{self.agent_name} starting run cycle...")
         tasks = self._load_tasks()
         if not tasks:
-            # logger.debug("No tasks loaded or error reading task list.")
-            return # Nothing to do
+            return
+
+        # Create a map for quick dependency lookup
+        tasks_map = {task.get("task_id"): task for task in tasks if isinstance(task, dict) and task.get("task_id")}
+
+        # Sort tasks by priority (lower number = higher priority), PENDING first
+        def sort_key(task):
+            if not isinstance(task, dict):
+                return (float('inf'), float('inf')) # Invalid tasks last
+            status = task.get("status", TaskStatus.PENDING).upper()
+            priority = task.get("priority", 99) # Default priority if missing
+            # Sort PENDING tasks by priority, then other statuses
+            status_order = 0 if status == TaskStatus.PENDING else 1
+            return (status_order, priority)
+
+        sorted_tasks = sorted(tasks, key=sort_key)
 
         tasks_updated = False
-        for i, task in enumerate(tasks):
-            # Basic validation
+        for i, task in enumerate(sorted_tasks):
             if not isinstance(task, dict):
-                 logger.warning(f"Skipping invalid entry in task list (index {i}): Not a dictionary.")
+                 logger.warning(f"Skipping invalid entry in task list (index {i}, original list): Not a dictionary.")
                  continue
 
             task_id = task.get("task_id")
@@ -206,17 +238,30 @@ class TaskExecutorAgent:
             params = task.get("params", {})
             target_agent = task.get("target_agent")
             required_capability = task.get("capability")
+            retry_count = task.get("retry_count", 0)
 
             if status == TaskStatus.PENDING:
                 if not task_id or not action:
                      logger.error(f"Skipping invalid PENDING task (missing id or action): {task}")
-                     # Try to update status even without ID if possible? Difficult.
                      if task_id:
-                          self._update_task_status(tasks, task_id, TaskStatus.INVALID)
-                          tasks_updated = True
+                          if self._update_task_status(tasks, task_id, TaskStatus.INVALID):
+                              tasks_updated = True
                      continue
+                
+                # --- Dependency Check --- #
+                if not self._check_dependencies(task, tasks_map):
+                    logger.debug(f"Skipping task '{task_id}' due to unmet dependencies.")
+                    continue # Skip this task for now
 
-                # --- Dispatch Logic --- #
+                # --- Retry Logic (Placeholder/Increment) --- #
+                # Increment retry count on dispatch attempt (even if it fails to send)
+                # More complex retry logic (e.g., exponential backoff, based on failure type)
+                # would likely live in the response handling or a dedicated retry mechanism.
+                task["retry_count"] = retry_count + 1 
+                tasks_updated = True # Mark for save because retry_count changed
+                logger.debug(f"Attempting dispatch for task '{task_id}', attempt #{task['retry_count']}.")
+
+                # --- Dispatch Logic (Remains the same) --- #
                 recipient = None
                 if target_agent:
                     recipient = target_agent
@@ -256,9 +301,9 @@ class TaskExecutorAgent:
                 else:
                     logger.error(f"Failed to send message for task '{task_id}' to agent '{recipient}'")
                     self._update_task_status(tasks, task_id, TaskStatus.DISPATCH_FAILED)
-                tasks_updated = True # Mark list as needing save
+                # tasks_updated is already True due to retry_count increment
 
-        # Save changes if any task status was updated
+        # Save changes if any task status or retry_count was updated
         if tasks_updated:
             if not self._save_tasks(tasks):
                  logger.error("Failed to save updated task list!")
