@@ -118,6 +118,7 @@ class CursorControlAgent:
             "context_reload": self._handle_context_reload, # NOW REAL
             "clarify_objective": self._handle_clarify_objective, 
             "generic_recovery": self._handle_generic_recovery, # NOW REAL
+            "generate_code": self._handle_generate_code, # Added handler
             # Add other command handlers here
             # e.g., "run_terminal_command": self._handle_run_terminal_command
         }
@@ -255,6 +256,49 @@ class CursorControlAgent:
         # Success here means the script ran without error, not necessarily that it found no issues.
         # The script's output should be logged/analyzed if further action is needed.
         return success
+
+    def _handle_generate_code(self, message_payload: dict) -> bool:
+        """Constructs and attempts to send a prompt for code generation via UI."""
+        params = message_payload.get("params", {})
+        original_task_id = message_payload.get("original_task_id", "unknown_task")
+        logger.info(f"Handling 'generate_code' for task {original_task_id}. Params: {params}")
+
+        target_file = params.get("target_file")
+        description = params.get("description")
+        requirements = params.get("requirements", [])
+
+        if not target_file or not description:
+            logger.error("'generate_code' task missing required params: target_file or description.")
+            return False # Cannot proceed
+
+        # Construct the prompt
+        prompt = f"Please generate the code for the following file:\n\n"
+        prompt += f"Target File Path: {target_file}\n\n"
+        prompt += f"Description:\n{description}\n\n"
+        if requirements:
+            prompt += f"Requirements:\n"
+            for req in requirements:
+                prompt += f"- {req}\n"
+        prompt += f"\nPlease provide only the complete code for the file '{target_file}'."
+
+        # Log the prompt - for debugging
+        logger.info(f"--- CODE GENERATION PROMPT (Task: {original_task_id}) ---")
+        logger.info(prompt)
+        logger.info(f"--- END PROMPT ---")
+        
+        # Attempt to send the prompt via UI automation
+        logger.info("Attempting to send code generation prompt via UI controller...")
+        success = self.prompt_controller.send_prompt_to_chat(prompt)
+        
+        if success:
+            logger.info("Code generation prompt sent successfully via UI controller.")
+            # NOTE: This only sends the prompt. It doesn't guarantee generation
+            # or application of the code. Further steps would be needed for that.
+        else:
+             logger.error("Failed to send code generation prompt via UI controller.")
+
+        # Return success/failure of the *prompt sending attempt*
+        return success 
 
     # --- Mailbox Processing Logic --- (No changes needed here)
     def _process_mailbox_message(self, message_path: Path) -> bool:
