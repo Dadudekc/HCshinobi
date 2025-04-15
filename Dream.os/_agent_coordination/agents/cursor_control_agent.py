@@ -21,6 +21,22 @@ except ImportError:
             print("WARNING: process_directory_loop failed to import. Mailbox listener inactive.")
             while True: time.sleep(60)
 
+# --- Import Task Utils --- 
+try:
+    # Adjust relative import based on structure (agents -> _agent_coordination)
+    from .._agent_coordination.task_utils import update_task_status
+except ImportError:
+     try:
+        # Fallback if running directly
+        sys.path.append(str(Path(__file__).parent.parent))
+        from _agent_coordination.task_utils import update_task_status
+     except ImportError as e:
+        print(f"Error: Could not import update_task_status from task_utils. Status updates disabled. {e}")
+        # Define a dummy function if import fails
+        def update_task_status(*args, **kwargs):
+            print(f"WARNING: update_task_status failed to import. Task status not updated. Args: {args}")
+            return False
+
 # --- Import Real Cursor Terminal Controller --- 
 try:
     # Determine project root relative to this agent file (agents/agent.py -> project_root/)
@@ -86,7 +102,7 @@ class CursorControlAgent:
             # Add other command handlers here
             # e.g., "run_terminal_command": self._handle_run_terminal_command
         }
-        logger.info(f"{self.AGENT_NAME} initialized. Monitoring inbox: {self.inbox_dir}. Using: {type(self.cursor_controller).__name__}")
+        logger.info(f"{self.AGENT_NAME} initialized. Monitoring inbox: {self.inbox_dir}. Using: {type(self.cursor_controller).__name__}. Task List: {self.task_list_path}")
 
     # --- Command Handlers (Updated for Real Controller) ---
     def _handle_resume_operation(self, message_payload: dict) -> bool:
@@ -207,40 +223,73 @@ class CursorControlAgent:
 
     # --- Mailbox Processing Logic --- (No changes needed here)
     def _process_mailbox_message(self, message_path: Path) -> bool:
-        """Processes a single message file from the inbox."""
+        """Processes a single message file from the inbox and updates task status."""
         logger.debug(f"Processing message file: {message_path.name}")
+        message_payload = None
+        original_task_id = None
+        execution_success = False
+        error_msg = None
+        result_summary = None # Optional summary for successful tasks
+
         try:
             with message_path.open("r", encoding="utf-8") as f:
                 message_payload = json.load(f)
             
             command = message_payload.get("command")
+            # Get the ID of the task that generated this message
+            original_task_id = message_payload.get("original_task_id")
+
             if not command:
                 logger.error(f"Message {message_path.name} missing 'command'. Moving to error.")
-                return False # Move to error dir
-
-            handler = self.command_handlers.get(command)
-            if handler:
-                logger.info(f"Found handler for command '{command}'. Executing...")
-                # Execute the handler
-                success = handler(message_payload)
-                if success:
-                    logger.info(f"Handler for command '{command}' completed successfully.")
-                    # Optionally: Update original task in task_list.json here? Requires task_list access.
-                    # Optionally: Write response to an outbox?
-                    return True # Move to processed dir
-                else:
-                    logger.error(f"Handler for command '{command}' failed.")
-                    return False # Move to error dir
+                error_msg = "Message missing 'command' field"
+                execution_success = False
+            elif not original_task_id:
+                 logger.error(f"Message {message_path.name} missing 'original_task_id'. Cannot update status. Moving to error.")
+                 error_msg = "Message missing 'original_task_id' field"
+                 execution_success = False # Cannot update status, treat as failure
             else:
-                logger.warning(f"No handler found for command '{command}' in message {message_path.name}. Moving to error.")
-                return False # Move to error dir
+                handler = self.command_handlers.get(command)
+                if handler:
+                    logger.info(f"Found handler for command '{command}' from task {original_task_id}. Executing...")
+                    # Execute the handler
+                    execution_success = handler(message_payload)
+                    if execution_success:
+                        logger.info(f"Handler for command '{command}' from task {original_task_id} completed successfully.")
+                        result_summary = f"Handler '{command}' executed successfully."
+                        # Optionally capture more specific results from handlers if they return it
+                    else:
+                        logger.error(f"Handler for command '{command}' from task {original_task_id} failed.")
+                        error_msg = f"Handler for command '{command}' reported failure."
+                else:
+                    logger.warning(f"No handler found for command '{command}' (from task {original_task_id}) in message {message_path.name}. Moving to error.")
+                    error_msg = f"No handler found for command '{command}'"
+                    execution_success = False 
 
         except json.JSONDecodeError as e:
             logger.error(f"Failed to decode JSON from {message_path.name}: {e}. Moving to error.")
-            return False
+            error_msg = f"JSONDecodeError: {e}"
+            execution_success = False
         except Exception as e:
             logger.error(f"Unexpected error processing message {message_path.name}: {e}", exc_info=True)
-            return False # Move to error dir
+            error_msg = f"Unexpected error: {e}"
+            execution_success = False
+        
+        # --- Update Task Status --- 
+        if original_task_id:
+            final_status = "COMPLETED" if execution_success else "FAILED"
+            logger.info(f"Updating status for original task '{original_task_id}' to '{final_status}'")
+            update_task_status(
+                self.task_list_path, 
+                original_task_id, 
+                final_status, 
+                result_summary=result_summary, 
+                error_message=error_msg
+            )
+        else:
+             logger.error("Cannot update task status because original_task_id was not found in the message.")
+
+        # Return execution_success to determine if file moves to processed/error
+        return execution_success
 
     def start_listening(self):
         """Starts the mailbox listener loop in a separate thread."""
@@ -293,7 +342,12 @@ if __name__ == "__main__":
     print(f"Project Root detected as: {project_root}")
     print(f"Mailbox Root Dir: {mailbox_root}")
 
-    agent = CursorControlAgent(mailbox_root_dir=str(mailbox_root))
+    # Define task list path for the agent
+    task_list_file = project_root / "task_list.json"
+    
+    print(f"Task List Path: {task_list_file}")
+
+    agent = CursorControlAgent(mailbox_root_dir=str(mailbox_root), task_list_path=str(task_list_file))
     agent.start_listening()
 
     try:
