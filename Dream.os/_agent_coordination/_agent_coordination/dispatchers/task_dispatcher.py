@@ -1,19 +1,25 @@
 import json
 import time
 import os
+import uuid
 from pathlib import Path
 import logging
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# Check if handlers are already configured to avoid duplicates if reloaded
+if not logging.getLogger("TaskDispatcher").hasHandlers():
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("TaskDispatcher")
 
 class TaskDispatcher:
-    def __init__(self, task_list_path="task_list.json", check_interval=10):
+    def __init__(self, task_list_path="task_list.json", check_interval=10, mailbox_root_dir="mailboxes"):
         """Initializes the TaskDispatcher."""
         self.task_list_path = Path(task_list_path).resolve()
         self.check_interval = check_interval
-        logger.info(f"TaskDispatcher initialized. Monitoring: {self.task_list_path}")
+        # Define and ensure the root mailbox directory exists relative to task list
+        self.mailbox_root = self.task_list_path.parent / mailbox_root_dir
+        self.mailbox_root.mkdir(parents=True, exist_ok=True)
+        logger.info(f"TaskDispatcher initialized. Monitoring: {self.task_list_path}. Mailbox Root: {self.mailbox_root}")
 
     def _read_tasks(self):
         """Reads the task list from the JSON file."""
@@ -24,19 +30,25 @@ class TaskDispatcher:
                 return []
             
             with self.task_list_path.open("r", encoding="utf-8") as f:
-                # Handle empty file case
-                content = f.read()
+                content = f.read().strip()
                 if not content:
-                    logger.warning(f"Task list file is empty: {self.task_list_path}")
+                    # logger.debug(f"Task list file is empty: {self.task_list_path}")
                     return []
                 tasks = json.loads(content)
                 return tasks
         except json.JSONDecodeError as e:
-            logger.error(f"Error decoding JSON from {self.task_list_path}: {e}")
-            # Consider moving the corrupted file and starting fresh?
+            logger.error(f"Error decoding JSON from {self.task_list_path}: {e}. File content: '{content[:100]}...'")
+            # Optional: Move corrupted file
+            # corrupted_path = self.task_list_path.with_suffix(f".corrupted_{int(time.time())}.json")
+            # try: 
+            #     self.task_list_path.rename(corrupted_path)
+            #     logger.info(f"Moved corrupted task list to {corrupted_path}")
+            #     self.task_list_path.write_text("[]", encoding="utf-8") # Start fresh
+            # except Exception as move_e:
+            #     logger.error(f"Failed to move corrupted task list: {move_e}")
             return [] 
         except Exception as e:
-            logger.error(f"Error reading task list {self.task_list_path}: {e}")
+            logger.error(f"Error reading task list {self.task_list_path}: {e}", exc_info=True)
             return []
 
     def _write_tasks(self, tasks):
@@ -45,125 +57,181 @@ class TaskDispatcher:
             with self.task_list_path.open("w", encoding="utf-8") as f:
                 json.dump(tasks, f, indent=2)
         except Exception as e:
-            logger.error(f"Error writing task list {self.task_list_path}: {e}")
+            logger.error(f"Error writing task list {self.task_list_path}: {e}", exc_info=True)
 
     def _update_task_status(self, task_id, new_status, tasks=None, error_message=None):
         """Updates the status of a specific task in the list and writes back.
            Optionally takes the current task list to avoid re-reading.
         """
         updated = False
+        save_needed = False
         if tasks is None:
              tasks = self._read_tasks()
              
         for task in tasks:
             if task.get("task_id") == task_id:
-                task["status"] = new_status
-                task["timestamp_updated"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-                if error_message:
-                    task["error_message"] = error_message
-                updated = True
+                if task.get("status") != new_status:
+                    task["status"] = new_status
+                    task["timestamp_updated"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+                    if error_message:
+                        task["error_message"] = error_message
+                    elif "error_message" in task: # Clear previous error if status changes
+                        del task["error_message"] 
+                    updated = True
+                    save_needed = True
+                else:
+                    updated = True # Task found, but status already correct
                 break
                 
-        if updated:
+        if save_needed:
             self._write_tasks(tasks)
-        else:
+        elif not updated:
              logger.warning(f"Could not find task {task_id} to update status to {new_status}")
-        return updated
+
+        return updated # Return True if task was found, regardless of whether status changed
+
+    def _dispatch_message_to_agent(self, target_agent: str, message_payload: dict):
+        """Writes a message file to the target agent's inbox."""
+        try:
+            agent_inbox = self.mailbox_root / target_agent / "inbox"
+            agent_inbox.mkdir(parents=True, exist_ok=True)
+            
+            message_id = str(uuid.uuid4())
+            message_filename = f"msg_{message_id}.json"
+            message_path = agent_inbox / message_filename
+
+            # Add standard message envelope fields
+            message_payload["message_id"] = message_id
+            message_payload["sender_agent"] = "TaskDispatcher"
+            message_payload["timestamp_dispatched"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+            with message_path.open("w", encoding="utf-8") as f:
+                json.dump(message_payload, f, indent=2)
+            
+            logger.info(f"Dispatched message {message_id} to agent '{target_agent}' inbox: {message_path}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to dispatch message to agent '{target_agent}': {e}", exc_info=True)
+            return False
 
     def handle_task(self, task):
-        """Handles a single task based on its type and parameters."""
+        """Handles a single task by dispatching a message to the target agent's mailbox."""
         task_id = task.get("task_id", "unknown_task")
         task_type = task.get("task_type", "unknown_type")
         params = task.get("params", {})
-        target_agent = task.get("target_agent", "default") # e.g., 'CursorControlAgent'
+        target_agent = task.get("target_agent") # Expecting this to be set
+        action_keyword = task.get("action") # The original suggested action keyword
+
+        if not target_agent:
+            logger.error(f"Task {task_id} missing 'target_agent'. Cannot dispatch. Marking as FAILED.")
+            return False, "Missing target_agent"
 
         logger.info(f"Handling task {task_id} (Type: {task_type}, Target: {target_agent}) Params: {params}")
 
-        # --- Recovery Task Handling (from StallRecoveryAgent) ---
-        if task_type == "resume_operation":
-            logger.info(f"Dispatching '{task_type}': {params.get('instruction_hint')}")
-            # Placeholder: Send command/prompt to CursorControlAgent (or target_agent)
-            # Example: mailbox_utils.send_message(target_agent, {'command': 'GET_EDITOR_CONTENT', 'params': params})
-            pass 
-        elif task_type == "generate_task":
-            logger.info(f"Dispatching '{task_type}': {params.get('instruction_hint')}")
-            # Placeholder: Trigger a planning agent or log the need for manual intervention
-            pass
-        elif task_type == "diagnose_loop":
-            logger.info(f"Dispatching '{task_type}': {params.get('instruction_hint')}")
-            # Placeholder: Send analysis request to CursorControlAgent or a diagnostic agent
-            pass
-        elif task_type == "confirmation_check":
-            logger.info(f"Dispatching '{task_type}': {params.get('instruction_hint')}")
-            # Placeholder: Send analysis/request to Supervisor or CursorControlAgent
-            pass
-        elif task_type == "context_reload":
-            logger.info(f"Dispatching '{task_type}': {params.get('instruction_hint')}")
-            # Placeholder: Trigger context reload mechanism in target agent
-            pass
-        elif task_type == "clarify_objective":
-            logger.info(f"Dispatching '{task_type}': {params.get('instruction_hint')}")
-            # Placeholder: Generate prompt asking for clarification, potentially target Supervisor
-            pass
-        elif task_type == "generic_recovery":
-             logger.warning(f"Handling generic recovery task {task_id}. Action: {task.get('action')}. Consider defining a specific task_type.")
-             # Placeholder: Basic diagnostic action?
-             pass
-        # --- Add handlers for other task types here ---    
+        # Construct the message payload for the target agent
+        # This becomes the body of the message placed in the agent's mailbox
+        message_payload = {
+            "command": task_type, # Use task_type as the command for the target agent
+            "original_task_id": task_id,
+            "params": params,
+            "action_keyword": action_keyword 
+        }
+
+        # --- Dispatch based on Task Type (using file-based mailbox) ---
+        dispatch_successful = False
+        # Define known task types that require dispatching
+        dispatchable_task_types = [
+            "resume_operation", 
+            "generate_task", 
+            "diagnose_loop", 
+            "confirmation_check", 
+            "context_reload", 
+            "clarify_objective",
+            "generic_recovery",
+            # Add other known, non-recovery task types here
+            # e.g., "run_script", "send_prompt_to_cursor"
+        ]
+
+        if task_type in dispatchable_task_types:
+            logger.info(f"Dispatching task '{task_type}' message to agent '{target_agent}'")
+            dispatch_successful = self._dispatch_message_to_agent(target_agent, message_payload)
         else:
-            logger.warning(f"Unknown task type '{task_type}' for task {task_id}. Skipping.")
-            # Mark as failed or requires manual intervention?
-            # For now, we'll just update status to completed to avoid re-processing unknown types
-            pass 
+            logger.warning(f"Unknown or non-dispatchable task type '{task_type}' for task {task_id}. Marking as FAILED.")
+            return False, f"Unknown/Non-dispatchable task_type: {task_type}"
             
-        # Simulate task completion for now
-        return True, None # success, error_message
+        # Return success based on dispatch attempt
+        if dispatch_successful:
+            logger.info(f"Successfully dispatched task {task_id} message to {target_agent}.")
+            # Mark the task as COMPLETED in the task_list once dispatched.
+            # The target agent is responsible for its own execution status/logging.
+            return True, None 
+        else:
+            logger.error(f"Failed to dispatch task {task_id} message to {target_agent}. Marking as FAILED.")
+            return False, f"Failed to dispatch message to agent {target_agent}"
 
     def process_pending_tasks(self):
         """Reads the task list, processes pending tasks, and updates statuses."""
         logger.debug("Checking for pending tasks...")
         tasks = self._read_tasks()
         if not tasks:
-            logger.debug("Task list is empty or unreadable.")
+            # logger.debug("Task list is empty or unreadable.")
             return
 
-        processed_count = 0
-        pending_tasks = [task for task in tasks if task.get("status") == "PENDING"]
+        processed_ids = set()
+        tasks_to_process = [task for task in tasks if task.get("status") == "PENDING"]
 
-        if not pending_tasks:
-            logger.debug("No pending tasks found.")
+        if not tasks_to_process:
+            # logger.debug("No pending tasks found.")
             return
             
-        logger.info(f"Found {len(pending_tasks)} pending task(s).")
+        logger.info(f"Found {len(tasks_to_process)} pending task(s).")
 
-        # Create a copy to iterate over while modifying the original list implicitly via _update_task_status
-        tasks_to_process = list(pending_tasks) 
+        # We re-read the tasks inside the loop in case multiple dispatchers run
+        # or to get the most recent status before processing. 
+        # Alternatively, lock the file during processing.
 
         for task in tasks_to_process:
             task_id = task.get("task_id")
             if not task_id:
                  logger.warning(f"Skipping task with no ID: {task}")
                  continue
+            if task_id in processed_ids: # Avoid potential duplicate processing within the same batch
+                 continue
+
+            logger.info(f"Attempting to process task: {task_id}")
             
-            logger.info(f"Processing task: {task_id}")
-            # Update status to PROCESSING immediately to prevent reprocessing by other dispatchers (if any)
-            if not self._update_task_status(task_id, "PROCESSING", tasks=tasks):
-                 logger.warning(f"Failed to update task {task_id} status to PROCESSING. Skipping.")
+            # --- Read tasks again and check status just before processing --- 
+            current_tasks = self._read_tasks()
+            current_task_state = next((t for t in current_tasks if t.get("task_id") == task_id), None)
+
+            if not current_task_state:
+                logger.warning(f"Task {task_id} disappeared before processing could start. Skipping.")
+                continue
+            if current_task_state.get("status") != "PENDING":
+                logger.info(f"Task {task_id} status changed to {current_task_state.get('status')} before processing could start. Skipping.")
+                continue
+            # --- End Pre-check ---
+
+            # Update status to PROCESSING immediately
+            if not self._update_task_status(task_id, "PROCESSING", tasks=current_tasks):
+                 logger.warning(f"Failed to update task {task_id} status to PROCESSING. Skipping. Another process might have grabbed it.")
                  continue # Skip if we couldn't update status
 
             try:
-                success, error_msg = self.handle_task(task)
+                success, error_msg = self.handle_task(current_task_state) # Pass the confirmed current state
                 new_status = "COMPLETED" if success else "FAILED"
-                self._update_task_status(task_id, new_status, tasks=tasks, error_message=error_msg)
-                logger.info(f"Task {task_id} finished with status: {new_status}")
-                processed_count += 1
+                # Update status based on handle_task outcome
+                self._update_task_status(task_id, new_status, error_message=error_msg)
+                logger.info(f"Task {task_id} finished dispatch with status: {new_status}")
+                processed_ids.add(task_id)
             except Exception as e:
                 logger.error(f"Critical error handling task {task_id}: {e}", exc_info=True)
-                self._update_task_status(task_id, "FAILED", tasks=tasks, error_message=str(e))
-                processed_count += 1 # Count as processed (failed)
+                # Attempt to mark as FAILED
+                self._update_task_status(task_id, "FAILED", error_message=str(e))
+                processed_ids.add(task_id) 
 
-        if processed_count > 0:
-             logger.info(f"Finished processing batch of {processed_count} task(s).")
+        if processed_ids:
+             logger.info(f"Finished processing batch. {len(processed_ids)} task(s) attempted.")
         
     def run(self):
         """Main loop to periodically check and process tasks."""
@@ -171,7 +239,7 @@ class TaskDispatcher:
         try:
             while True:
                 self.process_pending_tasks()
-                logger.debug(f"Sleeping for {self.check_interval} seconds...")
+                # logger.debug(f"Sleeping for {self.check_interval} seconds...")
                 time.sleep(self.check_interval)
         except KeyboardInterrupt:
             logger.info("TaskDispatcher stopped by user.")
@@ -180,15 +248,23 @@ class TaskDispatcher:
 
 # Example instantiation (if run directly)
 if __name__ == "__main__":
-    # Assumes task_list.json is in the current working directory or project root
-    # You might need to adjust the path based on where this script is run from
-    project_root = Path(__file__).parent.parent.parent # Adjust based on actual nesting
-    task_list_file = project_root / "task_list.json"
+    # Determine project root relative to this script's location
+    # Assumes script is in _agent_coordination/dispatchers/
+    script_dir = Path(__file__).parent
+    project_root = script_dir.parent.parent # Go up two levels
     
-    if not task_list_file.exists():
+    task_list_file = project_root / "task_list.json"
+    mailbox_dir = project_root / "mailboxes"
+    
+    print(f"Project Root detected as: {project_root}")
+    print(f"Task List Path: {task_list_file}")
+    print(f"Mailbox Root Dir: {mailbox_dir}")
+
+    # Ensure task list exists before starting
+    if not task_list_file.is_file():
         print(f"WARNING: Task list {task_list_file} not found. Creating empty file.")
-        task_list_file.parent.mkdir(parents=True, exist_ok=True)
+        task_list_file.parent.mkdir(parents=True, exist_ok=True) # Ensure parent dir exists
         task_list_file.write_text("[]", encoding="utf-8")
         
-    dispatcher = TaskDispatcher(task_list_path=str(task_list_file))
+    dispatcher = TaskDispatcher(task_list_path=str(task_list_file), mailbox_root_dir=str(mailbox_dir))
     dispatcher.run() 
