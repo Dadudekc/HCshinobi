@@ -23,6 +23,7 @@ from agents.cursor_control_agent import CursorControlAgent
 from agents.task_executor_agent import TaskExecutorAgent, DEFAULT_TASK_LIST_PATH, TaskStatus
 from agents.agent_monitor_agent import AgentMonitorAgent, DEFAULT_LOG_PATH
 from agents.prompt_feedback_loop_agent import PromptFeedbackLoopAgent
+from agents.task_injector import TaskInjector
 
 # Setup Logging
 log_format = '%(asctime)s - %(threadName)s - %(levelname)s - %(name)s - %(message)s'
@@ -111,6 +112,7 @@ def main():
     run_dir = os.path.join(project_root, "run")
     mailbox_dir = os.path.join(run_dir, "mailboxes")
     task_list_path = os.path.join(project_root, DEFAULT_TASK_LIST_PATH)
+    input_tasks_path = os.path.join(run_dir, "input_tasks.jsonl") # File to watch for new tasks
     log_dir = os.path.join(run_dir, "logs")
     monitor_log_path = os.path.join(log_dir, os.path.basename(DEFAULT_LOG_PATH))
     status_dir = os.path.join(run_dir, "status") # For status files
@@ -122,6 +124,9 @@ def main():
     if not setup_task_list(task_list_path):
         logger.error("Failed to set up task list. Exiting.")
         return 1
+
+    # Create shared lock for task list access
+    task_list_lock = threading.Lock()
 
     # --- Initialization ---
     try:
@@ -144,12 +149,16 @@ def main():
         # Monitor agent currently has no background thread, processes messages via main loop polling
 
         logger.info("Initializing TaskExecutorAgent...")
-        task_executor = TaskExecutorAgent(agent_bus=bus, task_list_path=task_list_path)
+        task_executor = TaskExecutorAgent(agent_bus=bus, task_list_path=task_list_path, task_list_lock=task_list_lock)
         global_agents.append(task_executor)
 
         logger.info("Initializing PromptFeedbackLoopAgent...")
-        feedback_agent = PromptFeedbackLoopAgent(agent_bus=bus, task_list_path=task_list_path)
+        feedback_agent = PromptFeedbackLoopAgent(agent_bus=bus, task_list_path=task_list_path, task_list_lock=task_list_lock)
         global_agents.append(feedback_agent)
+
+        logger.info("Initializing TaskInjector...")
+        task_injector = TaskInjector(task_list_path=task_list_path, input_task_file_path=input_tasks_path, task_list_lock=task_list_lock)
+        global_agents.append(task_injector)
 
     except Exception as e:
         logger.error(f"Fatal error during agent initialization: {e}", exc_info=True)
@@ -161,6 +170,7 @@ def main():
     logger.info("Starting agent background threads...")
     task_executor.start() # Start the executor's loop
     feedback_agent.start() # Start the feedback loop's monitoring thread
+    task_injector.start() # Start the injector's file watching thread
     # CursorControlAgent currently processes messages directly when bus.process_messages is called,
     # but could be made multi-threaded if needed.
 
@@ -204,6 +214,9 @@ def main():
     
     if 'feedback_agent' in locals() and feedback_agent in global_agents:
         feedback_agent.stop()
+    
+    if 'task_injector' in locals() and task_injector in global_agents:
+        task_injector.stop()
     
     # Call shutdown on cursor_agent to potentially close the app
     if 'cursor_agent' in locals() and cursor_agent in global_agents:

@@ -48,20 +48,22 @@ class TaskStatus:
 class TaskExecutorAgent:
     """Reads tasks from a file and dispatches them via the AgentBus."""
 
-    def __init__(self, agent_bus: AgentBus, task_list_path: str = DEFAULT_TASK_LIST_PATH):
+    def __init__(self, agent_bus: AgentBus, task_list_path: str = DEFAULT_TASK_LIST_PATH, task_list_lock: Optional[threading.Lock] = None):
         """
         Initializes the task executor.
 
         Args:
             agent_bus: The central AgentBus instance.
             task_list_path: Path to the JSON file containing the task list.
+            task_list_lock: A threading.Lock() object for synchronizing access to task_list.json.
         """
         self.agent_name = AGENT_NAME
         self.bus = agent_bus
         self.task_list_path = os.path.abspath(task_list_path)
         self._stop_event = threading.Event()
         self._thread: Optional[threading.Thread] = None
-        self._lock = threading.Lock() # Lock for accessing/modifying task list file
+        # Use provided lock or create one if not given (for standalone use/testing)
+        self._lock = task_list_lock if task_list_lock else threading.Lock()
 
         # Ensure task list file exists
         if not os.path.exists(self.task_list_path):

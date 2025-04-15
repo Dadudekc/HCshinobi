@@ -43,20 +43,21 @@ MAX_REPAIR_ATTEMPTS = 1 # Limit repair attempts per failed task
 class PromptFeedbackLoopAgent:
     """Monitors for failed tasks and injects repair/diagnostic tasks."""
 
-    def __init__(self, agent_bus: AgentBus, task_list_path: str = DEFAULT_TASK_LIST_PATH):
+    def __init__(self, agent_bus: AgentBus, task_list_path: str = DEFAULT_TASK_LIST_PATH, task_list_lock: Optional[threading.Lock] = None):
         """
         Initializes the feedback loop agent.
 
         Args:
             agent_bus: The central AgentBus instance.
             task_list_path: Path to the JSON file containing the task list.
+            task_list_lock: A shared threading.Lock() for task list access.
         """
         self.agent_name = AGENT_NAME
         self.bus = agent_bus
         self.task_list_path = os.path.abspath(task_list_path)
         self._stop_event = threading.Event()
         self._thread: Optional[threading.Thread] = None
-        self._lock = threading.Lock() # Lock for task list access
+        self._lock = task_list_lock if task_list_lock else threading.Lock()
 
         # Ensure task list file exists (though TaskExecutorAgent likely creates it)
         if not os.path.exists(self.task_list_path):
