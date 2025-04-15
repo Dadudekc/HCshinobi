@@ -65,16 +65,48 @@ class StallRecoveryAgent:
             print(f"[StallRecovery] Failed to log stall event: {e}")
 
     def dispatch_recovery_task(self, context: dict):
-        """Generates and appends a recovery task to task_list.json."""
+        """Generates and appends a recovery task to task_list.json with dynamic parameters."""
         task_list_path = self.project_root / "task_list.json"
-        task_id = f"recovery_{context['stall_category'].lower()}_{int(time.time())}"
+        stall_category = context.get("stall_category", "UNCATEGORIZED")
+        task_id = f"recovery_{stall_category.lower()}_{int(time.time())}"
+        
+        # Determine task_type and base params based on category
+        task_type = "generic_recovery"
+        params = {
+            "stall_category": stall_category,
+            "relevant_files": context.get("relevant_files", [])[:3], # Limit for brevity in task
+            "recovery_intent": context.get("suggested_action_keyword", "Perform general diagnostics.")
+        }
+        target_agent = "CursorControlAgent" # Default target
+
+        if stall_category == "NO_INPUT":
+            task_type = "resume_operation"
+            params["instruction_hint"] = "Check editor state or task list for next action."
+        elif stall_category == "NEEDS_TASKS":
+            task_type = "generate_task"
+            params["instruction_hint"] = "Review project goals and define the next logical task."
+        elif stall_category == "LOOP_BREAK":
+            task_type = "diagnose_loop"
+            params["instruction_hint"] = "Analyze recent actions/logs for repetitive patterns and suggest a fix."
+        elif stall_category == "AWAIT_CONFIRM":
+            task_type = "confirmation_check"
+            params["instruction_hint"] = "Analyze state for safety, proceed if clear, otherwise summarize confirmation needed."
+            # Potentially target a Supervisor agent here later
+        elif stall_category == "MISSING_CONTEXT":
+            task_type = "context_reload"
+            params["instruction_hint"] = "Attempt to reload relevant context files or project state."
+        elif stall_category == "UNCLEAR_OBJECTIVE":
+            task_type = "clarify_objective"
+            params["instruction_hint"] = "Review high-level goals or request clarification."
+        # Add more specific types and params as needed
+
         new_task = {
             "task_id": task_id,
             "status": "PENDING",
-            # Using suggested_action_keyword as per user spec, might need refinement later
+            "task_type": task_type, # Added task type
             "action": context.get("suggested_action_keyword", "Perform general diagnostics."), 
-            "params": {},  # Add dynamic params based on category if needed
-            "target_agent": "CursorControlAgent", # Or determine dynamically?
+            "params": params,  # Now includes dynamic params
+            "target_agent": target_agent, # Still default, but defined
             "timestamp_created": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         }
 
