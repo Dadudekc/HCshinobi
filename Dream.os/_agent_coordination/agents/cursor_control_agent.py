@@ -66,6 +66,24 @@ except ImportError as e:
         def is_busy(self):
              return False
 
+# --- Import Cursor Prompt Controller --- 
+try:
+    # Adjust relative import (agents -> _agent_coordination/ui_controllers)
+    from .._agent_coordination.ui_controllers.cursor_prompt_controller import CursorPromptController
+except ImportError:
+     try:
+        # Fallback if running directly
+        sys.path.append(str(Path(__file__).parent.parent))
+        from _agent_coordination.ui_controllers.cursor_prompt_controller import CursorPromptController
+     except ImportError as e:
+        print(f"Error: Could not import CursorPromptController. Prompt sending disabled. {e}")
+        # Define a dummy class if import fails
+        class CursorPromptController:
+            def send_prompt_to_chat(self, prompt: str) -> bool:
+                logger = logging.getLogger("CursorControlAgent") # Get logger
+                logger.warning(f"[DummyPromptController] Would send prompt: {prompt[:100]}...")
+                return False # Indicate failure as it's a dummy
+
 # --- Configure Logging --- 
 # (Existing logging setup)
 if not logging.getLogger("CursorControlAgent").hasHandlers():
@@ -88,6 +106,7 @@ class CursorControlAgent:
         self.error_dir.mkdir(parents=True, exist_ok=True)
         
         self.cursor_controller = CursorTerminalController() # Instantiate the REAL controller
+        self.prompt_controller = CursorPromptController() # Instantiate prompt controller
         self.stop_event = threading.Event()
         self.listener_thread = None
 
@@ -97,7 +116,7 @@ class CursorControlAgent:
             "diagnose_loop": self._handle_diagnose_loop, 
             "confirmation_check": self._handle_confirmation_check, # Still placeholder-ish
             "context_reload": self._handle_context_reload, # Needs concrete command
-            "clarify_objective": self._handle_clarify_objective, # Logs prompt intent
+            "clarify_objective": self._handle_clarify_objective, # Will now use prompt_controller
             "generic_recovery": self._handle_generic_recovery, 
             # Add other command handlers here
             # e.g., "run_terminal_command": self._handle_run_terminal_command
@@ -194,7 +213,7 @@ class CursorControlAgent:
         return success
         
     def _handle_clarify_objective(self, message_payload: dict) -> bool:
-        """Logs the clarification prompt that *should* be sent."""
+        """Generates and attempts to send a clarification prompt via UI automation."""
         params = message_payload.get("params", {})
         logger.info(f"Handling 'clarify_objective'. Params: {params}")
         hint = params.get("instruction_hint", "Objective unclear.")
@@ -202,11 +221,18 @@ class CursorControlAgent:
         context_str = f"Relevant files: {relevant_files}. " if relevant_files else ""
         prompt = f"Agent stalled due to unclear objective. {context_str}Instruction hint: {hint}. Please provide a clearer next step or goal."
         
-        # Log the prompt - cannot send directly with current controller
-        logger.info(f"INTENDED PROMPT (cannot send directly): {prompt}")
-        # We return True because the task *was* handled (by logging intent), 
-        # even if the ideal action couldn't be performed by this controller.
-        return True 
+        logger.info(f"Attempting to send clarification prompt via UI controller...")
+        # Use the prompt controller to send the prompt
+        success = self.prompt_controller.send_prompt_to_chat(prompt)
+        
+        if success:
+            logger.info("Clarification prompt sent successfully via UI controller.")
+        else:
+            logger.error("Failed to send clarification prompt via UI controller.")
+            # Consider fallback? Log to file? For now, just report failure.
+
+        # Return success/failure of the UI automation attempt
+        return success 
         
     def _handle_generic_recovery(self, message_payload: dict) -> bool:
         """Runs a generic recovery script."""
