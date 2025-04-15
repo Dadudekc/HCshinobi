@@ -1,0 +1,394 @@
+# Agent Worker Loop for Agent {agent_id} ({domain_name})
+# This file defines the core worker process for the agent.
+
+import asyncio
+import json
+import logging
+import os
+import sys
+import time
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+# Ensure core modules are importable
+# Adjust the path as necessary based on your project structure
+SCRIPT_DIR = Path(__file__).resolve().parent
+CORE_DIR = SCRIPT_DIR.parent.parent / 'core'
+sys.path.append(str(CORE_DIR.parent)) # Add project root to path
+
+try:
+    # Assuming core components are accessible via adjusted path
+    from core.agent_bus import agent_bus, AgentStatus, Event, EventType
+    from core.communication.message import Message
+    from core.coordination.task import Task, TaskStatus
+    from core.enums.agent_domain import AgentDomain # Ensure this import exists
+    # from core.memory.memory_manager import memory_manager # If needed
+    # from core.llm.llm_service import LLMService # If needed
+except ImportError as e:
+    print(f"Error importing core modules: {{{{e}}}}. Ensure PYTHONPATH is set or structure is correct.")
+    sys.exit(1)
+
+# --- Configuration ---
+AGENT_ID = "{agent_id}"
+AGENT_DOMAIN = AgentDomain.{domain_enum_name}
+AGENT_CAPABILITIES = {capabilities_list_str}
+INITIAL_STATUS = AgentStatus.IDLE
+HEARTBEAT_INTERVAL = 30 # Seconds
+MAX_CONCURRENT_TASKS = 1
+
+# --- Setup Logging ---
+LOG_DIR = Path("logs")
+LOG_DIR.mkdir(exist_ok=True)
+log_path = LOG_DIR / f"agent_{{{{AGENT_ID}}}}.log"
+
+logging.basicConfig(
+    level=logging.DEBUG, # Adjust log level as needed (DEBUG, INFO, WARNING)
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(log_path),
+        logging.StreamHandler(sys.stdout) # Also log to console
+    ]
+)
+logger = logging.getLogger(f"AgentWorker_{{{{AGENT_ID}}}}")
+
+# --- Agent Worker Class ---
+class AgentWorker:
+    """Manages the lifecycle and task execution for Agent {agent_id}."""
+
+    def __init__(self):
+        self.agent_id: str = AGENT_ID
+        self.domain: AgentDomain = AGENT_DOMAIN
+        self.capabilities: List[str] = AGENT_CAPABILITIES
+        self.status: AgentStatus = INITIAL_STATUS
+        self.current_task_id: Optional[str] = None
+        self.task_queue: asyncio.Queue = asyncio.Queue(maxsize=MAX_CONCURRENT_TASKS)
+        self.running: bool = False
+        self.shutdown_requested: bool = False
+        # self.llm_service = LLMService() # Optional: Initialize LLM if needed
+        logger.info(f"AgentWorker {{{{self.agent_id}}}} initialized with domain {{{{self.domain}}}}.")
+
+    async def _register_with_bus(self) -> bool:
+        """Registers the agent with the AgentBus."""
+        logger.info(f"Attempting to register Agent {{{{self.agent_id}}}} with AgentBus...")
+        try:
+            await agent_bus.register_agent(self.agent_id, self.domain, self.capabilities, self._handle_message)
+            self.status = AgentStatus.IDLE
+            logger.info(f"Agent {{{{self.agent_id}}}} successfully registered and is IDLE.")
+            await self._send_event(EventType.SYSTEM, {{"status": "registered", "agent_id": self.agent_id}})
+            return True
+        except Exception as e:
+            logger.error(f"Failed to register Agent {{{{self.agent_id}}}} with AgentBus: {{{{e}}}}", exc_info=True)
+            self.status = AgentStatus.OFFLINE
+            return False
+
+    async def _deregister_from_bus(self) -> None:
+        """Deregisters the agent from the AgentBus."""
+        logger.info(f"Deregistering Agent {{{{self.agent_id}}}} from AgentBus...")
+        try:
+            await agent_bus.deregister_agent(self.agent_id)
+            self.status = AgentStatus.OFFLINE
+            logger.info(f"Agent {{{{self.agent_id}}}} successfully deregistered.")
+            await self._send_event(EventType.SYSTEM, {{"status": "deregistered", "agent_id": self.agent_id}})
+        except Exception as e:
+            logger.error(f"Error deregistering Agent {{{{self.agent_id}}}}: {{{{e}}}}", exc_info=True)
+
+    async def _send_heartbeat(self) -> None:
+        """Sends periodic heartbeats to the AgentBus."""
+        while self.running and not self.shutdown_requested:
+            try:
+                payload = {{
+                    "agent_id": self.agent_id,
+                    "status": self.status.value,
+                    "timestamp": time.time(),
+                    "current_task_id": self.current_task_id,
+                    # Add other relevant metrics like queue size, memory usage etc.
+                    "task_queue_size": self.task_queue.qsize()
+                }}
+                await self._send_event(EventType.HEARTBEAT, payload)
+                logger.debug(f"Heartbeat sent for Agent {{{{self.agent_id}}}} (Status: {{{{self.status.name}}}})")
+            except Exception as e:
+                logger.error(f"Failed to send heartbeat for Agent {{{{self.agent_id}}}}: {{{{e}}}}", exc_info=True)
+            await asyncio.sleep(HEARTBEAT_INTERVAL)
+
+    async def _send_event(self, event_type: EventType, payload: Dict[str, Any]) -> None:
+        """Sends an event to the AgentBus."""
+        event = Event(event_type=event_type, source_agent_id=self.agent_id, payload=payload)
+        try:
+            await agent_bus.publish_event(event)
+        except Exception as e:
+            logger.error(f"Failed to send event {{{{event_type.name}}}} from Agent {{{{self.agent_id}}}}: {{{{e}}}}", exc_info=True)
+
+    async def _update_status_on_bus(self, status: AgentStatus, task_id: Optional[str] = None) -> None:
+        """Updates the agent's status on the AgentBus."""
+        self.status = status
+        self.current_task_id = task_id
+        logger.info(f"Agent {{{{self.agent_id}}}} status updated to: {{{{status.name}}}}")
+        # Optionally send a status update event
+        await self._send_event(EventType.STATUS_UPDATE, {{
+            "agent_id": self.agent_id,
+            "status": self.status.value,
+            "current_task_id": self.current_task_id
+        }})
+
+    async def _handle_message(self, message: Message) -> None:
+        """Callback function to handle messages received from the AgentBus."""
+        logger.debug(f"Agent {{{{self.agent_id}}}} received message: {{{{message.message_type}}}} from {{{{message.sender_id}}}}")
+        # Example: Handle different message types
+        if message.message_type == "task_assignment":
+            task_data = message.payload.get("task")
+            if task_data:
+                logger.info(f"Received task assignment: {{{{task_data.get('task_id')}}}}")
+                await self._add_task(task_data)
+        elif message.message_type == "command":
+            command = message.payload.get("command")
+            if command == "status_query":
+                # Respond with status (implementation needed)
+                logger.info("Received status query command.")
+            elif command == "shutdown_signal": # Specific signal for shutdown
+                logger.warning(f"Received external shutdown signal for Agent {{{{self.agent_id}}}}.")
+                self.shutdown_requested = True
+        elif message.message_type == "shutdown_directive": # From AgentBus coordination
+            phase = message.payload.get("directive", {{}}).get("phase")
+            logger.info(f"Received shutdown directive for phase: {{{{phase}}}}")
+            if phase == "preparation":
+                # Stop accepting new tasks, prepare for state saving
+                self.shutdown_requested = True
+                logger.info(f"Agent {{{{self.agent_id}}}} entering shutdown preparation phase.")
+                # Finish current task if possible within a short timeframe
+            elif phase == "state_persistence":
+                # Save state (tasks, memory, etc.)
+                logger.info(f"Agent {{{{self.agent_id}}}} entering state persistence phase.")
+                await self._persist_state()
+            elif phase == "cleanup":
+                # Release resources, connections
+                logger.info(f"Agent {{{{self.agent_id}}}} entering cleanup phase.")
+                await self._cleanup_resources()
+            elif phase == "final_broadcast":
+                 logger.info(f"Agent {{{{self.agent_id}}}} acknowledging final broadcast. Ready to terminate.")
+                 # Final confirmation sent by AgentBus implicitly via readiness checks
+            # Acknowledge receipt/completion of phase (important for coordination)
+            await agent_bus.acknowledge_shutdown_phase(self.agent_id, phase)
+        else:
+            logger.warning(f"Unhandled message type: {{{{message.message_type}}}}")
+
+    async def _add_task(self, task_data: Dict) -> None:
+        """Adds a task to the agent's queue."""
+        if self.shutdown_requested:
+            logger.warning(f"Shutdown requested, rejecting new task: {{{{task_data.get('task_id')}}}}")
+            # Optionally notify requester or AgentBus about rejection
+            return
+        try:
+            # You might want to validate task_data or create a Task object here
+            task = Task(**task_data) # Assuming Task can be created from dict
+            await self.task_queue.put(task)
+            logger.info(f"Task {{{{task.task_id}}}} added to queue (Queue size: {{{{self.task_queue.qsize()}}}}).")
+            await self._send_event(EventType.TASK, {{
+                "type": "task_queued",
+                "task_id": task.task_id,
+                "agent_id": self.agent_id
+            }})
+        except asyncio.QueueFull:
+            logger.error(f"Task queue full. Cannot add task {{{{task_data.get('task_id')}}}}.")
+            # Handle queue full scenario (e.g., reject task, notify)
+        except Exception as e:
+            logger.error(f"Error adding task {{{{task_data.get('task_id')}}}} to queue: {{{{e}}}}", exc_info=True)
+
+    async def _process_tasks(self) -> None:
+        """Continuously processes tasks from the queue."""
+        while self.running:
+            if self.shutdown_requested and self.task_queue.empty():
+                logger.info("Shutdown requested and task queue empty. Exiting task processing loop.")
+                break
+            try:
+                task: Task = await asyncio.wait_for(self.task_queue.get(), timeout=1.0)
+                logger.info(f"Dequeued task: {{{{task.task_id}}}}")
+                await self._update_status_on_bus(AgentStatus.BUSY, task_id=task.task_id)
+                await self._execute_task(task)
+                self.task_queue.task_done()
+                logger.info(f"Finished processing task: {{{{task.task_id}}}}")
+                # Reset status only if not shutting down or if queue is empty
+                if not self.shutdown_requested or self.task_queue.empty():
+                     await self._update_status_on_bus(AgentStatus.IDLE)
+                else:
+                    logger.info(f"Shutdown in progress, maintaining BUSY status until queue clear or timeout.")
+
+            except asyncio.TimeoutError:
+                # No task in queue, continue loop
+                continue
+            except Exception as e:
+                logger.error(f"Error processing task queue: {{{{e}}}}", exc_info=True)
+                # Decide if agent should go into an error state
+                await self._update_status_on_bus(AgentStatus.ERROR)
+                await asyncio.sleep(5) # Avoid rapid error looping
+
+            # Small sleep to prevent tight loop if queue is empty
+            await asyncio.sleep(0.1)
+
+    async def _execute_task(self, task: Task) -> None:
+        """Executes a single task."""
+        task_id = task.task_id
+        description = task.description
+        task_type = task.task_type
+        params = task.params
+
+        logger.info(f"Executing task: {{{{task_id}}}} - {{{{description}}}}")
+        start_time = time.time()
+        success = False
+        result_data = {{}}
+
+        try:
+            # --- Task Execution Logic ---
+            # Replace this block with domain-specific logic for the agent
+            logger.info(f"[{self.domain.name}] Task Type: {{{{task_type}}}}, Params: {{{{params}}}}")
+
+            # Example: Simple task simulation
+            await asyncio.sleep(2) # Simulate work
+            result_data = {{"status": "completed", "detail": f"Task {{{{task_id}}}} processed."}}
+            success = True
+            # --- End Task Execution Logic ---
+
+        except Exception as e:
+            logger.error(f"Error executing task {{{{task_id}}}}: {{{{e}}}}", exc_info=True)
+            result_data = {{"status": "failed", "error": str(e)}}
+            success = False
+        finally:
+            duration = time.time() - start_time
+            logger.info(f"Task {{{{task_id}}}} execution {'succeeded' if success else 'failed'}} in {{{{duration:.2f}}}} seconds.")
+            # Send task result event
+            await self._send_event(EventType.TASK, {{
+                "type": "task_result",
+                "task_id": task_id,
+                "agent_id": self.agent_id,
+                "success": success,
+                "duration_seconds": duration,
+                "result": result_data
+            }})
+
+    async def _persist_state(self) -> None:
+        """Saves the agent's current state before shutdown."""
+        logger.info(f"Persisting state for Agent {{{{self.agent_id}}}}...")
+        try:
+            state = {{
+                "agent_id": self.agent_id,
+                "status": self.status.value,
+                "current_task_id": self.current_task_id,
+                "task_queue": [t.to_dict() for t in list(self.task_queue._queue)], # Save pending tasks
+                # Add other relevant state, e.g., memory snapshot
+                "timestamp": time.time()
+            }}
+            # Define where to save the state (e.g., a file)
+            state_file = Path(f"state/agent_{{{{self.agent_id}}}}_state.json")
+            state_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(state_file, 'w') as f:
+                json.dump(state, f, indent=4)
+            logger.info(f"Agent {{{{self.agent_id}}}} state successfully persisted to {{{{state_file}}}}")
+        except Exception as e:
+            logger.error(f"Failed to persist state for Agent {{{{self.agent_id}}}}: {{{{e}}}}", exc_info=True)
+            # This is critical during shutdown, may need escalation or specific handling
+
+    async def _cleanup_resources(self) -> None:
+        """Releases any resources held by the agent."""
+        logger.info(f"Cleaning up resources for Agent {{{{self.agent_id}}}}...")
+        try:
+            # Example: Close network connections, files, subprocesses
+            # if hasattr(self, 'llm_service') and hasattr(self.llm_service, 'close'):
+            #     await self.llm_service.close()
+            # logger.info("LLM service connection closed.")
+
+            # Clear any sensitive data from memory if necessary
+            # ...
+
+            logger.info(f"Resource cleanup completed for Agent {{{{self.agent_id}}}}.")
+        except Exception as e:
+            logger.error(f"Error during resource cleanup for Agent {{{{self.agent_id}}}}: {{{{e}}}}", exc_info=True)
+
+
+    async def start(self) -> None:
+        """Starts the agent worker loop."""
+        self.running = True
+        logger.info(f"Starting Agent Worker {{{{self.agent_id}}}}...")
+
+        if not await self._register_with_bus():
+            self.running = False
+            logger.critical(f"Agent {{{{self.agent_id}}}} failed to register. Shutting down.")
+            return
+
+        # Start background tasks like heartbeat
+        heartbeat_task = asyncio.create_task(self._send_heartbeat())
+        # Start the main task processing loop
+        process_task = asyncio.create_task(self._process_tasks())
+
+        logger.info(f"Agent Worker {{{{self.agent_id}}}} started successfully and is listening for tasks.")
+
+        # Keep running until shutdown is requested
+        while self.running and not self.shutdown_requested:
+            await asyncio.sleep(1)
+
+        # --- Shutdown Sequence ---
+        logger.warning(f"Shutdown sequence initiated for Agent {{{{self.agent_id}}}}...")
+
+        # Stop accepting new tasks (already handled by setting self.shutdown_requested)
+        # Wait for task processing to finish (or timeout)
+        logger.info("Waiting for active task processing to complete...")
+        try:
+            # Give some time for the _process_tasks loop to exit gracefully
+            await asyncio.wait_for(process_task, timeout=HEARTBEAT_INTERVAL * 2)
+        except asyncio.TimeoutError:
+            logger.error("Timeout waiting for task processing loop to finish. Tasks might be interrupted.")
+        except Exception as e:
+             logger.error(f"Error during task processing shutdown wait: {{{{e}}}}", exc_info=True)
+
+
+        # If shutdown wasn't initiated by AgentBus directive, perform local shutdown steps
+        if not agent_bus.is_shutdown_initiated(): # Check if bus coordinated shutdown
+            logger.info("Performing local shutdown persistence and cleanup...")
+            await self._persist_state()
+            await self._cleanup_resources()
+
+        # Deregister from AgentBus (only if not part of coordinated shutdown final phase)
+        # AgentBus handles deregistration implicitly during its coordinated shutdown verification
+        if not agent_bus.is_shutdown_initiated():
+            await self._deregister_from_bus()
+        else:
+             logger.info("Skipping explicit deregistration as part of coordinated shutdown.")
+
+        self.running = False
+        logger.info(f"Agent Worker {{{{self.agent_id}}}} has stopped.")
+
+    def stop(self) -> None:
+        """Requests the agent worker to stop."""
+        logger.warning(f"Stop requested for Agent Worker {{{{self.agent_id}}}}.")
+        self.shutdown_requested = True
+        # Note: Actual stopping logic is handled within the start() loop
+
+# --- Main Execution ---
+async def main():
+    """Main function to initialize and run the agent worker."""
+    worker = AgentWorker()
+    try:
+        # Register signal handlers for graceful shutdown (optional but recommended)
+        # We need to import signal module here if it's not imported globally
+        import signal
+        loop = asyncio.get_running_loop()
+        for sig in (signal.SIGINT, signal.SIGTERM):
+            loop.add_signal_handler(sig, worker.stop)
+        except NotImplementedError:
+             # Signal handlers may not be available on all platforms (e.g., Windows)
+             logger.warning("Signal handlers for SIGINT/SIGTERM not available on this platform.")
+
+        await worker.start()
+    except Exception as e:
+        logger.critical(f"Critical error in AgentWorker {{{{AGENT_ID}}}}: {{{{e}}}}", exc_info=True)
+    finally:
+        logger.info(f"AgentWorker {{{{AGENT_ID}}}} main loop finished.")
+
+if __name__ == "__main__":
+    # Import signal here if needed for main execution context
+    import signal
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logger.info(f"AgentWorker {{{{AGENT_ID}}}} interrupted by user.")
+    except Exception as e:
+        logger.critical(f"Unhandled exception in main execution: {{{{e}}}}", exc_info=True)
+        sys.exit(1) 

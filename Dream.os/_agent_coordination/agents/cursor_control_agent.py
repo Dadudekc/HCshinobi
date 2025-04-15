@@ -114,16 +114,16 @@ class CursorControlAgent:
             "resume_operation": self._handle_resume_operation,
             "generate_task": self._handle_generate_task, 
             "diagnose_loop": self._handle_diagnose_loop, 
-            "confirmation_check": self._handle_confirmation_check, # Still placeholder-ish
-            "context_reload": self._handle_context_reload, # Needs concrete command
-            "clarify_objective": self._handle_clarify_objective, # Will now use prompt_controller
-            "generic_recovery": self._handle_generic_recovery, 
+            "confirmation_check": self._handle_confirmation_check, # NOW REAL
+            "context_reload": self._handle_context_reload, # NOW REAL
+            "clarify_objective": self._handle_clarify_objective, 
+            "generic_recovery": self._handle_generic_recovery, # NOW REAL
             # Add other command handlers here
             # e.g., "run_terminal_command": self._handle_run_terminal_command
         }
         logger.info(f"{self.AGENT_NAME} initialized. Monitoring inbox: {self.inbox_dir}. Using: {type(self.cursor_controller).__name__}. Task List: {self.task_list_path}")
 
-    # --- Command Handlers (Updated for Real Controller) ---
+    # --- Command Handlers (Updated for Real Controller & Tools) ---
     def _handle_resume_operation(self, message_payload: dict) -> bool:
         """Attempt to resume by running a status check or default command."""
         params = message_payload.get("params", {})
@@ -193,20 +193,27 @@ class CursorControlAgent:
         return success # Return success of the command execution
 
     def _handle_confirmation_check(self, message_payload: dict) -> bool:
-        params = message_payload.get('params')
+        params = message_payload.get('params', {})
         logger.info(f"Handling 'confirmation_check'. Params: {params}")
-        # Placeholder: Requires a command/script to analyze state. Example:
-        command = "python tools/check_confirmation_state.py"
+        # Execute the dedicated tool script
+        command = "python tools/check_confirmation_state.py" 
+        # Add params from message if needed by script, e.g.:
+        # context_file = params.get('context_file')
+        # if context_file: command += f" --context-file {context_file}" 
+        
         success = self.cursor_controller.run_command(command, wait_for_completion=True)
-        output = self.cursor_controller.get_output(max_lines=10)
-        logger.info(f"Confirmation check command '{command}' success: {success}. Output: {output}")
-        return success
+        output = self.cursor_controller.get_output(max_lines=10) # Get output/result from script
+        logger.info(f"Confirmation check command '{command}' success (script exited 0?): {success}. Output: {output}")
+        # Script uses exit code 0 for safe, 1 for needs confirmation (which run_command treats as success=False)
+        return success # True if safe, False if confirmation needed
         
     def _handle_context_reload(self, message_payload: dict) -> bool:
-        params = message_payload.get('params')
+        params = message_payload.get('params', {})
         logger.info(f"Handling 'context_reload'. Params: {params}")
-        # Placeholder: Requires a command/script to trigger context reload.
-        command = "python tools/reload_agent_context.py --target CursorControlAgent" # Example
+        # Execute the dedicated tool script, passing target agent name
+        target = params.get("target_agent", self.AGENT_NAME) # Default to self if not specified?
+        command = f"python tools/reload_agent_context.py --target {target}" 
+        
         success = self.cursor_controller.run_command(command, wait_for_completion=True)
         output = self.cursor_controller.get_output(max_lines=10)
         logger.info(f"Context reload command '{command}' success: {success}. Output: {output}")
@@ -235,16 +242,18 @@ class CursorControlAgent:
         return success 
         
     def _handle_generic_recovery(self, message_payload: dict) -> bool:
-        """Runs a generic recovery script."""
+        """Runs the diagnostics script as the generic recovery action."""
         params = message_payload.get("params", {})
         action_keyword = message_payload.get("action_keyword", "Perform general diagnostics.")
         logger.warning(f"Handling 'generic_recovery'. Action: {action_keyword}. Params: {params}")
         
-        # Example: Run a generic diagnostic/fallback script
-        command = params.get("fallback_command", "python tools/diagnostics.py --auto")
+        # Run the diagnostics script in auto mode
+        command = "python tools/diagnostics.py --auto"
         success = self.cursor_controller.run_command(command, wait_for_completion=True)
         output = self.cursor_controller.get_output(max_lines=20)
         logger.info(f"Generic recovery command '{command}' success: {success}. Output: {output}")
+        # Success here means the script ran without error, not necessarily that it found no issues.
+        # The script's output should be logged/analyzed if further action is needed.
         return success
 
     # --- Mailbox Processing Logic --- (No changes needed here)
