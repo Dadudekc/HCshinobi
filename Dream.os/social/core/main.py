@@ -22,6 +22,7 @@ from coordination.agent_bus import AgentBus
 from agents.cursor_control_agent import CursorControlAgent
 from agents.task_executor_agent import TaskExecutorAgent, DEFAULT_TASK_LIST_PATH, TaskStatus
 from agents.agent_monitor_agent import AgentMonitorAgent, DEFAULT_LOG_PATH
+from agents.prompt_feedback_loop_agent import PromptFeedbackLoopAgent
 
 # Setup Logging
 log_format = '%(asctime)s - %(threadName)s - %(levelname)s - %(name)s - %(message)s'
@@ -146,6 +147,10 @@ def main():
         task_executor = TaskExecutorAgent(agent_bus=bus, task_list_path=task_list_path)
         global_agents.append(task_executor)
 
+        logger.info("Initializing PromptFeedbackLoopAgent...")
+        feedback_agent = PromptFeedbackLoopAgent(agent_bus=bus, task_list_path=task_list_path)
+        global_agents.append(feedback_agent)
+
     except Exception as e:
         logger.error(f"Fatal error during agent initialization: {e}", exc_info=True)
         # Attempt cleanup if bus was created
@@ -155,6 +160,7 @@ def main():
     # --- Start Agents ---
     logger.info("Starting agent background threads...")
     task_executor.start() # Start the executor's loop
+    feedback_agent.start() # Start the feedback loop's monitoring thread
     # CursorControlAgent currently processes messages directly when bus.process_messages is called,
     # but could be made multi-threaded if needed.
 
@@ -195,6 +201,9 @@ def main():
     # Stop agents in reverse order of dependency (or based on function)
     if task_executor in global_agents:
         task_executor.stop()
+    
+    if 'feedback_agent' in locals() and feedback_agent in global_agents:
+        feedback_agent.stop()
     
     # Call shutdown on cursor_agent to potentially close the app
     if 'cursor_agent' in locals() and cursor_agent in global_agents:
