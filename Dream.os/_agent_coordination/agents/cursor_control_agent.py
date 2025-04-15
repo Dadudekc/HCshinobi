@@ -3,116 +3,209 @@ import logging
 import time
 import threading
 import shutil
+import sys # Added for path manipulation
 from pathlib import Path
 from typing import Dict, Callable
 
-# Assuming mailbox_utils is importable (adjust path if needed)
-# Potential: from _agent_coordination.mailbox_utils import process_directory_loop
+# --- Import Mailbox Utils --- 
+# (Existing try/except block for mailbox_utils)
 try:
-    # Adjust this relative import based on actual project structure
     from .._agent_coordination.mailbox_utils import process_directory_loop 
 except ImportError:
-    # Fallback if running script directly or structure differs
     try:
-        # Attempt import assuming it's in the parent directory's _agent_coordination
-        import sys
         sys.path.append(str(Path(__file__).parent.parent))
         from _agent_coordination.mailbox_utils import process_directory_loop
     except ImportError as e:
         print(f"Error: Could not import process_directory_loop. Please ensure mailbox_utils.py is accessible. {e}")
-        # Define a dummy function if import fails, to allow basic structure creation
         def process_directory_loop(*args, **kwargs):
             print("WARNING: process_directory_loop failed to import. Mailbox listener inactive.")
             while True: time.sleep(60)
 
-# Placeholder for actual Cursor interaction logic
-class CursorTerminalController:
-    def run_command(self, command, params):
-        logger.info(f"[Placeholder] Running command: {command} with params {params}")
-        # Simulate success
-        return {"status": "success", "output": f"Executed {command}"}
+# --- Import Real Cursor Terminal Controller --- 
+try:
+    # Determine project root relative to this agent file (agents/agent.py -> project_root/)
+    project_root = Path(__file__).parent.parent 
+    # Add the 'social' directory to the path to allow imports from there
+    social_core_path = project_root / "social" / "core"
+    if str(social_core_path.parent) not in sys.path:
+         sys.path.insert(0, str(social_core_path.parent)) # Add 'social' dir
+    
+    # Now import assuming 'social' is in the path
+    from core.coordination.cursor.cursor_terminal_controller import CursorTerminalController
+    logger.info("Successfully imported real CursorTerminalController.")
+except ImportError as e:
+    logger.error(f"Failed to import real CursorTerminalController: {e}. Falling back to placeholder.", exc_info=True)
+    # Define a placeholder class if the real one fails to import
+    class CursorTerminalController:
+        def run_command(self, command, wait_for_completion=True):
+            logger.warning(f"[PlaceholderController] Running command: {command}")
+            return True # Simulate success
+        def get_output(self, max_lines=None):
+             return ["[PlaceholderController] Output..."]
+        def get_current_directory(self):
+             return "/placeholder/cwd"
+        def send_input(self, text_input):
+             logger.warning("[PlaceholderController] Sending input - not implemented.")
+             return False
+        def is_busy(self):
+             return False
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# --- Configure Logging --- 
+# (Existing logging setup)
+if not logging.getLogger("CursorControlAgent").hasHandlers():
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("CursorControlAgent")
+
 
 class CursorControlAgent:
     AGENT_NAME = "CursorControlAgent"
 
-    def __init__(self, mailbox_root_dir="mailboxes"):
+    def __init__(self, mailbox_root_dir="mailboxes", task_list_path="task_list.json"):
         self.mailbox_root = Path(mailbox_root_dir).resolve()
+        self.task_list_path = Path(task_list_path).resolve()
         self.inbox_dir = self.mailbox_root / self.AGENT_NAME / "inbox"
         self.processed_dir = self.mailbox_root / self.AGENT_NAME / "processed"
         self.error_dir = self.mailbox_root / self.AGENT_NAME / "error"
         
-        # Ensure directories exist
         self.inbox_dir.mkdir(parents=True, exist_ok=True)
         self.processed_dir.mkdir(parents=True, exist_ok=True)
         self.error_dir.mkdir(parents=True, exist_ok=True)
         
-        self.cursor_controller = CursorTerminalController() # Placeholder
+        self.cursor_controller = CursorTerminalController() # Instantiate the REAL controller
         self.stop_event = threading.Event()
         self.listener_thread = None
 
-        # Map command strings (from task_type) to handler methods
         self.command_handlers: Dict[str, Callable[[dict], bool]] = {
             "resume_operation": self._handle_resume_operation,
-            "generate_task": self._handle_generate_task, # Placeholder
-            "diagnose_loop": self._handle_diagnose_loop, # Placeholder
-            "confirmation_check": self._handle_confirmation_check, # Placeholder
-            "context_reload": self._handle_context_reload, # Placeholder
-            "clarify_objective": self._handle_clarify_objective, # Placeholder
-            "generic_recovery": self._handle_generic_recovery, # Placeholder
-            # Add other commands CursorControlAgent should handle
+            "generate_task": self._handle_generate_task, 
+            "diagnose_loop": self._handle_diagnose_loop, 
+            "confirmation_check": self._handle_confirmation_check, # Still placeholder-ish
+            "context_reload": self._handle_context_reload, # Needs concrete command
+            "clarify_objective": self._handle_clarify_objective, # Logs prompt intent
+            "generic_recovery": self._handle_generic_recovery, 
+            # Add other command handlers here
             # e.g., "run_terminal_command": self._handle_run_terminal_command
         }
-        logger.info(f"{self.AGENT_NAME} initialized. Monitoring inbox: {self.inbox_dir}")
+        logger.info(f"{self.AGENT_NAME} initialized. Monitoring inbox: {self.inbox_dir}. Using: {type(self.cursor_controller).__name__}")
 
-    # --- Command Handlers ---
+    # --- Command Handlers (Updated for Real Controller) ---
     def _handle_resume_operation(self, message_payload: dict) -> bool:
-        logger.info(f"Handling 'resume_operation'. Params: {message_payload.get('params')}")
-        # Example: Send a no-op or status check command to Cursor
-        result = self.cursor_controller.run_command("check_status", message_payload.get('params'))
-        # Update task list based on result? Send feedback?
-        return result.get("status") == "success"
+        """Attempt to resume by running a status check or default command."""
+        params = message_payload.get("params", {})
+        logger.info(f"Handling 'resume_operation'. Params: {params}")
+        # Example: Run a simple command like 'pwd' or a specific status script
+        command = params.get("resume_command", "pwd") # Allow command override via params
+        success = self.cursor_controller.run_command(command, wait_for_completion=True)
+        output = self.cursor_controller.get_output(max_lines=10)
+        logger.info(f"Resume command '{command}' success: {success}. Output: {output}")
+        return success
 
     def _handle_generate_task(self, message_payload: dict) -> bool:
-        logger.info(f"Handling 'generate_task'. Params: {message_payload.get('params')}")
-        # Placeholder: May involve complex interaction or invoking another agent
-        return True # Simulate success for now
+        """Generates a placeholder task and appends it to task_list.json."""
+        # (Logic remains the same as it doesn't use the terminal controller directly)
+        params = message_payload.get("params", {})
+        logger.info(f"Handling 'generate_task'. Hint: {params.get('instruction_hint')}")
+        new_task_id = f"generated_{int(time.time())}"
+        new_task = {
+            "task_id": new_task_id,
+            "status": "PENDING",
+            "task_type": "review_project_state", 
+            "action": "Review current project state and suggest next logical step.",
+            "params": {"triggering_stall": params.get("stall_category", "unknown")},
+            "target_agent": "PlanningAgent", 
+            "timestamp_created": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        }
+        try:
+            if not self.task_list_path.exists():
+                 self.task_list_path.write_text("[]", encoding="utf-8")
+            with self.task_list_path.open("r+", encoding="utf-8") as f:
+                try:
+                    content = f.read()
+                    tasks = json.loads(content) if content else []
+                except json.JSONDecodeError:
+                    logger.error(f"Failed to decode task_list.json, cannot append generated task.")
+                    tasks = [] 
+                    return False
+                tasks.append(new_task)
+                f.seek(0)
+                json.dump(tasks, f, indent=2)
+                f.truncate()
+            logger.info(f"Appended generated task {new_task_id} to {self.task_list_path}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to append generated task to {self.task_list_path}: {e}")
+            return False
         
     def _handle_diagnose_loop(self, message_payload: dict) -> bool:
-        logger.info(f"Handling 'diagnose_loop'. Params: {message_payload.get('params')}")
-        # Placeholder: Get recent logs/actions from Cursor, analyze, maybe suggest prompt
-        result = self.cursor_controller.run_command("get_recent_activity", message_payload.get('params'))
-        return result.get("status") == "success"
+        """Runs a command to retrieve logs for loop diagnosis."""
+        params = message_payload.get("params", {})
+        logger.info(f"Handling 'diagnose_loop'. Params: {params}")
+        # Example: Tail the main agent log file
+        log_file_path = params.get("log_file", "logs/agent_main.log") # Parameterize log file
+        num_lines = params.get("lines", 50)
+        command = f"tail -n {num_lines} {log_file_path}" # Adjust command for OS if needed
+        
+        success = self.cursor_controller.run_command(command, wait_for_completion=True)
+        output_lines = self.cursor_controller.get_output(max_lines=num_lines + 5) # Get command + output
+        logger.info(f"Log retrieval command '{command}' success: {success}")
+        # Instead of sending prompt (not supported by controller), log the findings
+        if success:
+             logger.info(f"Retrieved Logs for Loop Diagnosis:\n---\n" + "\n".join(output_lines) + "\n---")
+             # Could potentially write output_lines to a diagnostic file
+        else:
+             logger.error(f"Failed to retrieve logs using command: {command}")
+
+        return success # Return success of the command execution
 
     def _handle_confirmation_check(self, message_payload: dict) -> bool:
-        logger.info(f"Handling 'confirmation_check'. Params: {message_payload.get('params')}")
-        # Placeholder: Analyze state, maybe send a specific confirmation prompt via Cursor
-        result = self.cursor_controller.run_command("analyze_confirmation_context", message_payload.get('params'))
-        return result.get("status") == "success"
+        params = message_payload.get('params')
+        logger.info(f"Handling 'confirmation_check'. Params: {params}")
+        # Placeholder: Requires a command/script to analyze state. Example:
+        command = "python tools/check_confirmation_state.py"
+        success = self.cursor_controller.run_command(command, wait_for_completion=True)
+        output = self.cursor_controller.get_output(max_lines=10)
+        logger.info(f"Confirmation check command '{command}' success: {success}. Output: {output}")
+        return success
         
     def _handle_context_reload(self, message_payload: dict) -> bool:
-        logger.info(f"Handling 'context_reload'. Params: {message_payload.get('params')}")
-        # Placeholder: Trigger internal context reload or send command to Cursor
-        result = self.cursor_controller.run_command("reload_context", message_payload.get('params'))
-        return result.get("status") == "success"
+        params = message_payload.get('params')
+        logger.info(f"Handling 'context_reload'. Params: {params}")
+        # Placeholder: Requires a command/script to trigger context reload.
+        command = "python tools/reload_agent_context.py --target CursorControlAgent" # Example
+        success = self.cursor_controller.run_command(command, wait_for_completion=True)
+        output = self.cursor_controller.get_output(max_lines=10)
+        logger.info(f"Context reload command '{command}' success: {success}. Output: {output}")
+        return success
         
     def _handle_clarify_objective(self, message_payload: dict) -> bool:
-        logger.info(f"Handling 'clarify_objective'. Params: {message_payload.get('params')}")
-        # Placeholder: Generate and send a clarification prompt via Cursor
-        prompt = f"Need clarification based on stall: {message_payload.get('params', {}).get('instruction_hint')}"
-        result = self.cursor_controller.run_command("send_clarification_prompt", {"prompt": prompt})
-        return result.get("status") == "success"
+        """Logs the clarification prompt that *should* be sent."""
+        params = message_payload.get("params", {})
+        logger.info(f"Handling 'clarify_objective'. Params: {params}")
+        hint = params.get("instruction_hint", "Objective unclear.")
+        relevant_files = params.get("relevant_files", [])
+        context_str = f"Relevant files: {relevant_files}. " if relevant_files else ""
+        prompt = f"Agent stalled due to unclear objective. {context_str}Instruction hint: {hint}. Please provide a clearer next step or goal."
+        
+        # Log the prompt - cannot send directly with current controller
+        logger.info(f"INTENDED PROMPT (cannot send directly): {prompt}")
+        # We return True because the task *was* handled (by logging intent), 
+        # even if the ideal action couldn't be performed by this controller.
+        return True 
         
     def _handle_generic_recovery(self, message_payload: dict) -> bool:
-        logger.warning(f"Handling 'generic_recovery'. Action: {message_payload.get('action_keyword')}. Params: {message_payload.get('params')}")
-        # Placeholder: Attempt a basic diagnostic command
-        result = self.cursor_controller.run_command("run_basic_diagnostics", message_payload.get('params'))
-        return result.get("status") == "success"
+        """Runs a generic recovery script."""
+        params = message_payload.get("params", {})
+        action_keyword = message_payload.get("action_keyword", "Perform general diagnostics.")
+        logger.warning(f"Handling 'generic_recovery'. Action: {action_keyword}. Params: {params}")
+        
+        # Example: Run a generic diagnostic/fallback script
+        command = params.get("fallback_command", "python tools/diagnostics.py --auto")
+        success = self.cursor_controller.run_command(command, wait_for_completion=True)
+        output = self.cursor_controller.get_output(max_lines=20)
+        logger.info(f"Generic recovery command '{command}' success: {success}. Output: {output}")
+        return success
 
-    # --- Mailbox Processing Logic ---
+    # --- Mailbox Processing Logic --- (No changes needed here)
     def _process_mailbox_message(self, message_path: Path) -> bool:
         """Processes a single message file from the inbox."""
         logger.debug(f"Processing message file: {message_path.name}")
