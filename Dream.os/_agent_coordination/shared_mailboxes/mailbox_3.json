@@ -1,0 +1,9 @@
+[
+  {
+    "sender": "AgentBootstrap",
+    "command": "initial_onboarding",
+    "params": {
+      "prompt_template_path": "user_prompts/agent_activation_template.txt"
+    }
+  }
+]

@@ -1,0 +1,47 @@
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Test cache
+.pytest_cache/
+
+# Runtime directory (contains instance-specific data, logs, etc.)
+# Uncomment if you want to exclude the entire runtime directory
+# runtime/
+# Or exclude specific common runtime files/patterns:
+runtime/**/inbox/*
+runtime/**/outbox/*
+runtime/**/*.log
+runtime/**/*.json # Be careful, might exclude config if stored here
+!runtime/governance_memory.jsonl # Example: Keep this specific log
+!runtime/rulebook.md # Example: Keep the canonical runtime rulebook
+
+# Analysis outputs (optional, depends on workflow)
+# analysis/temp_*
+# analysis/latest_*
+# analysis/architect_reports/*
+# !analysis/rulebook_update_proposals.md # Keep proposals?
+
+# Generated reports (e.g., from find_todos)
+todo_report_categories/
+
+# Environment variables
+.env
+
+# IDE specific folders
+.vscode/
+.idea/
+.cursor-prompts/
+
+# Build artifacts (if any)
+dist/
+build/
+*.egg-info/
+
+# Configuration files containing secrets
+social/social_config.json
+
+# Secrets storage (e.g., cookies)
+secrets/ 

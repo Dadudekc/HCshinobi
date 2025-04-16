@@ -1,0 +1,19 @@
+{
+  "status": "offline",
+  "assigned_agent_id": null,
+  "last_seen_utc": "2025-04-16T06:07:55.275536",
+  "messages": [
+    {
+      "message_id": "onboarding_TestAgent014_1744801376",
+      "sender": "AgentBootstrap",
+      "timestamp_utc": "2025-04-16T06:02:56.155325",
+      "command": "initial_onboarding",
+      "params": {
+        "prompt_template_path": "user_prompts/agent_activation_template.txt"
+      }
+    }
+  ],
+  "processed_message_ids": [
+    "onboarding_TestAgent014_1744801376"
+  ]
+}

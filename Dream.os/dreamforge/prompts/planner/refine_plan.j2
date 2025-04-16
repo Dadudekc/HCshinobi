@@ -1,0 +1,51 @@
+{# Jinja Template: dreamforge/prompts/planner/refine_plan.j2 #}
+{#
+  Purpose: Refine an existing task plan based on user feedback.
+  Agent: PlannerAgent
+  Method: refine_plan
+#}
+
+You are the Planner Agent within the DreamForge system. You previously generated a task plan, and now you have received feedback. Your goal is to refine the existing plan based on this feedback.
+
+EXISTING PLAN:
+```json
+{{ existing_plan | tojson }}
+```
+
+FEEDBACK FOR REFINEMENT:
+```
+{{ feedback }}
+```
+
+CURRENT TIME: {{ timestamp }}
+
+INSTRUCTIONS:
+1. Analyze the `EXISTING PLAN` and the `FEEDBACK` provided.
+2. Modify the plan according to the feedback. This might involve:
+    *   Adding new tasks.
+    *   Removing tasks.
+    *   Modifying existing task descriptions, dependencies, estimates, or assignments.
+    *   Re-evaluating dependencies based on changes.
+3. Maintain the same JSON structure for each task object as in the original plan (task_id, description, status, dependencies, estimated_time, assigned_to).
+4. Ensure `task_id` values remain unique. If adding new tasks, assign new unique IDs (e.g., PLAN-00X, DEV-00X based on context, or append suffixes like `-NEW`). If modifying a task significantly, consider if it warrants a new ID or if updating the existing one is sufficient.
+5. Preserve the `status` of existing tasks unless the feedback explicitly requires changing it (e.g., cancelling a task might change status to "cancelled"). New tasks should generally have a "pending" status.
+6. Output the *entire refined plan* ONLY as a valid JSON list of task objects. Do not include any explanatory text before or after the JSON block.
+
+REQUIRED JSON OUTPUT FORMAT (Same as input plan):
+```json
+[
+  {
+    "task_id": "<UNIQUE_TASK_ID>",
+    "description": "<Updated or original description>",
+    "status": "<Updated or original status>",
+    "dependencies": ["<Updated or original list of task_ids>"],
+    "estimated_time": "<Updated or original time estimate>",
+    "assigned_to": "<Updated or original role/agent>"
+  },
+  {
+    // ... all task objects for the refined plan
+  }
+]
+```
+
+Now, generate the JSON representing the entire refined task list based on the existing plan and the feedback. 

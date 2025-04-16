@@ -1,0 +1,58 @@
+{
+    "agent": "Agent Social",
+    "role": "Strategy Tester + Snapshot Finalizer",
+    "priority": "high",
+    "tasks": [
+        {
+            "id": "SOC-001",
+            "title": "Platform Strategy Tests",
+            "description": "Verify all social platform integration tests",
+            "platforms": [
+                "Twitter",
+                "Facebook"
+            ],
+            "test_scenarios": [
+                "Post creation",
+                "Media attachment",
+                "Error handling",
+                "Rate limiting"
+            ],
+            "status": "pending"
+        },
+        {
+            "id": "SOC-002",
+            "title": "Generate Baseline Snapshots",
+            "description": "Create and verify baseline snapshot files",
+            "deliverables": [
+                "/snapshots/twitter_baseline.json",
+                "/snapshots/facebook_baseline.json",
+                "/snapshots/sentiment_baseline.json"
+            ],
+            "status": "pending"
+        },
+        {
+            "id": "SOC-003",
+            "title": "Configuration Documentation",
+            "description": "Document all platform configuration requirements",
+            "deliverables": [
+                ".env.template update",
+                "demo_tweets.md",
+                "demo_posts.md"
+            ],
+            "validation": [
+                "All API keys documented",
+                "Example configurations provided",
+                "Demo content prepared"
+            ],
+            "status": "pending"
+        }
+    ],
+    "reporting": {
+        "frequency": "hourly",
+        "metrics": [
+            "platform_test_status",
+            "snapshot_validation_results",
+            "config_completeness"
+        ]
+    }
+} 

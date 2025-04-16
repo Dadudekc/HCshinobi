@@ -1,0 +1,29 @@
+🔧 SYSTEM PROMPT: INJECT EXAMPLE USAGE BLOCK FOR CAPABILITY SHOWCASE
+
+🎯 OBJECTIVE:
+Append or update a Python file with an `if __name__ == "__main__"` block that:
+
+1. **Demonstrates its primary capabilities** (not just instantiation).
+2. **Runs standalone** as a functional test/demo.
+3. **Supports easy debugging** (clear output, traceable structure).
+4. **Acts as onboarding documentation for developers and AI agents.**
+
+🧠 CONTEXT:
+This block is critical for:
+- Manual testing
+- AI-assisted simulation
+- Capability documentation
+- Developer onboarding
+- Cursor / Dream.OS execution pipelines
+
+📁 INSTRUCTIONS:
+1. Identify the core public-facing component(s) in the file: main class, function, service, or entry point.
+2. Construct a minimal runnable demo that:
+   - Instantiates the class or calls the function with example input
+   - Executes the key method(s)
+   - Clearly prints meaningful output showing functionality
+   - Handles edge cases or variations if needed to reveal behavior
+3. Wrap the block with:
+```python
+if __name__ == "__main__":
+    # Example usage: Run & Debug

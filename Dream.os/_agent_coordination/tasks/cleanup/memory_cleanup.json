@@ -1,0 +1,12 @@
+{
+    "name": "Memory Cleanup",
+    "domain": "memory",
+    "description": "Cleans up stale memory entries and optimizes memory usage",
+    "dependencies": ["perception", "reasoning"],
+    "impact_level": "medium",
+    "target_files": [
+        "memory/cache/*.json",
+        "memory/working/*.tmp",
+        "memory/logs/*.log"
+    ]
+} 

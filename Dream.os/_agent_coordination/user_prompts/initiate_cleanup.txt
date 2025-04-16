@@ -1,0 +1,46 @@
+🧼 PROTOCOL: #CLEANUPTIME
+
+🎯 OBJECTIVE:
+Review the entire codebase with the goal of **refinement—not expansion**. Identify and eliminate inefficiencies, duplication, or architectural drift. Prioritize internal coherence over growth.
+
+📍 MANDATORY RULE:
+**Before creating any new file, function, or class, check if an equivalent already exists.**
+Duplicate functionality should be merged or redirected—not reinvented.
+
+🏗 SCOPE:
+- ❌ No new features
+- ❌ No new modules unless consolidating multiple existing ones
+- ✅ All work must reduce fragmentation, bloat, or ambiguity
+
+📁 START PATH:
+root = .
+
+📋 CATEGORIES TO FLAG:
+1. 🔁 Duplicate Code/Functions/Classes
+2. 📦 Module Bloat (files that could be merged or renamed)
+3. 🧩 Fragmented Utilities (helper logic scattered across files)
+4. 🪓 Dead or Unused Code
+5. ⚠ Architectural Drift (services that violate project conventions)
+
+🧠 PRIORITY ORDER:
+1. Remove obvious duplication
+2. Collapse unnecessary module trees
+3. Rename or merge disjointed files
+4. Fix inconsistent imports, structure, or naming
+5. Refactor configs/constants into shared modules
+
+📝 FOR EACH CHANGE:
+- Record a before/after summary
+- Output Git commit message
+- Update all relevant imports and references
+- Re-run system tests or validate CLI execution (if applicable)
+
+✅ GIT COMMIT FORMAT:
+git commit -m "refactor(cleanup): <concise desc> in <file(s)>"
+
+🚫 WHAT TO AVOID:
+- Don’t create new abstractions unless consolidating existing ones
+- Don’t increase the total file count
+- Don’t ask the user for clarification—default to consolidation and deletion
+
+🏁 Execute. No new drift. No loose ends. System must be lean, tight, and stable before shutdown or merge.

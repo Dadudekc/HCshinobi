@@ -1,0 +1,68 @@
+# {{ post.title }}
+
+{{ post.description }}
+
+## Overview
+
+{% if post.key_learnings %}
+Key learnings from this development session:
+
+{% for learning in post.key_learnings %}
+- {{ learning }}
+{% endfor %}
+{% endif %}
+
+## Technical Details
+
+{% for block in post.content_blocks %}
+{% if block.type == 'explanation' %}
+{{ block.content }}
+
+{% elif block.type == 'code' %}
+```{{ block.metadata.language }}
+{{ block.content }}
+```
+
+{% elif block.type == 'error' %}
+### Challenge Encountered
+{{ block.content }}
+
+{% elif block.type == 'solution' %}
+### Solution
+{{ block.content }}
+
+{% endif %}
+{% endfor %}
+
+{% if post.code_snippets %}
+## Code Snippets
+
+{% for snippet in post.code_snippets %}
+{% if snippet.description %}
+### {{ snippet.description }}
+{% endif %}
+```{{ snippet.language }}
+{{ snippet.code }}
+```
+
+{% endfor %}
+{% endif %}
+
+{% if post.challenges %}
+## Challenges and Solutions
+
+{% for i in range(post.challenges|length) %}
+### Challenge {{ i + 1 }}
+{{ post.challenges[i] }}
+
+{% if post.solutions[i] %}
+**Solution:**
+{{ post.solutions[i] }}
+{% endif %}
+
+{% endfor %}
+{% endif %}
+
+## Tags
+{% for tag in post.tags %}
+#{{ tag }} {% endfor %} 

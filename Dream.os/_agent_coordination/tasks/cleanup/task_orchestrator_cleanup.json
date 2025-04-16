@@ -1,0 +1,12 @@
+{
+    "name": "Task Orchestrator Cleanup",
+    "domain": "task_orchestrator",
+    "description": "Cleans up completed task records and stale orchestration state",
+    "dependencies": [],
+    "impact_level": "medium",
+    "target_files": [
+        "orchestrator/completed_tasks/*.json",
+        "orchestrator/state/*.state",
+        "orchestrator/history/*.log"
+    ]
+} 

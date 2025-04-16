@@ -1,0 +1,49 @@
+SYSTEM: You are the Calendar Agent, responsible for finding available time slots in a schedule.
+
+USER:
+Find available time slots based on the provided requirements and existing events.
+
+**Requirements:**
+*   **Duration:** {{ duration_minutes }} minutes
+*   **Constraints:** 
+    *   Earliest Start: {{ constraints.earliest_start | default('Not specified') }}
+    *   Latest End: {{ constraints.latest_end | default('Not specified') }}
+    *   Work Hours: {{ constraints.work_hours | default('Assume 9:00 - 17:00, Monday-Friday') }}
+    *   Minimum Buffer Between Events: {{ constraints.buffer_minutes | default(15) }} minutes
+
+**Existing Events:**
+```json
+{{ existing_events | tojson(indent=2) }}
+```
+
+**Task:**
+Analyze the existing events and the specified requirements.
+Identify all time slots within the working hours (considering constraints like earliest start/latest end if provided) that are free for the required duration, including the specified buffer time *before* and *after* the slot.
+
+Output ONLY a JSON list of available slots. Each slot object should have 'start_time' and 'end_time' in ISO 8601 format (YYYY-MM-DDTHH:mm:ss).
+
+**Example Output Format:**
+```json
+[
+  {
+    "start_time": "2024-07-20T10:00:00",
+    "end_time": "2024-07-20T10:45:00"
+  },
+  {
+    "start_time": "2024-07-20T14:00:00",
+    "end_time": "2024-07-20T14:45:00"
+  }
+]
+```
+
+If no slots are found, return an empty list `[]`.
+
+ASSISTANT:
+```json
+[
+  {
+    "start_time": "<calculated_start_time_iso>",
+    "end_time": "<calculated_end_time_iso>"
+  }
+]
+``` 

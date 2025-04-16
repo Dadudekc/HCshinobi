@@ -1,0 +1,74 @@
+{
+    "role": "Test + Strategy Sync",
+    "priority": 2,
+    "tasks": [
+        {
+            "id": "SOCIAL_001",
+            "title": "Deduplicate Social Strategy Logic",
+            "description": "Consolidate social platform strategy logic (auth, post handling, error recovery)",
+            "target_files": [
+                "social/strategies/*.py",
+                "social/platforms/*.py",
+                "social/handlers/*.py"
+            ],
+            "success_criteria": {
+                "unified_interface": true,
+                "platform_specific": true,
+                "error_handling": true,
+                "test_coverage": 90
+            }
+        },
+        {
+            "id": "SOCIAL_002",
+            "title": "Consolidate Test Fixtures",
+            "description": "Merge common test fixtures (mock_config, mock_api, shared response mocks)",
+            "target_files": [
+                "tests/fixtures/*.py",
+                "tests/mocks/*.py",
+                "tests/conftest.py"
+            ],
+            "success_criteria": {
+                "shared_fixtures": true,
+                "reduced_duplication": true,
+                "documentation": true
+            }
+        },
+        {
+            "id": "SOCIAL_003",
+            "title": "Unify Snapshot Templates",
+            "description": "Ensure snapshot templates and test baselines are not repeated",
+            "target_files": [
+                "tests/snapshots/*.json",
+                "tests/baselines/*.json",
+                "tests/templates/*.json"
+            ],
+            "success_criteria": {
+                "template_reuse": true,
+                "versioned_snapshots": true,
+                "validation_rules": true
+            }
+        },
+        {
+            "id": "SOCIAL_004",
+            "title": "Refactor Test Directory Layout",
+            "description": "Restructure test directory to mirror social/strategies/",
+            "target_files": [
+                "tests/social/*",
+                "tests/strategies/*",
+                "tests/platforms/*"
+            ],
+            "success_criteria": {
+                "mirror_structure": true,
+                "clear_organization": true,
+                "discovery_improved": true
+            }
+        }
+    ],
+    "dependencies": ["COORD_001", "COORD_004"],
+    "validation_rules": {
+        "commit_format": "refactor(cleanup): {what} in {modules}",
+        "required_tests": ["unit", "integration", "snapshot"],
+        "changelog_update": true,
+        "snapshot_validation": true
+    }
+} 

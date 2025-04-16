@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dreamos"
+version = "0.1.0"
+description = "Autonomous agent architecture for Dream.OS"
+authors = [
+    { name = "Victor", email = "victor@example.com" }
+]
+readme = "README.md"
+requires-python = ">=3.9"
+
+[tool.setuptools.packages.find]
+where = ["."] # Look in the root directory for packages
+include = ["core*", "utils*"] # Include core and utils and their subpackages
+exclude = ["tests*"] # Exclude tests
+
+[tool.setuptools]
+# Removed packages = ["core"] as find handles it now
+include-package-data = true 

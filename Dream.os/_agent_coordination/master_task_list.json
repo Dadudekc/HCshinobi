@@ -1,0 +1,3761 @@
+[
+  {
+    "task_id": "f8b1e2d0-c3a4-4b5e-9d6f-a1b2c3d4e5f6",
+    "description": "FLAMEPROOF Phase 2: Consolidate AgentBus implementations. Designate core/coordination/agent_bus.py as canonical. Analyze & merge logic from old locations (dreamforge/core/agent_bus.py, coordination/agent_bus.py, agents/chatgpt_commander_agent.py). Refactor all agent code to use the canonical bus. Delete old bus files.",
+    "status": "FAILED",
+    "assigned_to": "agent1",
+    "priority": "CRITICAL",
+    "source_file": "supervisor/agent1",
+    "module": "core/coordination",
+    "depends_on": ["c5e8a3f9-1a0b-4d7e-8c1a-f0b1d2e3c4d5"],
+    "timestamp_created_utc": "2023-10-27T10:30:00Z"
+  },
+  {
+    "task_id": "c5e8a3f9-1a0b-4d7e-8c1a-f0b1d2e3c4d5",
+    "description": "Systematically test core agent coordination tools (`agent_entrypoint.py`, `view_shared_mailboxes.py`, `send_shared_mailbox_message.py`, `aggregate_task_lists.py`). Define test cases covering normal operation, `--help`, argument validation, error conditions (e.g., missing files, invalid agent IDs), and concurrency issues. Document findings and required fixes.",
+    "status": "BLOCKED",
+    "assigned_to": "agent1",
+    "priority": "CRITICAL",
+    "source_file": "supervisor/agent1",
+    "module": "_agent_coordination/supervisor_tools",
+    "original_line": null,
+    "timestamp_aggregated_utc": null,
+    "timestamp_created_utc": "2023-10-27T10:00:00Z"
+  },
+  {
+    "task_id": "a90b7e14-e552-4da2-a1eb-2972779be574",
+    "description": "**Review Agent Registration:** Ensure all agents within this directory are correctly registered with the `AgentBus` (`/d:/Dream.os/_agent_coordination/core/agent_bus.py`).",
+    "status": "COMPLETED",
+    "assigned_to": "agent1",
+    "result_summary": "Review complete. Found agents agent_1, agent_2, agent_3, agent_4, social/core/*, agents/dreamforge/agent_monitor_agent, agents/agents/* are registering. Missing registration in _agent_coordination/agents/cursor_control_agent, _agent_coordination/agents/stall_recovery_agent, agents/calendar_agent, agents/architects_edge_agent, agents/chatgpt_commander_agent. Sub-tasks created.",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 109,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "e148d2f2-3f8d-46c4-b4c0-b4e5b54d58c1",
+    "description": "**Standardize Event Handling:** Ensure agents consistently subscribe to and handle events using `AgentBus` methods.",
+    "status": "IN_PROGRESS",
+    "assigned_to": "agent1",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 110,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "a7510711-9785-4e3e-b3d5-fcccf79adf31",
+    "description": "**Task Reception (`EventType.TASK`):**",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 111,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "92b76553-25c9-411b-927e-2dc01ab4540d",
+    "description": "Verify all agents intended to receive tasks from `/d:/Dream.os/_agent_coordination/dispatchers/task_dispatcher.py` correctly handle the `EventType.TASK` event.",
+    "status": "COMPLETED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Verification complete. Agents handle tasks via specific actions dispatched by TaskExecutorAgent through AgentBus, not via a generic EventType.TASK from the specified dispatcher path (which appears inconsistent with project structure).",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 112,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "b9031d13-fa55-4f03-aac2-b5ccb985d58a",
+    "description": "Ensure robust parsing of the task payload (`action`, `params`, etc.).",
+    "status": "COMPLETED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Payload parsing reviewed and confirmed robust in CursorControlAgent. SocialMediaAgent handlers refactored for robust payload handling.",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 113,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "7ba52afd-b7eb-4ada-896b-9c17afce8063",
+    "description": "**Task Status Updates:**",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 114,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "54e1cf8e-42ff-4d67-947c-62e8ee1ce8b5",
+    "description": "Standardize how agents report `COMPLETED`/`FAILED` status for tasks originating from the task list (e.g., direct update to `/d:/Dream.os/runtime/task_list.json` via utility, `AgentBus` status event).",
+    "status": "COMPLETED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Created core/utils/task_status_updater.py utility. Refactored TaskExecutorAgent to use this utility for updating task statuses, prioritizing AgentBus with file write fallback. Updated core/main.py to instantiate and inject the updater.",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 115,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "23b95365-68fd-454b-8aff-049ce9f94070",
+    "description": "Ensure the chosen mechanism is reliable and handles potential errors (e.g., uses file locking if writing directly).",
+    "status": "BLOCKED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Blocked: Cannot verify reliability. Need to analyze core/utils/task_status_updater.py (mentioned in task 54e1cf8e-... result), but file search was interrupted.",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 116,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "c7c28c88-6148-4f7b-b274-000bf76c186c",
+    "description": "**`CursorControlAgent`:**",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 120,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "c34cd058-6919-4b68-aa68-0dac2ed7ef5c",
+    "description": "Review handled `task_type`s and ensure they align with the inference map in `TaskDispatcherAgent`.",
+    "status": "BLOCKED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Blocked: Found CursorControlAgent (agents/cursor/control_agent.py), but file search for TaskDispatcherAgent.py/TaskExecutorAgent.py was interrupted. Cannot compare handled types.",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 121,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "ff92e25e-9f12-4853-86fc-ebc5849c692b",
+    "description": "Verify interaction logic with VS Code or other target IDEs.",
+    "status": "BLOCKED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Blocked: Cannot verify interaction logic. File search found agents/cursor/control_agent.py, but read_file failed and list_dir confirmed the path is invalid. Cannot locate CursorControlAgent code.",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 122,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "7801022d-8f05-4678-bcdc-f6c16f96eb7c",
+    "description": "Test robustness of terminal command execution and output handling.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 123,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "876a1969-d971-480d-87ca-e85390a0bf03",
+    "description": "**`MeredithResonanceScanner`:**",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 124,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "c761de27-29f0-491a-bbee-b0ce32705efc",
+    "description": "Define tasks/events handled by this agent.",
+    "status": "BLOCKED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Blocked: Cannot define tasks/events because the agent implementation file (meredith_resonance_scanner.py) was not found in the workspace.",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 125,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "a392f8db-5cc8-4067-ab77-857382fd7010",
+    "description": "Verify integration with relevant data sources or systems.",
+    "status": "BLOCKED",
+    "assigned_to": "Agent_4",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 126,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z",
+    "result": {
+      "status": "BLOCKED",
+      "summary": "Blocked due to missing implementation file for MeredithResonanceScanner agent (meredith_resonance_scanner.py). Cannot verify integrations without agent code.",
+      "timestamp_utc": "2024-07-12T14:15:00Z"
+    }
+  },
+  {
+    "task_id": "bbf04c63-1599-4693-8478-1659f2114204",
+    "description": "**`FeedbackEngine`:**",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 127,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "373bbe93-62e7-4baf-bbcd-651dd9266bf4",
+    "description": "Define tasks/events handled by this agent.",
+    "status": "BLOCKED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Blocked: File search for FeedbackEngine.py or PromptFeedbackLoopAgent.py was interrupted. Cannot define tasks/events.",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 128,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "a8b67a0c-8e43-4585-9121-ca13e94060ff",
+    "description": "Verify feedback processing logic.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 129,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "036a0e1b-085d-4fab-803f-4a7854e9f37d",
+    "description": "**`AgentMonitorAgent`:**",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 130,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "707c4b57-7d0c-406e-9144-ce9050c94146",
+    "description": "Define tasks/events handled by this agent.",
+    "status": "BLOCKED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Blocked: Cannot define tasks/events. File search located AgentMonitorAgent.py at agents/dreamforge/agents/agent_monitor_agent.py, but read_file failed. Subsequent list_dir confirmed the directory ../dreamforge/agents exists but does not contain the file. Inconsistent tool results prevent access.",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 131,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "f27dc544-76a8-4692-84be-0de4c658f6c3",
+    "description": "Verify system status reporting mechanisms.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 132,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "44c7aaee-c86a-40ac-94d9-e4b70ef13cb9",
+    "description": "**Other Agents:** Review any other agents in `/d:/Dream.os/agents/` for AgentBus integration, task handling, and specific logic.",
+    "status": "BLOCKED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Blocked: Failed to update task status to IN_PROGRESS in master_task_list.json after multiple attempts (edit_file and reapply). Cannot claim task.",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 133,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "8405c14f-7e6d-4aa2-903b-c26f4aa8883f",
+    "description": "Add/update unit tests for individual agent logic.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 137,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "60e20bbb-ce35-4a83-a44e-9ac39704a294",
+    "description": "Add/update integration tests (using mocked `AgentBus`) for agent event handling and task processing (as outlined in `/d:/Dream.os/tests/task_list.md`).",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 138,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "ae96d734-b430-454c-94b1-2abc62086b23",
+    "description": "Ensure each agent file has a clear module/class docstring explaining its purpose.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 142,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "6833a19e-42e9-4ee8-9589-62554ac64361",
+    "description": "Document the specific tasks/events handled by each agent.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 143,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "1dc761eb-7feb-4dd0-ae11-6dcd3a51823c",
+    "description": "Enhance logging within agents for better traceability of actions and decisions.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 144,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "ad3b1fc5-08fd-4d1c-b72c-96d562e35c62",
+    "description": "Commit all changes to agent code.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 148,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "6215f994-a352-4055-83b7-a109d832c38c",
+    "description": "Resolve any outstanding TODOs or issues within agent implementations.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 149,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "6fb86279-d734-4b68-a07b-93454db77dc7",
+    "description": "Basic functionality: Read calendar events.",
+    "status": "COMPLETED",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 154,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "eeed2985-543d-4be0-bb08-8bd7b3a0a77a",
+    "description": "Add new events.",
+    "status": "BLOCKED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Blocked: File search for calendar_agent.py source file was interrupted or failed to locate it in likely directories (agents/, dreamforge/agents/).",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 155,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "85417317-dfb0-42e8-8362-70e533af75c5",
+    "description": "Edit existing events.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 156,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "8fb9aea8-d569-4938-8e1e-fa4d43db70d7",
+    "description": "Integrate with Google Calendar API.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 157,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "650b36b8-76f6-46df-bd8a-061af2dd8ff0",
+    "description": "AgentBus Integration: Handle relevant scheduling tasks/events.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 158,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "a9c5f8ab-f5b7-4b4d-91eb-c50d988747d1",
+    "description": "Initial setup.",
+    "status": "COMPLETED",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 161,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "02faebbd-4c1f-4f92-9493-24de1e585cba",
+    "description": "Define core architectural analysis tasks.",
+    "status": "BLOCKED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Blocked: File search for architects_edge_agent.py source file was interrupted or failed to locate it in likely directories (agents/, dreamforge/agents/). Cannot define tasks.",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 162,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "457e4ead-4b99-4690-a070-fe31ce8a875f",
+    "description": "Integrate with project structure analysis tools.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 163,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "aff37076-2590-4d6a-ad33-6faf026d1242",
+    "description": "AgentBus Integration: Subscribe to code change events, report architectural violations.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 164,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "12da2e94-020d-497d-bd4d-4122c0b575b3",
+    "description": "Basic interaction loop.",
+    "status": "COMPLETED",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 167,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "598cefa8-8a8a-45eb-90f0-f767569691d0",
+    "description": "Command parsing refinement.",
+    "status": "BLOCKED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Blocked: Failed to update task status to IN_PROGRESS in master_task_list.json. Edit tool reported 'no changes'. Cannot claim task.",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 168,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "de0b49c6-9fb4-4906-a678-86b38d80b067",
+    "description": "State management for conversations.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 169,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "96aeafb6-1f39-4b02-bc1a-f7b0c7f657ab",
+    "description": "Error handling for API calls.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 170,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "910517e8-2bd5-4af7-977b-1dcab1f54550",
+    "description": "AgentBus Integration: Receive commands, dispatch resulting tasks/events.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 171,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "09d2b818-d8b0-4cc5-8ef2-286b81559c5f",
+    "description": "Define reflection process steps.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 174,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "99d89fb9-4404-4b5a-becc-5f75643809b1",
+    "description": "Implement data gathering for reflection.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 175,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "1e6cab49-3e7a-49d9-82bf-b079fa8ce45f",
+    "description": "Develop reflection analysis algorithms.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 176,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "eaf2d057-5c82-459a-9228-cad0a30cdf5f",
+    "description": "AgentBus Integration: Trigger reflection cycles, report insights.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 177,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "92bf23a8-720c-44e3-81c8-1bdca97edb89",
+    "description": "**Review Agent Registration:** Ensure all agents within `/d:/Dream.os/agents/` are correctly registered with the `AgentBus` (`/d:/Dream.os/_agent_coordination/core/agent_bus.py`).",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 183,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "266658ab-fd6b-4bbd-a08e-8858b98d2f2d",
+    "description": "**Standardize Event Handling:** Ensure agents consistently subscribe to and handle events using `AgentBus` methods.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 184,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "f296d630-6655-4960-941a-ce3cd29c6147",
+    "description": "**Task Reception (`EventType.TASK`):**",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 185,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "69d7f41a-5306-4ac5-98c2-b0cf8d739bb9",
+    "description": "Verify all agents intended to receive tasks from `/d:/Dream.os/_agent_coordination/dispatchers/task_dispatcher.py` correctly handle the `EventType.TASK` event.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 186,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "e7fadf96-e7c3-4b9f-aa60-cbf01d3d1316",
+    "description": "Ensure robust parsing of the task payload (`action`, `params`, etc.).",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 187,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "807861d5-48e3-40da-9915-5ee0683d633b",
+    "description": "**Task Status Updates:**",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 188,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "3060f69a-c2ba-4489-be89-319f9ba9179a",
+    "description": "Standardize how agents report `COMPLETED`/`FAILED` status for tasks originating from the task list (e.g., direct update to `/d:/Dream.os/runtime/task_list.json` via utility, `AgentBus` status event).",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 189,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "b245ee45-6959-4117-9c48-ceaadf8ec4b4",
+    "description": "Ensure the chosen mechanism is reliable and handles potential errors (e.g., uses file locking if writing directly).",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 190,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "beb14381-b147-4b04-937b-24e427c2a67f",
+    "description": "**`CursorControlAgent`:**",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 194,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "88b0c6be-099f-4755-8ab5-f894b15d1fc9",
+    "description": "Review handled `task_type`s and ensure they align with the inference map in `TaskDispatcherAgent`.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 195,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "c973e281-a528-4259-898b-17f0a4a857c8",
+    "description": "Verify interaction logic with VS Code or other target IDEs.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 196,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "97d8a7de-9871-4616-904c-91673d051f18",
+    "description": "Test robustness of terminal command execution and output handling.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 197,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "ed7d2c8f-61cf-4529-b46e-c71b0c83519a",
+    "description": "**`MeredithResonanceScanner`:**",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 198,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "bf835d94-5dec-4fab-a5d6-8d4a9e5ae311",
+    "description": "Define tasks/events handled by this agent.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 199,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "51ac87c2-54df-4e68-b94e-dbeaa21c0b03",
+    "description": "Verify integration with relevant data sources or systems.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 200,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "2b1702bd-7f03-43e6-b1d4-f10f244f3c67",
+    "description": "**`FeedbackEngine`:**",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 201,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "2fc085ee-f187-40b5-b7eb-54f791be8bdf",
+    "description": "Define tasks/events handled by this agent.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 202,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "5d367f44-8da2-46c9-80a3-35cb3c99d7ea",
+    "description": "Verify feedback processing logic.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 203,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "a07cd846-11f9-4569-b427-d53fd6b473b4",
+    "description": "**`AgentMonitorAgent`:**",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 204,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "b21b1c17-e08b-461a-bbe1-4f2bd8659094",
+    "description": "Define tasks/events handled by this agent.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 205,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "4da29788-344e-4e6c-bdeb-2e9c8ec42580",
+    "description": "Verify system status reporting mechanisms.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 206,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "b0d0c4c6-88c1-496d-91ba-ac18175862ea",
+    "description": "**Other Agents:** Review any other agents in `/d:/Dream.os/agents/` for AgentBus integration, task handling, and specific logic post-coordination refactor.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 207,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "45c6edd4-c4ff-4ba9-b11f-13c450f5e79f",
+    "description": "Add/update unit tests for individual agent logic.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 211,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "57544fa3-95c5-4ccc-ba58-185d08b2ba24",
+    "description": "Add/update integration tests (using mocked `AgentBus`) for agent event handling and task processing (as outlined in `/d:/Dream.os/tests/task_list.md`).",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 212,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "44eec390-890c-431c-9eb5-d77cc3b6f4d4",
+    "description": "Ensure each agent file has a clear module/class docstring explaining its purpose.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 216,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "a08649b1-1cb6-407c-a8bb-571295a279cd",
+    "description": "Document the specific tasks/events handled by each agent.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 217,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "2f024da9-99ef-4fe8-8b54-0cc4dd992190",
+    "description": "Enhance logging within agents for better traceability of actions and decisions.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 218,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "d4eff525-1a12-462a-8133-99fe4927c814",
+    "description": "Develop template/boilerplate for new agents.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 222,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "76084ed6-d00f-41b3-9c43-a5a384c1f480",
+    "description": "Define standard agent lifecycle methods (start, stop, handle_message).",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 223,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "d334c674-c209-4c8b-8ce4-bcf386908cd3",
+    "description": "Improve error handling and resilience framework for agents.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 224,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "fa2fd482-fa20-484d-9d92-1430bcb680c2",
+    "description": "Commit all changes to agent code.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 228,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "253bed93-9165-4f48-80e7-0a70c612121f",
+    "description": "Resolve any outstanding TODOs or issues within agent implementations.",
+    "status": "PENDING",
+    "source_file": "agents/task_list.md",
+    "module": "agents",
+    "original_line": 229,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "434ce82b-cb98-435b-a096-c9812ff76509",
+    "description": "**Standardize Task Structure:** Formally define the common JSON schema for all tasks stored in `/d:/Dream.os/runtime/task_list.json` (e.g., `task_id`, `task_type`, `status`, `params`, `target_agent`, timestamps, `priority`, `dependencies`).",
+    "status": "COMPLETED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Defined standard task schema based on observed fields and task description. Mandatory fields: task_id, description, status, task_type, priority (default NORMAL). Optional: params, assigned_to, target_agent, depends_on, result_summary, result, source_file, module, original_line, timestamps (created/updated recommended). Schema definition added to result field.",
+    "result": {
+      "schema_definition": "interface Task {\n  task_id: string; // UUID, Mandatory\n  description: string; // Mandatory\n  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED' | 'BLOCKED'; // Mandatory\n  priority: 'CRITICAL' | 'HIGH' | 'NORMAL' | 'LOW'; // Recommended Mandatory, Default: NORMAL\n  task_type: string; // Mandatory (Defines the action/handler)\n  params?: Record<string, any>; // Optional, structure depends on task_type\n\n  // Optional Fields:\n  assigned_to?: string; // Agent ID, added when claimed/completed\n  target_agent?: string; // Explicit agent target, overrides inference\n  depends_on?: string[]; // List of prerequisite task_ids\n  result_summary?: string; // Text summary of result/error\n  result?: Record<string, any>; // Detailed structured result/error data\n  source_file?: string; // Originating file path (e.g., task_list.md)\n  module?: string; // Logical module association\n  original_line?: number; // Line number in source_file\n  timestamp_created_utc?: string; // ISO 8601 timestamp (Task definition time)\n  timestamp_updated_utc?: string; // ISO 8601 timestamp (Last status change)\n  timestamp_aggregated_utc?: string; // ISO 8601 timestamp (Task aggregation time)\n}"
+    },
+    "source_file": "agent_tasks/task_list.md",
+    "module": "agent_tasks",
+    "original_line": 7,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "dffb8c48-633f-4fea-8054-d63cd0cc4e98",
+    "description": "**Define Specific Task Payloads:** For each `task_type` used by the system (e.g., `resume_operation`, `diagnose_loop`, `generate_task`, social tasks), define the expected structure and fields within the `params` object.",
+    "status": "BLOCKED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Blocked: Cannot define all task payloads. Requires access to agent source code to identify all task_types and their specific parameter requirements. Many agent files are currently inaccessible due to prior blocked/interrupted file searches.",
+    "source_file": "agent_tasks/task_list.md",
+    "module": "agent_tasks",
+    "original_line": 8,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "b666173e-d69f-42ce-8b3e-bdd52af26564",
+    "description": "**Schema Validation:** Implement or integrate schema validation when tasks are created or potentially when read by the dispatcher (`/d:/Dream.os/_agent_coordination/dispatchers/task_dispatcher.py`).",
+    "status": "PENDING",
+    "source_file": "agent_tasks/task_list.md",
+    "module": "agent_tasks",
+    "original_line": 9,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "379a7e32-25ca-4cb5-9ec2-22bee751ac7d",
+    "description": "**Catalog Task Types:** Maintain a clear list or enumeration of all valid `task_type` values used across the system.",
+    "status": "PENDING",
+    "source_file": "agent_tasks/task_list.md",
+    "module": "agent_tasks",
+    "original_line": 13,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "5543c9c6-5d36-45ab-8921-148e07ad625b",
+    "description": "**Update Inference Map:** Ensure the `_infer_target_agent` routing map in `/d:/Dream.os/_agent_coordination/dispatchers/task_dispatcher.py` is kept consistent with the defined task types and their intended agents.",
+    "status": "PENDING",
+    "source_file": "agent_tasks/task_list.md",
+    "module": "agent_tasks",
+    "original_line": 14,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "56075e86-20aa-42a2-a0a8-c2e841c49acf",
+    "description": "**Define Status Transitions:** Clearly document the valid state transitions for task `status` (e.g., `PENDING` -> `PROCESSING` -> (`DISPATCHED` | `FAILED`), `DISPATCHED` -> (`COMPLETED` | `FAILED` via agent update)).",
+    "status": "COMPLETED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Defined standard status transitions based on schema and common practice. PENDING -> {IN_PROGRESS, FAILED}; IN_PROGRESS -> {COMPLETED, FAILED, CANCELLED, BLOCKED}; FAILED -> {PENDING (Retry)}; BLOCKED -> {PENDING}. Precise active status (IN_PROGRESS/CLAIMED/RUNNING) depends on implementation.",
+    "result": {
+      "valid_transitions": [
+        "PENDING -> IN_PROGRESS",
+        "PENDING -> CLAIMED",
+        "PENDING -> RUNNING",
+        "PENDING -> FAILED",
+        "IN_PROGRESS/CLAIMED/RUNNING -> COMPLETED",
+        "IN_PROGRESS/CLAIMED/RUNNING -> FAILED",
+        "IN_PROGRESS/CLAIMED/RUNNING -> CANCELLED",
+        "IN_PROGRESS/CLAIMED/RUNNING -> BLOCKED",
+        "FAILED -> PENDING",
+        "BLOCKED -> PENDING"
+      ]
+    },
+    "source_file": "agent_tasks/task_list.md",
+    "module": "agent_tasks",
+    "original_line": 18,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "2eed6fb8-466e-4d2b-af07-ff4da934809c",
+    "description": "**Error/Result Payloads:** Define standard structures for `error` and `result` fields within completed/failed tasks in `/d:/Dream.os/runtime/task_list.json`.",
+    "status": "COMPLETED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Defined standard structures for result (success) and error payloads within the task object. Includes fields like status, message, data (for success), and error_code, message, details (for error).",
+    "result": {
+      "success_payload_structure": {
+        "status": "success",
+        "message": "Optional human-readable success message",
+        "data": "Object containing task-specific structured output data"
+      },
+      "error_payload_structure": {
+        "status": "error", 
+        "error_code": "Standardized error category string (e.g., AGENT_ERROR, FILE_NOT_FOUND)",
+        "message": "Mandatory human-readable error message",
+        "details": "Optional object containing structured error details (e.g., traceback, failed_step)"
+      }
+    },
+    "source_file": "agent_tasks/task_list.md",
+    "module": "agent_tasks",
+    "original_line": 19,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "168ac35e-5364-4f74-bccf-a55eaad3c922",
+    "description": "**Document Task Schema:** Add comprehensive documentation (e.g., in `/d:/Dream.os/docs/task_list.md`) detailing the task JSON structure and fields.",
+    "status": "COMPLETED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Created ../docs/schemas/task_schema.md documenting the standardized task schema, status transitions, and result/error payload structures defined in previous tasks.",
+    "source_file": "agent_tasks/task_list.md",
+    "module": "agent_tasks",
+    "original_line": 23,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "58c45576-1729-47df-9a09-1d33783fa7c0",
+    "description": "**Document Task Types:** For each `task_type`, document its purpose, expected `params`, and the agent(s) responsible for handling it.",
+    "status": "PENDING",
+    "source_file": "agent_tasks/task_list.md",
+    "module": "agent_tasks",
+    "original_line": 24,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "0ba365b8-3e39-4d63-81aa-985cbc66f6ce",
+    "description": "Commit any changes to task definitions or schemas.",
+    "status": "COMPLETED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Committed changes to master_task_list.json and docs/schemas/task_schema.md related to task schema definition.",
+    "source_file": "agent_tasks/task_list.md",
+    "module": "agent_tasks",
+    "original_line": 28,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "fe87b49c-5dbe-43f2-9497-db28fff053e5",
+    "description": "Ensure task structures are consistent and well-documented.",
+    "status": "COMPLETED",
+    "assigned_to": "Agent_4",
+    "result_summary": "General task structure, transitions, and payload formats are defined and documented (docs/schemas/task_schema.md). Consistency is good at this level. Specific payload definitions remain blocked (task dffb8c48-...).",
+    "source_file": "agent_tasks/task_list.md",
+    "module": "agent_tasks",
+    "original_line": 29,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "4cd5b7e4-5661-47f3-aef3-a7e6b48562a4",
+    "description": "**Identify Analysis Goals:** Define the key metrics and questions to be answered (e.g., task completion rates, agent response times, error frequencies, resource usage).",
+    "status": "BLOCKED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Blocked: Identified analysis goals, but failed to mark task as COMPLETED in master_task_list.json. Edit tool reported 'no changes'. Unable to save progress.",
+    "result": {
+      "analysis_goals_metrics": [
+        "Task Throughput: Rate of task completion (overall, per agent, per task_type).",
+        "Task Latency: Time from PENDING to COMPLETED/FAILED (average, median, p95).",
+        "Error Rates: Frequency of FAILED/BLOCKED tasks (overall, per agent, per task_type). Categorize errors using result.error_code.",
+        "Agent Utilization: Time spent BUSY vs IDLE (requires agent status reporting via AgentBus).",
+        "Resource Consumption: CPU/Memory usage per agent or per task (requires OS/infra integration).",
+        "Task Queue Length: Monitor the number of PENDING tasks over time.",
+        "Retry Rates: Frequency of retries and success rate after retry.",
+        "Specific Agent KPIs: Define relevant output/success metrics per agent role (e.g., code changes, posts created)."
+      ]
+    },
+    "source_file": "analysis/task_list.md",
+    "module": "analysis",
+    "original_line": 7,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "0e3f7b77-a0c5-497e-b7c1-eee3b3660c0d",
+    "description": "**Review/Implement Scripts:** Develop or refine scripts within `/d:/Dream.os/analysis/` to perform these analyses.",
+    "status": "COMPLETED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Reviewed existing script: ../analysis/log_analyzer.py. It provides basic agent success/error counts from memory/performance_log.jsonl. Requires refinement: Update log path, align status checks (COMPLETED/FAILED), add latency/throughput metrics, use standard error_code.",
+    "source_file": "analysis/task_list.md",
+    "module": "analysis",
+    "original_line": 8,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "83ed1055-c064-41a0-ae61-aeec58f17517",
+    "description": "**Data Sources:** Ensure scripts correctly access necessary data (e.g., `/d:/Dream.os/runtime/task_list.json`, logs from `/d:/Dream.os/logs/`, performance metrics).",
+    "status": "IN_PROGRESS",
+    "assigned_to": "Agent_4",
+    "source_file": "analysis/task_list.md",
+    "module": "analysis",
+    "original_line": 9,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "7c46bb1e-49da-4c3c-9a0d-1feafb363466",
+    "description": "**Visualization Needs:** Determine required visualizations (e.g., task status trends, agent load distribution).",
+    "status": "BLOCKED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Blocked: Claiming this task introduced JSON linting errors (End of file expected). Subsequent attempts to fix the JSON or mark task as completed failed. Persistent issues modifying master_task_list.json prevent progress.",
+    "result": {
+        "visualization_needs": [
+            "Task Throughput: Time series line chart (completed tasks/time), stacked by agent/task_type.",
+            "Task Latency: Histogram/Box plot of completion times, filterable by agent/task_type.",
+            "Error Rates: Pie chart (status proportions), Time series line chart (error rate), Bar chart (errors per error_code).",
+            "Agent Utilization: Stacked area chart (agent status over time - requires status data).",
+            "Task Queue Length: Time series line chart (PENDING tasks over time)."
+        ]
+    },
+    "source_file": "analysis/task_list.md",
+    "module": "analysis",
+    "original_line": 13,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "381f5860-0f49-4520-897c-cf7355eb2f4e",
+    "description": "**Implement Visualizations:** Use appropriate libraries (e.g., Matplotlib, Seaborn, Plotly) within analysis scripts or dedicated tools to generate visualizations.",
+    "status": "PENDING",
+    "source_file": "analysis/task_list.md",
+    "module": "analysis",
+    "original_line": 14,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "e7b248d2-ad24-4f39-86b9-3ec6ce6c67d0",
+    "description": "**Integration with Reports:** Consider integrating key visualizations into reports generated from `/d:/Dream.os/reports/`.",
+    "status": "PENDING",
+    "source_file": "analysis/task_list.md",
+    "module": "analysis",
+    "original_line": 15,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "18e47538-ac04-41a6-8b78-bba5f1b2a232",
+    "description": "**Define Metrics:** Specify key performance indicators (KPIs) for the system and individual agents.",
+    "status": "PENDING",
+    "source_file": "analysis/task_list.md",
+    "module": "analysis",
+    "original_line": 19,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "51a44d87-3444-4cf8-8504-7da63145b736",
+    "description": "**Implement Monitoring:** Develop mechanisms to collect and track these KPIs (potentially involving `AgentBus` events or log parsing).",
+    "status": "PENDING",
+    "source_file": "analysis/task_list.md",
+    "module": "analysis",
+    "original_line": 20,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "42315ca8-30ab-47f7-a46b-f00bab62d74d",
+    "description": "**Alerting (Optional):** Consider adding alerts for performance degradation or critical metric thresholds.",
+    "status": "PENDING",
+    "source_file": "analysis/task_list.md",
+    "module": "analysis",
+    "original_line": 21,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "de26f185-6154-4355-aaaf-e5864546616d",
+    "description": "**Test Analysis Logic:** Verify the correctness of calculations and logic within analysis scripts.",
+    "status": "PENDING",
+    "source_file": "analysis/task_list.md",
+    "module": "analysis",
+    "original_line": 25,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "0091b1c2-1397-4500-9a97-c15f01ef0590",
+    "description": "**Validate Data Sources:** Ensure the data being analyzed is accurate and complete.",
+    "status": "PENDING",
+    "source_file": "analysis/task_list.md",
+    "module": "analysis",
+    "original_line": 26,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "f167cbf1-0091-4503-a10d-9a287aded5b1",
+    "description": "**Document Analysis Scripts:** Explain the purpose, usage, and output of each script.",
+    "status": "PENDING",
+    "source_file": "analysis/task_list.md",
+    "module": "analysis",
+    "original_line": 30,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "62395383-617e-4257-81d7-25af49bde0f8",
+    "description": "**Document Metrics:** Define how KPIs and other analyzed metrics are calculated.",
+    "status": "PENDING",
+    "source_file": "analysis/task_list.md",
+    "module": "analysis",
+    "original_line": 31,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "21221652-d108-4eaf-82d9-ef7df2622334",
+    "description": "**Summarize Findings:** Document key findings or insights derived from the analysis.",
+    "status": "PENDING",
+    "source_file": "analysis/task_list.md",
+    "module": "analysis",
+    "original_line": 32,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "03d50cdd-b480-4933-bc55-79318d9fca34",
+    "description": "Commit analysis scripts and related code.",
+    "status": "PENDING",
+    "source_file": "analysis/task_list.md",
+    "module": "analysis",
+    "original_line": 36,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "4be6e158-39f9-4442-8356-7e833dbb8758",
+    "description": "Ensure analysis tools provide valuable insights into system behavior.",
+    "status": "PENDING",
+    "source_file": "analysis/task_list.md",
+    "module": "analysis",
+    "original_line": 37,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:25Z"
+  },
+  {
+    "task_id": "7f98556d-9a82-4b9c-9601-a3a064f1af15",
+    "description": "**Review Config Files:** Identify all configuration files used by the system (e.g., `config.yaml`, `.env`, specific agent configs).",
+    "status": "COMPLETED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Identified main config sources: dreamforge/core/config.py (defines paths, settings), Environment Variables (DREAM_OS_DEBUG, _LOG_LEVEL, _ENV), agent-specific constants, secrets/cookies.json (in chatgpt_commander). No standard YAML/JSON/INI files found.",
+    "source_file": "config/task_list.md",
+    "module": "config",
+    "original_line": 7,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "62626e46-e161-4475-bb59-1c011d37c4e3",
+    "description": "**Standardize Format:** Ensure a consistent format (e.g., YAML, JSON, INI) is used where appropriate.",
+    "status": "COMPLETED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Review complete. Configuration primarily uses the dreamforge/core/config.py module and environment variables, establishing Python/env vars as the standard format. No external YAML/JSON/INI files are central to configuration.",
+    "source_file": "config/task_list.md",
+    "module": "config",
+    "original_line": 8,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "d52afa21-b64a-4e81-9a07-296a73faf1f3",
+    "description": "**Parameter Naming:** Verify consistent and clear naming conventions for configuration parameters.",
+    "status": "COMPLETED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Reviewed dreamforge/core/config.py. Naming conventions are consistent and follow Python standards: UPPER_SNAKE_CASE for constants and env vars (with DREAM_OS_ prefix), lower_snake_case for dict keys.",
+    "source_file": "config/task_list.md",
+    "module": "config",
+    "original_line": 9,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "be7b3409-f9ba-4bc6-8847-517e76dde9f2",
+    "description": "**Environment Variables:** Clarify the use of environment variables versus config files.",
+    "status": "COMPLETED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Clarified usage: Environment variables (DREAM_OS_*) are used for deployment-specific settings (DEBUG, LOG_LEVEL, ENV). The config.py module is used for application constants, defaults, and derived paths. This seems a reasonable separation.",
+    "source_file": "config/task_list.md",
+    "module": "config",
+    "original_line": 10,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "1ac7e133-9700-49e6-9cd1-2f4750d5e6bb",
+    "description": "**AgentBus Config:** Document configuration options for `/d:/Dream.os/_agent_coordination/core/agent_bus.py` (if any).",
+    "status": "IN_PROGRESS",
+    "assigned_to": "Agent_4",
+    "source_file": "config/task_list.md",
+    "module": "config",
+    "original_line": 14,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "c7c9b78f-3a6b-4e1d-9e27-e652998961fe",
+    "description": "**TaskDispatcher Config:** Document configuration options for `/d:/Dream.os/_agent_coordination/dispatchers/task_dispatcher.py` (e.g., `CHECK_INTERVAL_SECONDS`, task list path if configurable).",
+    "status": "PENDING",
+    "source_file": "config/task_list.md",
+    "module": "config",
+    "original_line": 15,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "0aae3c68-6674-4578-9857-35cb6e7e8933",
+    "description": "**Logging Configuration:** Review and document how logging levels and outputs are configured.",
+    "status": "PENDING",
+    "source_file": "config/task_list.md",
+    "module": "config",
+    "original_line": 16,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "bbd4385f-838f-48f2-a238-2a303cfe4716",
+    "description": "**Review Agent Params:** Check if agents require specific configuration parameters (API keys, model names, resource limits).",
+    "status": "PENDING",
+    "source_file": "config/task_list.md",
+    "module": "config",
+    "original_line": 20,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "c8e33a65-2481-49fa-b490-bac953c3df04",
+    "description": "**Consolidate Config:** Consider consolidating agent-specific configurations into a central file or structure.",
+    "status": "PENDING",
+    "source_file": "config/task_list.md",
+    "module": "config",
+    "original_line": 21,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "2accef4e-a439-412a-a326-a7b8ea291e36",
+    "description": "**Review Loading Logic:** Examine how configuration is loaded (e.g., in `/d:/Dream.os/core/` or specific modules).",
+    "status": "PENDING",
+    "source_file": "config/task_list.md",
+    "module": "config",
+    "original_line": 25,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "53892d86-cad1-4f16-b4a3-9b4500ae9856",
+    "description": "**Implement Validation:** Add validation for critical configuration parameters (e.g., required fields, value types/ranges).",
+    "status": "PENDING",
+    "source_file": "config/task_list.md",
+    "module": "config",
+    "original_line": 26,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "da90f649-8665-4dc6-987c-852be88a1387",
+    "description": "**Default Values:** Define sensible default values for non-critical parameters.",
+    "status": "PENDING",
+    "source_file": "config/task_list.md",
+    "module": "config",
+    "original_line": 27,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "2d171f3d-0237-4cec-af1c-bf60ac146b15",
+    "description": "**Document Config Files:** Create documentation (e.g., in `/d:/Dream.os/docs/task_list.md` or a dedicated config doc) explaining all configuration options, their purpose, and possible values.",
+    "status": "PENDING",
+    "source_file": "config/task_list.md",
+    "module": "config",
+    "original_line": 31,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "c7d245d0-c475-4362-8bb5-2e5ec81e6eb3",
+    "description": "**Provide Examples:** Include example configuration snippets.",
+    "status": "PENDING",
+    "source_file": "config/task_list.md",
+    "module": "config",
+    "original_line": 32,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "26717246-565f-435f-95e7-d61e5317a07b",
+    "description": "Commit any changes to configuration files or loading logic.",
+    "status": "PENDING",
+    "source_file": "config/task_list.md",
+    "module": "config",
+    "original_line": 36,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "d72ea618-af10-4c2a-b312-9a75ffc321b3",
+    "description": "Ensure configuration is well-structured and documented.",
+    "status": "PENDING",
+    "source_file": "config/task_list.md",
+    "module": "config",
+    "original_line": 37,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "eb22a729-efd1-4170-ba9a-8c76f90dc634",
+    "description": "**Define Scope:** Clarify the specific coordination mechanisms implemented or defined within this directory.",
+    "status": "PENDING",
+    "source_file": "coordination/task_list.md",
+    "module": "coordination",
+    "original_line": 9,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "21edb185-81fa-450e-b5ea-1f53d6e264f7",
+    "description": "**Review Algorithms:** Examine any coordination algorithms (e.g., leader election, distributed consensus, workflow patterns if not in `core`).",
+    "status": "PENDING",
+    "source_file": "coordination/task_list.md",
+    "module": "coordination",
+    "original_line": 10,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "39da93ab-9694-43fc-af62-ffc782093c2a",
+    "description": "**Compare with `_agent_coordination`:** Determine how strategies here relate to or complement the `AgentBus` and `TaskDispatcherAgent` in `/d:/Dream.os/_agent_coordination/`.",
+    "status": "PENDING",
+    "source_file": "coordination/task_list.md",
+    "module": "coordination",
+    "original_line": 11,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "69d14e47-6060-4397-a3a9-692dce2c9d56",
+    "description": "**Code Quality:** Review implementation for clarity, correctness, and efficiency.",
+    "status": "PENDING",
+    "source_file": "coordination/task_list.md",
+    "module": "coordination",
+    "original_line": 15,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "4bf1b473-29cc-49ac-aa35-b5ac016220d1",
+    "description": "**Integration:** Verify how components in this module interact with agents (`/d:/Dream.os/agents/`) or the core system (`/d:/Dream.os/core/`).",
+    "status": "PENDING",
+    "source_file": "coordination/task_list.md",
+    "module": "coordination",
+    "original_line": 16,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "4ad1fd59-a82e-46f8-a3b7-06d7db6d1e77",
+    "description": "**State Management:** Review how coordination state is managed (if applicable).",
+    "status": "PENDING",
+    "source_file": "coordination/task_list.md",
+    "module": "coordination",
+    "original_line": 17,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "4c675789-cdd4-47ce-9eb0-68027b705b12",
+    "description": "**Interaction with `task_list.json`:** Determine if coordination logic here reads or writes to `/d:/Dream.os/runtime/task_list.json`.",
+    "status": "PENDING",
+    "source_file": "coordination/task_list.md",
+    "module": "coordination",
+    "original_line": 21,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "219e82e7-9921-463b-b1c7-b0f3f2e1e393",
+    "description": "**Triggering Tasks:** Check if coordination events trigger new tasks via the dispatcher or other means.",
+    "status": "PENDING",
+    "source_file": "coordination/task_list.md",
+    "module": "coordination",
+    "original_line": 22,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "029fea87-5e93-4586-a982-48b99a227998",
+    "description": "**Add Unit Tests:** Test core coordination algorithms and logic.",
+    "status": "PENDING",
+    "source_file": "coordination/task_list.md",
+    "module": "coordination",
+    "original_line": 26,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "b2ac5acb-e6f9-4682-abc0-7a9c424cd434",
+    "description": "**Add Integration Tests:** Test the interaction of these coordination mechanisms with agents and the rest of the system.",
+    "status": "PENDING",
+    "source_file": "coordination/task_list.md",
+    "module": "coordination",
+    "original_line": 27,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "96a03e02-6135-4eef-94c8-65ed63be07a6",
+    "description": "**Test Scalability/Robustness:** Evaluate how coordination strategies perform under load or in failure scenarios.",
+    "status": "PENDING",
+    "source_file": "coordination/task_list.md",
+    "module": "coordination",
+    "original_line": 28,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "4782ceb9-8e05-44c4-b860-fd775f238c52",
+    "description": "**Document Strategies:** Explain the coordination mechanisms implemented here.",
+    "status": "PENDING",
+    "source_file": "coordination/task_list.md",
+    "module": "coordination",
+    "original_line": 32,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "94b5755b-4902-4a9c-900e-31598e909685",
+    "description": "**Document APIs/Interfaces:** Detail how other modules interact with components in `/d:/Dream.os/coordination/`.",
+    "status": "PENDING",
+    "source_file": "coordination/task_list.md",
+    "module": "coordination",
+    "original_line": 33,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "d5de721a-9a0e-4932-9685-eb41a703e26f",
+    "description": "**Clarify Relation to `_agent_coordination`:** Document the distinction and relationship between the two coordination directories.",
+    "status": "PENDING",
+    "source_file": "coordination/task_list.md",
+    "module": "coordination",
+    "original_line": 34,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "c1b8f5f0-aa9a-4050-8fb0-721241f5f9e1",
+    "description": "Commit changes to coordination code.",
+    "status": "PENDING",
+    "source_file": "coordination/task_list.md",
+    "module": "coordination",
+    "original_line": 38,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "4d8726d7-8318-4036-b39b-e4ee5cd544f4",
+    "description": "Resolve TODOs within this module.",
+    "status": "PENDING",
+    "source_file": "coordination/task_list.md",
+    "module": "coordination",
+    "original_line": 39,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "89d8b6bc-c66e-4518-ba5a-c767f43f4cdd",
+    "description": "Ensure clarity on the role and function of this coordination module.",
+    "status": "PENDING",
+    "source_file": "coordination/task_list.md",
+    "module": "coordination",
+    "original_line": 40,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "73939c99-b601-4811-bd76-cf6892aa0435",
+    "description": "**Review Main Loop/Workflow:** Examine the primary control flow of the system.",
+    "status": "PENDING",
+    "source_file": "core/task_list.md",
+    "module": "core",
+    "original_line": 7,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "f83ec6c8-7961-40f4-aebf-93e4b0d59fd9",
+    "description": "**Integration with Task Dispatcher:** Ensure the core system correctly utilizes or interacts with the `/d:/Dream.os/_agent_coordination/dispatchers/task_dispatcher.py` (e.g., triggering initial tasks, handling system-level events).",
+    "status": "PENDING",
+    "source_file": "core/task_list.md",
+    "module": "core",
+    "original_line": 8,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "30d57f2c-04d8-4add-baf3-1df1d36fccce",
+    "description": "**State Management:** Review how overall system state is managed.",
+    "status": "PENDING",
+    "source_file": "core/task_list.md",
+    "module": "core",
+    "original_line": 9,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "91b4fea2-1f55-4832-888c-247a1ed30380",
+    "description": "**System-Level Events:** Identify and handle any system-wide events monitored or published by the core module via `/d:/Dream.os/_agent_coordination/core/agent_bus.py`.",
+    "status": "PENDING",
+    "source_file": "core/task_list.md",
+    "module": "core",
+    "original_line": 13,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "7c0f1677-57d1-4b3b-ad4e-25e02365efaf",
+    "description": "**Initialization:** Ensure `AgentBus` and core agents are initialized correctly during system startup.",
+    "status": "PENDING",
+    "source_file": "core/task_list.md",
+    "module": "core",
+    "original_line": 14,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "e0c38776-4a97-4dd2-9591-4bff8aa9a2a2",
+    "description": "**Verify Config Usage:** Check how configuration (potentially from `/d:/Dream.os/config/`) is loaded and used by core components.",
+    "status": "PENDING",
+    "source_file": "core/task_list.md",
+    "module": "core",
+    "original_line": 18,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "fbdf1f41-9e28-43b2-a027-7470d3e6c7e2",
+    "description": "**Error Handling:** Ensure robust handling of missing or invalid configuration.",
+    "status": "PENDING",
+    "source_file": "core/task_list.md",
+    "module": "core",
+    "original_line": 19,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "a8f152f5-0da2-479d-b795-bdf47bb04b50",
+    "description": "**System-Wide Error Handling:** Review top-level error handling and potential recovery mechanisms.",
+    "status": "PENDING",
+    "source_file": "core/task_list.md",
+    "module": "core",
+    "original_line": 23,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "0c46df1c-b342-4bfd-8ab8-e5d9f639641d",
+    "description": "**Shutdown Procedures:** Ensure a clean shutdown process for the system and its agents.",
+    "status": "PENDING",
+    "source_file": "core/task_list.md",
+    "module": "core",
+    "original_line": 24,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "42415327-45e0-4312-8c0e-e18e6a49337a",
+    "description": "**Integration Tests:** Add tests covering the core workflow and interactions between major components (Dispatcher, AgentBus, key agents).",
+    "status": "PENDING",
+    "source_file": "core/task_list.md",
+    "module": "core",
+    "original_line": 28,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "696e7ae7-75c3-493e-b4c3-c4efc5d8df06",
+    "description": "**End-to-End Tests:** Develop tests simulating realistic scenarios from task injection to expected outcomes.",
+    "status": "PENDING",
+    "source_file": "core/task_list.md",
+    "module": "core",
+    "original_line": 29,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "964da426-7f75-4232-8139-bee5ba625cb7",
+    "description": "**Document Core Workflow:** Explain the main execution flow and component interactions.",
+    "status": "PENDING",
+    "source_file": "core/task_list.md",
+    "module": "core",
+    "original_line": 33,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "e7e2fda4-d7f5-4e24-9449-1415b52bda45",
+    "description": "**Document Configuration:** Detail required configuration parameters.",
+    "status": "PENDING",
+    "source_file": "core/task_list.md",
+    "module": "core",
+    "original_line": 34,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "241a1b69-7fda-409d-8bea-f88512d2ee4c",
+    "description": "Commit changes to core system files.",
+    "status": "PENDING",
+    "source_file": "core/task_list.md",
+    "module": "core",
+    "original_line": 38,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "9c93cbae-3e50-445e-bd50-1d18e9ed9b7a",
+    "description": "Resolve TODOs within the `core` module.",
+    "status": "PENDING",
+    "source_file": "core/task_list.md",
+    "module": "core",
+    "original_line": 39,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "c82e0a88-824e-4528-85ba-552d1873bb25",
+    "description": "**Task Dispatcher:** Document the refactored `TaskDispatcherAgent` (`/d:/Dream.os/_agent_coordination/dispatchers/task_dispatcher.py`), including:",
+    "status": "PENDING",
+    "source_file": "docs/task_list.md",
+    "module": "docs",
+    "original_line": 7,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "3bfb4cb6-13a5-454f-88d7-f5999a70b603",
+    "description": "**AgentBus:** Document the `AgentBus` (`/d:/Dream.os/_agent_coordination/core/agent_bus.py` or similar):",
+    "status": "PENDING",
+    "source_file": "docs/task_list.md",
+    "module": "docs",
+    "original_line": 12,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "58a975d4-c1f5-4f07-9c36-e414320962e2",
+    "description": "**Task List (`task_list.json`):** Document the structure and fields of `/d:/Dream.os/runtime/task_list.json`.",
+    "status": "PENDING",
+    "source_file": "docs/task_list.md",
+    "module": "docs",
+    "original_line": 16,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "f0798bf8-9859-44ed-a807-34c35bfd9b91",
+    "description": "**TaskListVisualizer:** Document the usage of the visualizer tool (`/d:/Dream.os/tools/task_list_visualizer.py`).",
+    "status": "PENDING",
+    "source_file": "docs/task_list.md",
+    "module": "docs",
+    "original_line": 19,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "db32b771-dcad-4156-b708-0433248c971a",
+    "description": "**Update Architecture Diagram:** Modify diagrams to accurately reflect the role of `TaskDispatcherAgent` and `AgentBus` in the task flow.",
+    "status": "PENDING",
+    "source_file": "docs/task_list.md",
+    "module": "docs",
+    "original_line": 26,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "7c230be9-69aa-4c92-9e03-18c4b5c896a4",
+    "description": "**Developer Guide:** Add/update sections on:",
+    "status": "PENDING",
+    "source_file": "docs/task_list.md",
+    "module": "docs",
+    "original_line": 27,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "3d9b7361-e456-4c51-b54b-7cbcc2340941",
+    "description": "**User Guide (If Applicable):** Document how to interact with the system or monitor its status, potentially referencing the visualizer.",
+    "status": "PENDING",
+    "source_file": "docs/task_list.md",
+    "module": "docs",
+    "original_line": 31,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "1dca8d23-fda9-4671-89f0-6e5f256c54a0",
+    "description": "**Review Existing Docs:** Check all existing documentation for accuracy following recent refactoring.",
+    "status": "PENDING",
+    "source_file": "docs/task_list.md",
+    "module": "docs",
+    "original_line": 35,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "da5d6d82-df85-46c5-bbc8-56d3bc3f0d38",
+    "description": "**Fix Broken Links:** Ensure all internal/external links are valid.",
+    "status": "PENDING",
+    "source_file": "docs/task_list.md",
+    "module": "docs",
+    "original_line": 36,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "45dfc52c-8cf5-415a-8c5d-9991232bd967",
+    "description": "**Improve Readability:** Refine formatting and structure for clarity.",
+    "status": "PENDING",
+    "source_file": "docs/task_list.md",
+    "module": "docs",
+    "original_line": 37,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "352261d0-c219-485c-8a1b-125e526760d2",
+    "description": "Commit all documentation changes.",
+    "status": "PENDING",
+    "source_file": "docs/task_list.md",
+    "module": "docs",
+    "original_line": 41,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "4821c45d-be9d-4573-a502-d9d9079cee80",
+    "description": "Ensure documentation accurately reflects the current state of the codebase.",
+    "status": "PENDING",
+    "source_file": "docs/task_list.md",
+    "module": "docs",
+    "original_line": 42,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "8d713780-e4d1-4d06-a5b3-a6d7ed304c10",
+    "description": "**Review Purpose:** Clarify the specific role and responsibilities of the `dreamforge` module within the overall system.",
+    "status": "PENDING",
+    "source_file": "dreamforge/task_list.md",
+    "module": "dreamforge",
+    "original_line": 7,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "babf89a9-d215-4ca4-abd2-ae82a82e2b96",
+    "description": "**Examine Key Components:** Identify and review the main classes and functions within `/d:/Dream.os/dreamforge/`.",
+    "status": "PENDING",
+    "source_file": "dreamforge/task_list.md",
+    "module": "dreamforge",
+    "original_line": 8,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "6d319ee1-b151-4e2d-92fa-aed9dd01a88a",
+    "description": "**Refactoring Opportunities:** Look for areas to improve code structure, clarity, or efficiency.",
+    "status": "PENDING",
+    "source_file": "dreamforge/task_list.md",
+    "module": "dreamforge",
+    "original_line": 9,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "1e914ac3-3859-4364-8a19-206e4969fa8f",
+    "description": "**AgentBus Interaction:**",
+    "status": "PENDING",
+    "source_file": "dreamforge/task_list.md",
+    "module": "dreamforge",
+    "original_line": 13,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "af12a23d-e0fd-4cfb-aa0a-306b9325697a",
+    "description": "If `dreamforge` contains agents, ensure they are registered and interact correctly with `/d:/Dream.os/_agent_coordination/core/agent_bus.py`.",
+    "status": "PENDING",
+    "source_file": "dreamforge/task_list.md",
+    "module": "dreamforge",
+    "original_line": 14,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "e1bf4211-02a6-493c-b0f2-9a9966271927",
+    "description": "Identify any custom events published or subscribed to by this module.",
+    "status": "PENDING",
+    "source_file": "dreamforge/task_list.md",
+    "module": "dreamforge",
+    "original_line": 15,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "650c86b6-74e6-422c-ad05-e965ad2767de",
+    "description": "**Task Handling:**",
+    "status": "PENDING",
+    "source_file": "dreamforge/task_list.md",
+    "module": "dreamforge",
+    "original_line": 16,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "fd40acae-48f9-4604-a7bf-afe47466e08c",
+    "description": "Verify how `dreamforge` components receive tasks (e.g., via `AgentBus` event from `/d:/Dream.os/_agent_coordination/dispatchers/task_dispatcher.py`).",
+    "status": "PENDING",
+    "source_file": "dreamforge/task_list.md",
+    "module": "dreamforge",
+    "original_line": 17,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "9b91e683-895a-47f3-9f10-692d52bce6a9",
+    "description": "Ensure correct parsing of task payloads relevant to `dreamforge`.",
+    "status": "PENDING",
+    "source_file": "dreamforge/task_list.md",
+    "module": "dreamforge",
+    "original_line": 18,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "becfbafc-d505-45e0-b4fe-2e126e116707",
+    "description": "Confirm status updates (`COMPLETED`/`FAILED`) are reported back correctly (consistent with `/d:/Dream.os/agents/task_list.md` guidelines).",
+    "status": "PENDING",
+    "source_file": "dreamforge/task_list.md",
+    "module": "dreamforge",
+    "original_line": 19,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "902347d4-2024-4811-8d32-a2b519968ac1",
+    "description": "**Planning Engine (if applicable):** Review planning algorithms and output structures.",
+    "status": "PENDING",
+    "source_file": "dreamforge/task_list.md",
+    "module": "dreamforge",
+    "original_line": 23,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "01b83ece-5148-4a2d-a7f3-3621025e752d",
+    "description": "**Code Generation (if applicable):** Verify code generation logic and template usage.",
+    "status": "PENDING",
+    "source_file": "dreamforge/task_list.md",
+    "module": "dreamforge",
+    "original_line": 24,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "b345f74d-f030-4106-9050-8290859f4fa4",
+    "description": "**Specialized Agent Logic (if applicable):** Review unique behaviors of agents within this module.",
+    "status": "PENDING",
+    "source_file": "dreamforge/task_list.md",
+    "module": "dreamforge",
+    "original_line": 25,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "acb1e37c-0a1c-4812-ab63-e010196efbf1",
+    "description": "**Add Unit Tests:** Ensure core `dreamforge` logic is well-tested.",
+    "status": "PENDING",
+    "source_file": "dreamforge/task_list.md",
+    "module": "dreamforge",
+    "original_line": 29,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "2a45065a-523f-4571-b379-d76d263bb781",
+    "description": "**Add Integration Tests:** Test interactions between `dreamforge` components and the core system (e.g., `AgentBus`, `TaskDispatcherAgent`).",
+    "status": "PENDING",
+    "source_file": "dreamforge/task_list.md",
+    "module": "dreamforge",
+    "original_line": 30,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "ad011c60-9e65-4bed-9c60-5afe51f69c7d",
+    "description": "**Document Module Purpose:** Add/update a README or docstrings explaining the role of the `dreamforge` module.",
+    "status": "PENDING",
+    "source_file": "dreamforge/task_list.md",
+    "module": "dreamforge",
+    "original_line": 34,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "529b4b4b-1c98-491f-8298-505a530b4724",
+    "description": "**Document Key Components:** Explain the functionality of major classes and functions.",
+    "status": "PENDING",
+    "source_file": "dreamforge/task_list.md",
+    "module": "dreamforge",
+    "original_line": 35,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "7d173f88-77bc-476e-9a10-35e58df8728c",
+    "description": "**Document APIs/Interfaces:** Detail how other parts of the system should interact with `dreamforge` components.",
+    "status": "PENDING",
+    "source_file": "dreamforge/task_list.md",
+    "module": "dreamforge",
+    "original_line": 36,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "d3a3d6e5-ac31-43c8-84c9-4b699eabc3bf",
+    "description": "Commit changes to `dreamforge` code.",
+    "status": "PENDING",
+    "source_file": "dreamforge/task_list.md",
+    "module": "dreamforge",
+    "original_line": 40,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "4df7b1e2-4234-40d1-aaad-7f5931ffb46d",
+    "description": "Resolve TODOs within this module.",
+    "status": "PENDING",
+    "source_file": "dreamforge/task_list.md",
+    "module": "dreamforge",
+    "original_line": 41,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "949f2de3-6bda-4b44-95fe-e2fa3f2b1981",
+    "description": "**Define Scope:** Clarify what constitutes the 'execution' environment. Does it involve sandboxing? Specific libraries? Interaction with external systems?",
+    "status": "PENDING",
+    "source_file": "execution/task_list.md",
+    "module": "execution",
+    "original_line": 7,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "0784c184-a793-4a88-8759-9b3ef52d0ad9",
+    "description": "**Resource Management:** Review how resources (CPU, memory, API quotas) are managed during task execution.",
+    "status": "PENDING",
+    "source_file": "execution/task_list.md",
+    "module": "execution",
+    "original_line": 8,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "c7ffa64c-2678-4d18-940f-75e6f3d6b710",
+    "description": "**Security Considerations:** Analyze potential security implications of task execution (e.g., running arbitrary code, accessing sensitive data).",
+    "status": "PENDING",
+    "source_file": "execution/task_list.md",
+    "module": "execution",
+    "original_line": 9,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "e591644c-c33c-43ca-9633-c92c839904a3",
+    "description": "**Review Execution Flow:** Examine how agent decisions translate into concrete actions within this module (if applicable).",
+    "status": "PENDING",
+    "source_file": "execution/task_list.md",
+    "module": "execution",
+    "original_line": 13,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "e9aa4fbe-4ec3-4cf6-b28f-3cd96cc568ee",
+    "description": "**Interaction with Agents:** Verify the interface between agents (e.g., `/d:/Dream.os/agents/CursorControlAgent`) and the execution logic here.",
+    "status": "PENDING",
+    "source_file": "execution/task_list.md",
+    "module": "execution",
+    "original_line": 14,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "2fc03744-750c-4bbc-9e61-d6b719e4bda5",
+    "description": "**Error Handling:** Ensure robust error handling during action execution (e.g., command failures, API errors, timeouts).",
+    "status": "PENDING",
+    "source_file": "execution/task_list.md",
+    "module": "execution",
+    "original_line": 15,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "e5520a92-b8ed-4c14-846a-346c6cf4a2ea",
+    "description": "**Result Reporting:** Confirm that execution results (success, failure, output) are correctly reported back to the originating agent or task status mechanism.",
+    "status": "PENDING",
+    "source_file": "execution/task_list.md",
+    "module": "execution",
+    "original_line": 16,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "f215bb26-eb13-468a-8686-34a59f52969f",
+    "description": "**Task Context:** Ensure the execution environment receives necessary context from the task definition (`/d:/Dream.os/runtime/task_list.json`).",
+    "status": "PENDING",
+    "source_file": "execution/task_list.md",
+    "module": "execution",
+    "original_line": 20,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "2168520c-52b6-4905-a5a0-b606679fce0c",
+    "description": "**Status Updates:** Clarify if this module is responsible for any direct task status updates or if that's solely handled by the agent.",
+    "status": "PENDING",
+    "source_file": "execution/task_list.md",
+    "module": "execution",
+    "original_line": 21,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "3d6a9338-3704-42d8-864c-f4a6d1035eb1",
+    "description": "**Test Execution Scenarios:** Add tests covering various action types and potential failure modes.",
+    "status": "PENDING",
+    "source_file": "execution/task_list.md",
+    "module": "execution",
+    "original_line": 25,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "2b84cab0-7aa8-4875-8a58-ec688d201962",
+    "description": "**Test Resource Limits (If Applicable):** Verify behavior when resource limits are approached or exceeded.",
+    "status": "PENDING",
+    "source_file": "execution/task_list.md",
+    "module": "execution",
+    "original_line": 26,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "939faeb1-7ec9-4964-9110-4980d02706ad",
+    "description": "**Test Security Constraints (If Applicable):** Ensure security measures prevent unauthorized actions.",
+    "status": "PENDING",
+    "source_file": "execution/task_list.md",
+    "module": "execution",
+    "original_line": 27,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "2e9fd803-90f3-4e20-9f03-5f976e63f3d0",
+    "description": "**Document Execution Flow:** Explain how tasks or actions are executed.",
+    "status": "PENDING",
+    "source_file": "execution/task_list.md",
+    "module": "execution",
+    "original_line": 31,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "af8d7e9a-0b5f-45a4-ae4e-beef96bc0cdb",
+    "description": "**Document Environment:** Detail any specific requirements or constraints of the execution environment.",
+    "status": "PENDING",
+    "source_file": "execution/task_list.md",
+    "module": "execution",
+    "original_line": 32,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "0073cd0b-0c34-4843-a82d-f6140999a685",
+    "description": "**Document APIs/Interfaces:** Specify how agents or other modules interact with the execution logic.",
+    "status": "PENDING",
+    "source_file": "execution/task_list.md",
+    "module": "execution",
+    "original_line": 33,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "1ff8dfbc-f3af-4592-8434-228d281197d6",
+    "description": "Commit changes to execution logic or environment setup.",
+    "status": "PENDING",
+    "source_file": "execution/task_list.md",
+    "module": "execution",
+    "original_line": 37,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "6116f9be-4ab5-4410-8509-652ae2cd096f",
+    "description": "Resolve TODOs within this module.",
+    "status": "PENDING",
+    "source_file": "execution/task_list.md",
+    "module": "execution",
+    "original_line": 38,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "70fefcea-8fa6-4b41-a030-795aa0b6a93b",
+    "description": "**Catalog Prompts:** List all prompt templates stored in `/d:/Dream.os/prompts/`.",
+    "status": "PENDING",
+    "source_file": "prompts/task_list.md",
+    "module": "prompts",
+    "original_line": 7,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "1930ffa3-978e-4e50-8741-73e510d29739",
+    "description": "**Review Purpose:** Verify the specific goal and intended agent/use case for each prompt.",
+    "status": "PENDING",
+    "source_file": "prompts/task_list.md",
+    "module": "prompts",
+    "original_line": 8,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "585b74b8-5ee3-437b-90ee-e741be8d620f",
+    "description": "**Organize Structure:** Ensure a clear and logical directory structure or naming convention for prompts.",
+    "status": "PENDING",
+    "source_file": "prompts/task_list.md",
+    "module": "prompts",
+    "original_line": 9,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "376ef55b-0b05-447b-b31b-5cba044f29ad",
+    "description": "**Review Effectiveness:** Evaluate the performance and quality of outputs generated by existing prompts.",
+    "status": "PENDING",
+    "source_file": "prompts/task_list.md",
+    "module": "prompts",
+    "original_line": 13,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "35a492e3-1e2b-4c3f-b3b9-50c912d08d2b",
+    "description": "**Refine Prompts:** Iterate on prompt wording, structure, and examples to improve agent performance, reliability, and adherence to instructions.",
+    "status": "PENDING",
+    "source_file": "prompts/task_list.md",
+    "module": "prompts",
+    "original_line": 14,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "0a0290fc-5f40-4a5a-a843-25c06aaf7882",
+    "description": "**Parameterization:** Ensure prompts are correctly parameterized (using a templating engine like Jinja2 if applicable) to accept necessary context or variables.",
+    "status": "PENDING",
+    "source_file": "prompts/task_list.md",
+    "module": "prompts",
+    "original_line": 15,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "318e96ac-4784-4373-bac3-5827212216ff",
+    "description": "**Negative Constraints:** Add constraints or negative examples where needed to prevent undesired outputs.",
+    "status": "PENDING",
+    "source_file": "prompts/task_list.md",
+    "module": "prompts",
+    "original_line": 16,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "6015b4dd-89a0-4211-be36-c64e266bd502",
+    "description": "**Develop Evaluation Criteria:** Define objective or subjective metrics to evaluate prompt performance.",
+    "status": "PENDING",
+    "source_file": "prompts/task_list.md",
+    "module": "prompts",
+    "original_line": 20,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "c25eb841-14b2-4b19-a3a7-d374bbc4a98e",
+    "description": "**Implement Prompt Testing:** Create scripts or processes (potentially in `/d:/Dream.os/tests/` or `/d:/Dream.os/scripts/`) to test prompts with various inputs and evaluate outputs against the criteria.",
+    "status": "PENDING",
+    "source_file": "prompts/task_list.md",
+    "module": "prompts",
+    "original_line": 21,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "05ece671-37da-4b1d-993c-21f635e7a6c2",
+    "description": "**Version Control:** Track changes to prompts effectively using Git.",
+    "status": "PENDING",
+    "source_file": "prompts/task_list.md",
+    "module": "prompts",
+    "original_line": 22,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "edb25547-0054-4599-add7-3716ebf37245",
+    "description": "**Verify Loading:** Ensure agents correctly load and format the required prompts from this directory.",
+    "status": "PENDING",
+    "source_file": "prompts/task_list.md",
+    "module": "prompts",
+    "original_line": 26,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "d8c48a2d-beb2-4e5b-a937-871f7e482a43",
+    "description": "**Context Injection:** Check that agents correctly inject the necessary context and variables into the prompt templates before sending them to the LLM.",
+    "status": "PENDING",
+    "source_file": "prompts/task_list.md",
+    "module": "prompts",
+    "original_line": 27,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "7dc580bb-b7c5-45be-b831-8878f1d3cf2c",
+    "description": "**Document Prompts:** Add comments or metadata within prompt files explaining their purpose, parameters, and expected output format.",
+    "status": "PENDING",
+    "source_file": "prompts/task_list.md",
+    "module": "prompts",
+    "original_line": 31,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "d0f50487-b5b9-4805-bd72-eddc886cf0c3",
+    "description": "**Summarize in Docs:** Consider summarizing key prompts and their usage in `/d:/Dream.os/docs/task_list.md`.",
+    "status": "PENDING",
+    "source_file": "prompts/task_list.md",
+    "module": "prompts",
+    "original_line": 32,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "9f56dc97-a079-49a0-bfab-a4b6360ff303",
+    "description": "Commit refined prompts and any testing scripts.",
+    "status": "PENDING",
+    "source_file": "prompts/task_list.md",
+    "module": "prompts",
+    "original_line": 36,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "8cbac3d4-cd35-4bf1-a8f3-c8debdbec163",
+    "description": "Ensure prompts are well-organized, effective, and documented.",
+    "status": "PENDING",
+    "source_file": "prompts/task_list.md",
+    "module": "prompts",
+    "original_line": 37,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "3ac8cbcb-d3ac-4376-a828-bac571c64ae9",
+    "description": "**Identify Report Types:** List the different reports generated by the system (e.g., task summaries, agent performance, error logs, test results).",
+    "status": "PENDING",
+    "source_file": "reports/task_list.md",
+    "module": "reports",
+    "original_line": 7,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "525befdf-8c2d-4ff3-93f4-d8f4f5c95bd4",
+    "description": "**Review Generation Logic:** Examine the code responsible for generating each report type.",
+    "status": "PENDING",
+    "source_file": "reports/task_list.md",
+    "module": "reports",
+    "original_line": 8,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "ce347d7b-0f48-44a8-a6f4-b5e7ebd02b53",
+    "description": "**Data Sources:** Verify reports use correct data sources (e.g., `/d:/Dream.os/runtime/task_list.json`, logs, AgentBus metrics if available).",
+    "status": "PENDING",
+    "source_file": "reports/task_list.md",
+    "module": "reports",
+    "original_line": 9,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "2c3fce0b-dfa4-49df-b0a7-2979e2875eaf",
+    "description": "**Format & Clarity:** Ensure reports are well-formatted, clear, and provide actionable information.",
+    "status": "PENDING",
+    "source_file": "reports/task_list.md",
+    "module": "reports",
+    "original_line": 10,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "285ef05d-b6b2-4e4f-829e-fec61caa0caa",
+    "description": "**Automated Generation:** Determine if report generation should be automated (e.g., triggered by specific events on `/d:/Dream.os/_agent_coordination/core/agent_bus.py`, scheduled tasks).",
+    "status": "PENDING",
+    "source_file": "reports/task_list.md",
+    "module": "reports",
+    "original_line": 14,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "b33eef09-11e7-4b8a-af41-d59a834172ea",
+    "description": "**Implement Automation:** Develop scripts or agent logic to automate report generation as needed.",
+    "status": "PENDING",
+    "source_file": "reports/task_list.md",
+    "module": "reports",
+    "original_line": 15,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "a76747ef-7f7e-48eb-b869-1f5a90ad6b26",
+    "description": "**Storage Location:** Confirm `/d:/Dream.os/reports/` is the appropriate location.",
+    "status": "PENDING",
+    "source_file": "reports/task_list.md",
+    "module": "reports",
+    "original_line": 19,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "1a4134e7-e50e-4046-ab66-994f039da133",
+    "description": "**Naming Conventions:** Define clear naming conventions for report files (e.g., including timestamps, report type).",
+    "status": "PENDING",
+    "source_file": "reports/task_list.md",
+    "module": "reports",
+    "original_line": 20,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "9427c503-e5d3-4af7-aee3-8938cfe86afe",
+    "description": "**Archiving/Rotation:** Implement a strategy for managing old reports (similar to `task_list.json` archiving).",
+    "status": "PENDING",
+    "source_file": "reports/task_list.md",
+    "module": "reports",
+    "original_line": 21,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "0750c093-fe42-47a0-96b6-a6dd9e18af02",
+    "description": "**Test Report Accuracy:** Add tests to verify the content and calculations within generated reports.",
+    "status": "PENDING",
+    "source_file": "reports/task_list.md",
+    "module": "reports",
+    "original_line": 25,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "a712cdd1-02ad-4216-97d0-62224ece9ac1",
+    "description": "**Test Generation Logic:** Test the report generation code under various conditions (e.g., empty data, large data sets).",
+    "status": "PENDING",
+    "source_file": "reports/task_list.md",
+    "module": "reports",
+    "original_line": 26,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "b4a1c27c-e6b0-42c4-8471-c117adba9967",
+    "description": "**Document Report Types:** Explain each available report, its purpose, and how to interpret it (e.g., in `/d:/Dream.os/docs/task_list.md`).",
+    "status": "PENDING",
+    "source_file": "reports/task_list.md",
+    "module": "reports",
+    "original_line": 30,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "6ba80c21-9b90-4fa9-834a-b3681284d498",
+    "description": "**Document Generation Process:** Detail how reports are generated (manually or automatically).",
+    "status": "PENDING",
+    "source_file": "reports/task_list.md",
+    "module": "reports",
+    "original_line": 31,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "e2d427e6-69e8-48e7-aab6-bd2429324662",
+    "description": "Commit changes related to report generation or management.",
+    "status": "PENDING",
+    "source_file": "reports/task_list.md",
+    "module": "reports",
+    "original_line": 35,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "80aa5a28-4c23-40f8-b4f4-5fff673157dc",
+    "description": "Ensure reports are accurate and useful.",
+    "status": "PENDING",
+    "source_file": "reports/task_list.md",
+    "module": "reports",
+    "original_line": 36,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "be9f31f5-282d-4941-beaf-95b1675c234a",
+    "description": "**Verify Path:** Confirm `/d:/Dream.os/runtime/task_list.json` is the definitive path used by all components (Dispatcher, Visualizer, potentially Agents for updates).",
+    "status": "PENDING",
+    "source_file": "runtime/task_list.md",
+    "module": "runtime",
+    "original_line": 7,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "28a6d411-3452-474e-9812-43d80316fe71",
+    "description": "**Schema Definition/Validation:**",
+    "status": "PENDING",
+    "source_file": "runtime/task_list.md",
+    "module": "runtime",
+    "original_line": 8,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "bc490ec0-8a6a-4c92-b101-626e9ee0c5e8",
+    "description": "Formally define the expected JSON schema for a task entry.",
+    "status": "PENDING",
+    "source_file": "runtime/task_list.md",
+    "module": "runtime",
+    "original_line": 9,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "2b5719a9-7756-431d-8fb5-7c4b6d03c2eb",
+    "description": "Implement validation checks when reading/writing tasks (e.g., required fields, data types) either in `_read/write_task_list` or upon task creation.",
+    "status": "PENDING",
+    "source_file": "runtime/task_list.md",
+    "module": "runtime",
+    "original_line": 10,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "d68123f1-7f7a-4ed7-ac96-0e021c914275",
+    "description": "**Archiving/Rotation:**",
+    "status": "PENDING",
+    "source_file": "runtime/task_list.md",
+    "module": "runtime",
+    "original_line": 11,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "67ddac14-8ef2-4f7d-8e43-d3773f506fd0",
+    "description": "Design a strategy for managing the size of `task_list.json` (e.g., moving completed/failed tasks older than X days to an archive file).",
+    "status": "PENDING",
+    "source_file": "runtime/task_list.md",
+    "module": "runtime",
+    "original_line": 12,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "9fcb019e-7743-4b89-a171-c07e5de24488",
+    "description": "Implement the archiving/rotation logic (potentially as a separate utility script or agent task).",
+    "status": "PENDING",
+    "source_file": "runtime/task_list.md",
+    "module": "runtime",
+    "original_line": 13,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "eeb40224-0678-4d94-ab26-ab232b6a5ff3",
+    "description": "**Status Update Mechanism:**",
+    "status": "PENDING",
+    "source_file": "runtime/task_list.md",
+    "module": "runtime",
+    "original_line": 14,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "d860db2a-6532-4b1c-8631-d1e8fd47df5e",
+    "description": "Clarify and document how agents update task status to `COMPLETED` or `FAILED` (e.g., Do they write directly? Send an `AgentBus` event? Use a shared utility?).",
+    "status": "PENDING",
+    "source_file": "runtime/task_list.md",
+    "module": "runtime",
+    "original_line": 15,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "c1e83ee7-1ae7-45b0-862b-b2f6203f7824",
+    "description": "Ensure the update mechanism uses file locking (`portalocker`) if direct writes occur.",
+    "status": "PENDING",
+    "source_file": "runtime/task_list.md",
+    "module": "runtime",
+    "original_line": 16,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "f1ce0ee1-4c19-49db-a0a4-73a6191bc338",
+    "description": "**Identify Other Files:** Review other files stored in `/d:/Dream.os/runtime/` (e.g., agent state, logs if stored here).",
+    "status": "PENDING",
+    "source_file": "runtime/task_list.md",
+    "module": "runtime",
+    "original_line": 20,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "d6e75e5a-cd8c-4220-a54d-1854423589c5",
+    "description": "**Review Formats:** Ensure data formats are efficient and well-defined.",
+    "status": "PENDING",
+    "source_file": "runtime/task_list.md",
+    "module": "runtime",
+    "original_line": 21,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "074a2b4f-23bc-4a7f-b2ac-34d4d553bd49",
+    "description": "**Consistency Checks:** Verify naming conventions and usage patterns for runtime files.",
+    "status": "PENDING",
+    "source_file": "runtime/task_list.md",
+    "module": "runtime",
+    "original_line": 22,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "9e0f71bd-3400-4260-bbf0-7f9e61f27ef7",
+    "description": "**Error Handling:** Ensure robust error handling for file I/O operations within this directory (e.g., permissions, disk full, corrupt files).",
+    "status": "PENDING",
+    "source_file": "runtime/task_list.md",
+    "module": "runtime",
+    "original_line": 26,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "b522f36c-dd58-475a-85c9-8aea4a9a3da5",
+    "description": "**Backup Strategy (Optional):** Consider if a backup mechanism for critical runtime data (like `task_list.json`) is needed.",
+    "status": "PENDING",
+    "source_file": "runtime/task_list.md",
+    "module": "runtime",
+    "original_line": 27,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "ca11c091-9484-4d15-83ca-2e74d410ed5a",
+    "description": "Commit any changes to runtime data handling logic.",
+    "status": "PENDING",
+    "source_file": "runtime/task_list.md",
+    "module": "runtime",
+    "original_line": 31,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "5467a0f2-13ad-43f6-86f7-eb3f83a5bf33",
+    "description": "Ensure runtime data structures are stable and documented.",
+    "status": "PENDING",
+    "source_file": "runtime/task_list.md",
+    "module": "runtime",
+    "original_line": 32,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "131de724-24f1-402b-90dd-d6c0c314e5e4",
+    "description": "**Identify Key Scripts:** List the essential scripts used for building, testing, deployment, or system maintenance.",
+    "status": "PENDING",
+    "source_file": "scripts/task_list.md",
+    "module": "scripts",
+    "original_line": 7,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "723e1acb-42f5-4756-98de-386c74081628",
+    "description": "**Review Functionality:** Verify each script performs its intended function correctly.",
+    "status": "PENDING",
+    "source_file": "scripts/task_list.md",
+    "module": "scripts",
+    "original_line": 8,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "d9a023b4-ea09-45fa-a8c4-1844af2a9dbd",
+    "description": "**Update for System Changes:** Ensure scripts are compatible with recent changes (e.g., `AgentBus`, task list format in `/d:/Dream.os/runtime/task_list.json`, directory structures).",
+    "status": "PENDING",
+    "source_file": "scripts/task_list.md",
+    "module": "scripts",
+    "original_line": 9,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "b1c3b060-b064-415e-8b10-74822d4a6d24",
+    "description": "**Error Handling:** Improve error handling and reporting within scripts.",
+    "status": "PENDING",
+    "source_file": "scripts/task_list.md",
+    "module": "scripts",
+    "original_line": 10,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "7c13f8bf-3ac6-4b79-a072-1f94f078fc92",
+    "description": "**Task Injection Script:**",
+    "status": "PENDING",
+    "source_file": "scripts/task_list.md",
+    "module": "scripts",
+    "original_line": 14,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "15c73c3b-b67d-44c1-b952-f8434a6ef0d9",
+    "description": "Consider creating a script to easily inject tasks into `/d:/Dream.os/runtime/task_list.json` for testing or manual triggering.",
+    "status": "PENDING",
+    "source_file": "scripts/task_list.md",
+    "module": "scripts",
+    "original_line": 15,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "c485ee81-a5db-4ee3-8213-24c5bfcefc5e",
+    "description": "Ensure the script creates tasks with the correct schema.",
+    "status": "PENDING",
+    "source_file": "scripts/task_list.md",
+    "module": "scripts",
+    "original_line": 16,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "639fa2fe-7c7c-469d-b373-c5c785aa30a3",
+    "description": "**Task List Maintenance Scripts:**",
+    "status": "PENDING",
+    "source_file": "scripts/task_list.md",
+    "module": "scripts",
+    "original_line": 17,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "5dab899f-31c0-401c-b9df-244b86cea390",
+    "description": "Implement the task archiving/rotation script designed in `/d:/Dream.os/runtime/task_list.md`.",
+    "status": "PENDING",
+    "source_file": "scripts/task_list.md",
+    "module": "scripts",
+    "original_line": 18,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "9c37751d-6c2b-46e3-aef4-bcd31441d668",
+    "description": "Consider scripts for validating `task_list.json` integrity.",
+    "status": "PENDING",
+    "source_file": "scripts/task_list.md",
+    "module": "scripts",
+    "original_line": 19,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "d6295030-51a2-4f41-af91-bb1fe4907c49",
+    "description": "**Review CI/CD Scripts:** Ensure build, test, and deployment scripts (if applicable) are up-to-date and reliable.",
+    "status": "PENDING",
+    "source_file": "scripts/task_list.md",
+    "module": "scripts",
+    "original_line": 23,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "24a5293f-bae1-4f6b-94c0-bc8c544c957a",
+    "description": "**Dependency Management:** Verify scripts correctly handle project dependencies (`/d:/Dream.os/requirements.txt` or similar).",
+    "status": "PENDING",
+    "source_file": "scripts/task_list.md",
+    "module": "scripts",
+    "original_line": 24,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "48673c7b-078e-49e8-9833-08da9a2d48a6",
+    "description": "**Script Usage:** Add comments or documentation explaining the purpose and usage of each key script.",
+    "status": "PENDING",
+    "source_file": "scripts/task_list.md",
+    "module": "scripts",
+    "original_line": 28,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "f5130030-5ed7-40ea-899c-123331b948fc",
+    "description": "**README:** Consider adding a `/d:/Dream.os/scripts/README.md` summarizing the available scripts.",
+    "status": "PENDING",
+    "source_file": "scripts/task_list.md",
+    "module": "scripts",
+    "original_line": 29,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "e57444fc-ecf9-4b06-a3f3-213a4bd91af4",
+    "description": "Commit any changes to script files.",
+    "status": "PENDING",
+    "source_file": "scripts/task_list.md",
+    "module": "scripts",
+    "original_line": 33,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "cbd2f855-355e-432a-b337-72f78bbe57ce",
+    "description": "Ensure all necessary utility scripts are functional and documented.",
+    "status": "PENDING",
+    "source_file": "scripts/task_list.md",
+    "module": "scripts",
+    "original_line": 34,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "7accca32-b6d8-4cda-8a81-6cce72c21e1b",
+    "description": "**Review Agent Registration:** Ensure all social agents are correctly registered with the `AgentBus` (likely defined in `/d:/Dream.os/_agent_coordination/core/agent_bus.py`).",
+    "status": "PENDING",
+    "source_file": "social/task_list.md",
+    "module": "social",
+    "original_line": 7,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "ec519de5-c8e4-4b27-a174-e06f7325fa3f",
+    "description": "**Define Social EventTypes:** Define specific `EventType` values for social interactions (e.g., `CHAT_MESSAGE`, `RELATIONSHIP_UPDATE`) within the `AgentBus` event definitions.",
+    "status": "PENDING",
+    "source_file": "social/task_list.md",
+    "module": "social",
+    "original_line": 8,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "f0394533-02c6-46de-9e3f-e60a31f4e878",
+    "description": "**Implement Event Handling:** Ensure social agents subscribe to and correctly handle relevant events from the `AgentBus`.",
+    "status": "PENDING",
+    "source_file": "social/task_list.md",
+    "module": "social",
+    "original_line": 9,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "48b28597-cce8-430a-b6fd-87093b86903b",
+    "description": "**Task Dispatch Compatibility:** Verify if social agents need to receive tasks via the `TaskDispatcherAgent`. If so, ensure they handle `EventType.TASK` events and parse the payload correctly.",
+    "status": "PENDING",
+    "source_file": "social/task_list.md",
+    "module": "social",
+    "original_line": 10,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "16bb7cd1-fb48-4a1b-afa4-7ea50763c6ac",
+    "description": "Add relevant `task_type` mappings to `_infer_target_agent` in `/d:/Dream.os/_agent_coordination/dispatchers/task_dispatcher.py` if needed.",
+    "status": "PENDING",
+    "source_file": "social/task_list.md",
+    "module": "social",
+    "original_line": 11,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "2e33d163-85ee-447b-8ed8-22c7d87f0cf4",
+    "description": "**Review Communication Protocols:** Ensure protocols for inter-agent social communication are robust and well-defined.",
+    "status": "PENDING",
+    "source_file": "social/task_list.md",
+    "module": "social",
+    "original_line": 15,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "9a663092-f368-4bdf-8aeb-847b52ae85d7",
+    "description": "**State Management:** Verify the handling of social states (e.g., relationships, ongoing conversations) is correct and persists appropriately.",
+    "status": "PENDING",
+    "source_file": "social/task_list.md",
+    "module": "social",
+    "original_line": 16,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "e5bc6f4b-8a49-4ae8-a575-dd3bd6e7d058",
+    "description": "**Integration with Core:** Confirm social interactions can correctly trigger core system tasks if needed (e.g., a chat command triggering a `CursorControlAgent` task).",
+    "status": "PENDING",
+    "source_file": "social/task_list.md",
+    "module": "social",
+    "original_line": 17,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "d666fcd4-d6ac-407f-be6a-f7ef1bf13309",
+    "description": "**Test Social Event Flows:** Simulate social events on the `AgentBus` and verify correct agent responses.",
+    "status": "PENDING",
+    "source_file": "social/task_list.md",
+    "module": "social",
+    "original_line": 21,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "79daa17b-0848-4146-ba15-c4d4eb3a3268",
+    "description": "**Test Social Task Handling:** If applicable, inject social-related tasks via `/d:/Dream.os/runtime/task_list.json` and monitor using `/d:/Dream.os/tools/task_list_visualizer.py`.",
+    "status": "PENDING",
+    "source_file": "social/task_list.md",
+    "module": "social",
+    "original_line": 22,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "e617324e-7bf3-48d4-99a9-ea52bb1347e9",
+    "description": "**Integration Tests:** Add tests covering interactions between social agents and core agents via the `AgentBus`.",
+    "status": "PENDING",
+    "source_file": "social/task_list.md",
+    "module": "social",
+    "original_line": 23,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "a6a4d872-58c5-4ef2-8f08-e69a070a5acc",
+    "description": "**Document Social Agents:** Ensure clear documentation for each social agent's purpose, capabilities, and handled events/tasks.",
+    "status": "PENDING",
+    "source_file": "social/task_list.md",
+    "module": "social",
+    "original_line": 27,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "b47e67f4-63e4-4e9a-af7e-770e15901c53",
+    "description": "**Document Social Protocols:** Explain the communication protocols used.",
+    "status": "PENDING",
+    "source_file": "social/task_list.md",
+    "module": "social",
+    "original_line": 28,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "2c21f651-2537-45c0-b6e7-5b41341990e1",
+    "description": "**Improve Logging:** Enhance logging within social agents for better debugging of interactions.",
+    "status": "PENDING",
+    "source_file": "social/task_list.md",
+    "module": "social",
+    "original_line": 29,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "fdf7f2ca-5af1-4b23-aa8e-56e12a811e72",
+    "description": "Commit all code changes related to this module.",
+    "status": "PENDING",
+    "source_file": "social/task_list.md",
+    "module": "social",
+    "original_line": 33,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "dda7f910-7977-46d1-b302-7a518f00ef5c",
+    "description": "Resolve any outstanding issues or TODOs specific to social features.",
+    "status": "PENDING",
+    "source_file": "social/task_list.md",
+    "module": "social",
+    "original_line": 34,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "d64584ac-6edf-4c80-87d8-f3c9adbfc9ce",
+    "description": "**Review Purpose:** Clarify the role of this directory. Does it hold example task JSON files? Templates for generating tasks? High-level goal definitions?",
+    "status": "PENDING",
+    "source_file": "tasks/task_list.md",
+    "module": "tasks",
+    "original_line": 110,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "f818bbc1-16bb-4237-b605-c5b4f6d8e040",
+    "description": "**Update Existing Tasks:** If this holds predefined task instances (e.g., for testing, common workflows), ensure they conform to the latest schema defined in `/d:/Dream.os/agent_tasks/task_list.md`.",
+    "status": "PENDING",
+    "source_file": "tasks/task_list.md",
+    "module": "tasks",
+    "original_line": 111,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "f0098493-c3e1-44de-bec7-3153b237b724",
+    "description": "**Task Template Engine (If Applicable):** If tasks are generated from templates here, review the templating logic.",
+    "status": "PENDING",
+    "source_file": "tasks/task_list.md",
+    "module": "tasks",
+    "original_line": 112,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "b1633758-2053-4cef-ae66-03a5664e2c27",
+    "description": "**Link to Project Tasks:** If this tracks high-level goals, ensure it aligns with `/d:/Dream.os/PROJECT_TASKS.md`.",
+    "status": "PENDING",
+    "source_file": "tasks/task_list.md",
+    "module": "tasks",
+    "original_line": 116,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "956f352e-c234-4f0d-af1f-9165ecf20448",
+    "description": "**Breakdown:** Ensure high-level goals here are broken down into actionable agent tasks tracked in `/d:/Dream.os/runtime/task_list.json`.",
+    "status": "PENDING",
+    "source_file": "tasks/task_list.md",
+    "module": "tasks",
+    "original_line": 117,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "3d2ed3dd-1c97-4f9c-a545-eaf03da85a47",
+    "description": "**Schema Compliance:** Ensure all task definitions or instances here use the standard schema.",
+    "status": "PENDING",
+    "source_file": "tasks/task_list.md",
+    "module": "tasks",
+    "original_line": 121,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "e596c3cb-3ef0-4ef9-96d4-bb70583d1307",
+    "description": "**Remove Obsolete Tasks:** Clean up any outdated templates or definitions.",
+    "status": "PENDING",
+    "source_file": "tasks/task_list.md",
+    "module": "tasks",
+    "original_line": 122,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "832c23a0-5161-4fbb-872e-c11d59ae0267",
+    "description": "**Document Purpose:** Clearly explain the purpose of this directory and its contents in a README or within `/d:/Dream.os/docs/task_list.md`.",
+    "status": "PENDING",
+    "source_file": "tasks/task_list.md",
+    "module": "tasks",
+    "original_line": 126,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "e3847d24-2ec5-4b6b-9e58-840595031560",
+    "description": "**Document Templates/Goals:** Explain any predefined task templates or high-level goals stored here.",
+    "status": "PENDING",
+    "source_file": "tasks/task_list.md",
+    "module": "tasks",
+    "original_line": 127,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "e1f31bdf-4e03-4d3b-87dd-8aec719041ed",
+    "description": "Commit changes to task definitions/templates.",
+    "status": "PENDING",
+    "source_file": "tasks/task_list.md",
+    "module": "tasks",
+    "original_line": 131,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "48b66691-a725-4abc-bbb8-322f5d9ca37d",
+    "description": "Ensure clarity on the role of this directory vs. other task-related locations.",
+    "status": "PENDING",
+    "source_file": "tasks/task_list.md",
+    "module": "tasks",
+    "original_line": 132,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "2345a746-2dc2-41f4-838a-ec77a13ba30b",
+    "description": "**Identify Usage:** Determine which processes or agents create files in `/d:/Dream.os/temp/`.",
+    "status": "PENDING",
+    "source_file": "temp/task_list.md",
+    "module": "temp",
+    "original_line": 7,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "0dec5a75-608d-405d-aa62-1977635d5f6b",
+    "description": "**Review Necessity:** Confirm if the use of this directory is necessary or if data can be handled in memory or stored elsewhere appropriately.",
+    "status": "PENDING",
+    "source_file": "temp/task_list.md",
+    "module": "temp",
+    "original_line": 8,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "43a3ccda-32c8-4b05-9089-c296da6c194b",
+    "description": "**File Types:** Understand the types and typical sizes of files stored here.",
+    "status": "PENDING",
+    "source_file": "temp/task_list.md",
+    "module": "temp",
+    "original_line": 9,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "68040334-631e-49a6-8b82-f06137750fba",
+    "description": "**Define Policy:** Establish a clear policy for when and how files in `/d:/Dream.os/temp/` should be deleted (e.g., on startup, after task completion, based on age).",
+    "status": "PENDING",
+    "source_file": "temp/task_list.md",
+    "module": "temp",
+    "original_line": 13,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "bef3dac2-a775-4420-8f36-37701250e3f8",
+    "description": "**Implement Cleanup:** Ensure the cleanup policy is implemented reliably (e.g., via startup scripts, agent logic, scheduled tasks).",
+    "status": "PENDING",
+    "source_file": "temp/task_list.md",
+    "module": "temp",
+    "original_line": 14,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "f6165a40-a53d-409f-b753-39781e1d42ba",
+    "description": "**Error Handling:** Handle potential errors during cleanup (e.g., file in use).",
+    "status": "PENDING",
+    "source_file": "temp/task_list.md",
+    "module": "temp",
+    "original_line": 15,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "878b6de2-98db-4984-a22f-b72bb7baf4af",
+    "description": "**Consider Alternatives:** Evaluate if Python's `tempfile` module or in-memory data handling could replace the need for this directory in some cases.",
+    "status": "PENDING",
+    "source_file": "temp/task_list.md",
+    "module": "temp",
+    "original_line": 19,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "f2392544-c66e-435c-9bca-04248f2aedb3",
+    "description": "**Document Usage:** Briefly explain why this directory is used and the cleanup policy in project documentation (e.g., `/d:/Dream.os/docs/task_list.md`).",
+    "status": "PENDING",
+    "source_file": "temp/task_list.md",
+    "module": "temp",
+    "original_line": 23,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "df0bae5c-3814-4362-92dc-d43196881f3d",
+    "description": "Commit any changes to cleanup logic.",
+    "status": "PENDING",
+    "source_file": "temp/task_list.md",
+    "module": "temp",
+    "original_line": 27,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "6bf2fe7d-103e-4da5-a628-d8ab27f9271b",
+    "description": "Ensure the temporary directory doesn't accumulate unnecessary files.",
+    "status": "PENDING",
+    "source_file": "temp/task_list.md",
+    "module": "temp",
+    "original_line": 28,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "7730e67e-b58a-4862-85cf-3c74b431cbce",
+    "description": "**Catalog Templates:** List all template files (e.g., Jinja2, other formats) in `/d:/Dream.os/templates/`.",
+    "status": "PENDING",
+    "source_file": "templates/task_list.md",
+    "module": "templates",
+    "original_line": 7,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "2e42e357-db3a-4f4f-8094-adc326bfc965",
+    "description": "**Identify Usage:** Determine where each template is used (e.g., which agent, script, or reporting process).",
+    "status": "PENDING",
+    "source_file": "templates/task_list.md",
+    "module": "templates",
+    "original_line": 8,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "6416b2e4-39c7-4f09-85f8-e35662498b5f",
+    "description": "**Organize Structure:** Ensure a clear directory structure or naming convention based on template usage.",
+    "status": "PENDING",
+    "source_file": "templates/task_list.md",
+    "module": "templates",
+    "original_line": 9,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "3738f6ef-6ddc-42bc-8a0a-74c02cb5b5d9",
+    "description": "**Review Accuracy:** Verify templates generate the correct output structure and content.",
+    "status": "PENDING",
+    "source_file": "templates/task_list.md",
+    "module": "templates",
+    "original_line": 13,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "a304fea7-013d-41cf-9b04-0666b95a2784",
+    "description": "**Refine Logic:** Improve template logic, parameter usage, and clarity.",
+    "status": "PENDING",
+    "source_file": "templates/task_list.md",
+    "module": "templates",
+    "original_line": 14,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "a63cb491-2d62-4163-a5fb-04631f85537b",
+    "description": "**Consistency:** Ensure consistent style and formatting across related templates.",
+    "status": "PENDING",
+    "source_file": "templates/task_list.md",
+    "module": "templates",
+    "original_line": 15,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "5487dd1a-ea38-458c-aac5-d85f8e083fdb",
+    "description": "**Verify Loading:** Check that modules using these templates (e.g., agents in `/d:/Dream.os/agents/`, reporting scripts) load them correctly.",
+    "status": "PENDING",
+    "source_file": "templates/task_list.md",
+    "module": "templates",
+    "original_line": 19,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "c855480c-ef2c-4250-983c-cdba9fd96a9a",
+    "description": "**Parameter Passing:** Ensure all necessary parameters are correctly passed to the templates during rendering.",
+    "status": "PENDING",
+    "source_file": "templates/task_list.md",
+    "module": "templates",
+    "original_line": 20,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "12409e36-00c0-4eaa-afef-131867dbf899",
+    "description": "**Error Handling:** Review how errors during template rendering are handled by the calling code.",
+    "status": "PENDING",
+    "source_file": "templates/task_list.md",
+    "module": "templates",
+    "original_line": 21,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "a568c05a-0ff3-4794-a02c-28e323bffc5e",
+    "description": "**Add Template Tests:** Create tests (unit or integration) that render templates with various inputs and validate the output.",
+    "status": "PENDING",
+    "source_file": "templates/task_list.md",
+    "module": "templates",
+    "original_line": 25,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "eb017bbf-bd64-4f6b-9868-c7c163f7b508",
+    "description": "**Test Edge Cases:** Include tests for missing parameters, invalid inputs, or complex template logic.",
+    "status": "PENDING",
+    "source_file": "templates/task_list.md",
+    "module": "templates",
+    "original_line": 26,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "ef0b29b1-4fd2-4276-99c6-cf64fd0272d4",
+    "description": "**Document Templates:** Add comments or documentation within templates explaining their purpose, parameters, and expected output.",
+    "status": "PENDING",
+    "source_file": "templates/task_list.md",
+    "module": "templates",
+    "original_line": 30,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "60fa44c7-1e70-45ed-a66c-74919d398901",
+    "description": "**Summarize in Docs:** Consider summarizing template usage in `/d:/Dream.os/docs/task_list.md`.",
+    "status": "PENDING",
+    "source_file": "templates/task_list.md",
+    "module": "templates",
+    "original_line": 31,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "4024931b-50d0-491f-a013-e23f2ef4bc61",
+    "description": "Commit changes to template files and related rendering logic.",
+    "status": "PENDING",
+    "source_file": "templates/task_list.md",
+    "module": "templates",
+    "original_line": 35,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "0ea845b5-7a2c-4240-8189-2d95f9afe961",
+    "description": "Ensure templates are accurate, well-organized, and documented.",
+    "status": "PENDING",
+    "source_file": "templates/task_list.md",
+    "module": "templates",
+    "original_line": 36,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "3c10793e-9f7f-455b-9e05-10287b60b8b7",
+    "description": "**`TaskDispatcherAgent` Integration Tests:**",
+    "status": "PENDING",
+    "source_file": "tests/task_list.md",
+    "module": "tests",
+    "original_line": 7,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "786d40a7-df80-46d3-b088-65a7621dfabc",
+    "description": "Test task injection (`PENDING` -> `PROCESSING` -> `DISPATCHED`) with explicit `target_agent`.",
+    "status": "PENDING",
+    "source_file": "tests/task_list.md",
+    "module": "tests",
+    "original_line": 8,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "ea99aa2e-0b62-48c6-a703-005e23b4420e",
+    "description": "Test task injection (`PENDING` -> `PROCESSING` -> `DISPATCHED`) with inferred `target_agent` (verify inference logic).",
+    "status": "PENDING",
+    "source_file": "tests/task_list.md",
+    "module": "tests",
+    "original_line": 9,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "3273ef0d-69d7-4556-938d-e70602b4ea3c",
+    "description": "Test task injection resulting in `FAILED` status (unknown `task_type`).",
+    "status": "PENDING",
+    "source_file": "tests/task_list.md",
+    "module": "tests",
+    "original_line": 10,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "809b569e-0835-4b3f-a0b0-67867c254b53",
+    "description": "Test task injection resulting in `FAILED` status (inference fails).",
+    "status": "PENDING",
+    "source_file": "tests/task_list.md",
+    "module": "tests",
+    "original_line": 11,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "5212a150-1e16-477a-9816-6be48142376a",
+    "description": "Test task injection resulting in `FAILED` status (mocked `AgentBus` dispatch error).",
+    "status": "PENDING",
+    "source_file": "tests/task_list.md",
+    "module": "tests",
+    "original_line": 12,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "721e9381-fec9-4358-9495-0986f23871ca",
+    "description": "**`_infer_target_agent` Unit Tests:** Add unit tests specifically for the inference map logic in `/d:/Dream.os/_agent_coordination/dispatchers/task_dispatcher.py`.",
+    "status": "PENDING",
+    "source_file": "tests/task_list.md",
+    "module": "tests",
+    "original_line": 14,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "e695fc40-5e83-4684-bdc3-eb8579cc0171",
+    "description": "**File Locking Tests:** Add tests to simulate concurrent access to `/d:/Dream.os/runtime/task_list.json` to ensure `portalocker` prevents race conditions during status updates.",
+    "status": "PENDING",
+    "source_file": "tests/task_list.md",
+    "module": "tests",
+    "original_line": 15,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "02b90796-a4de-404d-8bb5-bab5d593f604",
+    "description": "**`AgentBus` Tests:**",
+    "status": "PENDING",
+    "source_file": "tests/task_list.md",
+    "module": "tests",
+    "original_line": 16,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "41baa2cd-4000-4ab0-a671-8d77767f18c1",
+    "description": "Test agent registration/unregistration.",
+    "status": "PENDING",
+    "source_file": "tests/task_list.md",
+    "module": "tests",
+    "original_line": 17,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "eae29953-0784-4c1e-a1c5-793da2c8f0a1",
+    "description": "Test event dispatching and subscription (point-to-point and potentially broadcast if used).",
+    "status": "PENDING",
+    "source_file": "tests/task_list.md",
+    "module": "tests",
+    "original_line": 18,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "30a7472d-6769-4ea6-b055-8247c3db97ce",
+    "description": "Test error handling within the `AgentBus`.",
+    "status": "PENDING",
+    "source_file": "tests/task_list.md",
+    "module": "tests",
+    "original_line": 19,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "01a663e4-98b5-45e5-af43-b058df6fd174",
+    "description": "**Agent Event Reception:** For key agents (`CursorControlAgent`, etc.), add tests to verify they correctly receive `EventType.TASK` events from a mocked `AgentBus`.",
+    "status": "PENDING",
+    "source_file": "tests/task_list.md",
+    "module": "tests",
+    "original_line": 23,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "66f39e6e-54d6-42c4-b688-e143baa9dd2b",
+    "description": "**Task Payload Parsing:** Test agents' ability to parse task details (`action`, `params`) from the event payload.",
+    "status": "PENDING",
+    "source_file": "tests/task_list.md",
+    "module": "tests",
+    "original_line": 24,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "ec470e8d-e38e-4498-b5c4-4c975e87aa43",
+    "description": "**Task Status Update Tests:** Test the mechanism agents use to report `COMPLETED`/`FAILED` status back to `/d:/Dream.os/runtime/task_list.json` (mocking the update mechanism).",
+    "status": "PENDING",
+    "source_file": "tests/task_list.md",
+    "module": "tests",
+    "original_line": 25,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "67c1e7a8-f592-4a37-a89d-ca5f302c121a",
+    "description": "**Basic UI Tests:** *(Low Priority)* If feasible, add simple tests to check if `/d:/Dream.os/tools/task_list_visualizer.py` launches and displays the main elements.",
+    "status": "PENDING",
+    "source_file": "tests/task_list.md",
+    "module": "tests",
+    "original_line": 29,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "035fc06f-0538-455b-b6fe-d1c302a4b71a",
+    "description": "**Data Loading Test:** Test the `load_tasks` function in the visualizer, mocking `/d:/Dream.os/runtime/task_list.json` with various valid/invalid contents.",
+    "status": "PENDING",
+    "source_file": "tests/task_list.md",
+    "module": "tests",
+    "original_line": 30,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "63546b35-1898-4433-bc77-9cdafb2f9d30",
+    "description": "**Review Test Coverage:** Analyze test coverage for critical modules (`_agent_coordination`, `agents`) and add tests where needed.",
+    "status": "PENDING",
+    "source_file": "tests/task_list.md",
+    "module": "tests",
+    "original_line": 34,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "8fc7320a-5c72-47c1-af1e-f198479bdee6",
+    "description": "**Refactor Existing Tests:** Update any existing tests affected by the `AgentBus` integration or dispatcher refactor.",
+    "status": "PENDING",
+    "source_file": "tests/task_list.md",
+    "module": "tests",
+    "original_line": 35,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "4ed9d098-6196-4c45-9312-0b1dc9224370",
+    "description": "**CI Integration:** Ensure all tests run correctly in the Continuous Integration environment (if applicable).",
+    "status": "PENDING",
+    "source_file": "tests/task_list.md",
+    "module": "tests",
+    "original_line": 36,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "3759132d-b878-4ee1-bcac-a28c7b324162",
+    "description": "Commit all new or updated test code.",
+    "status": "PENDING",
+    "source_file": "tests/task_list.md",
+    "module": "tests",
+    "original_line": 40,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "e3f72408-6054-4aad-9666-8fa5b7275f66",
+    "description": "Ensure all tests are passing reliably.",
+    "status": "PENDING",
+    "source_file": "tests/task_list.md",
+    "module": "tests",
+    "original_line": 41,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "d02d8c82-1664-4e44-8521-c8702c9aa6d0",
+    "description": "Initial Implementation (Tkinter GUI).",
+    "status": "COMPLETED",
+    "source_file": "tools/task_list.md",
+    "module": "tools",
+    "original_line": 7,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "b44ea799-2721-4e9e-b478-01ba8272a134",
+    "description": "**Refinement & Robustness:**",
+    "status": "PENDING",
+    "source_file": "tools/task_list.md",
+    "module": "tools",
+    "original_line": 8,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "b1ab4b15-d9fa-4d40-85ff-0c107accb50d",
+    "description": "Improve error handling (e.g., file not found for `/d:/Dream.os/runtime/task_list.json`, invalid JSON).",
+    "status": "PENDING",
+    "source_file": "tools/task_list.md",
+    "module": "tools",
+    "original_line": 9,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "50fefc07-d292-40cb-aaee-9de648e8a796",
+    "description": "Make refresh interval configurable (e.g., via command-line argument or config file).",
+    "status": "PENDING",
+    "source_file": "tools/task_list.md",
+    "module": "tools",
+    "original_line": 10,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "be8ad64e-ba21-40b1-b42f-6dc4be2030fc",
+    "description": "Consider performance for very large task lists.",
+    "status": "PENDING",
+    "source_file": "tools/task_list.md",
+    "module": "tools",
+    "original_line": 11,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "7832314e-9e18-4584-917b-1e8d8c27fc35",
+    "description": "**Feature Enhancements (Optional - Bonus Upgrades):**",
+    "status": "PENDING",
+    "source_file": "tools/task_list.md",
+    "module": "tools",
+    "original_line": 12,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "868fa2ce-5685-4d42-b3f8-b324d4d21c32",
+    "description": "Task search by ID.",
+    "status": "PENDING",
+    "source_file": "tools/task_list.md",
+    "module": "tools",
+    "original_line": 13,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "6ed4085b-ed8f-47ab-a762-5861302f65dd",
+    "description": "Manual status override button (requires careful implementation - maybe dispatch a task?).",
+    "status": "PENDING",
+    "source_file": "tools/task_list.md",
+    "module": "tools",
+    "original_line": 14,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "35eff659-7de4-48cc-a3da-90e25b471330",
+    "description": "Retry button for failed tasks (dispatch a new task?).",
+    "status": "PENDING",
+    "source_file": "tools/task_list.md",
+    "module": "tools",
+    "original_line": 15,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "444be78c-55de-4142-b075-c9611b2c8067",
+    "description": "Manual task injection form.",
+    "status": "PENDING",
+    "source_file": "tools/task_list.md",
+    "module": "tools",
+    "original_line": 16,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "6ab2776c-d89c-41c4-9971-8226c8e7f465",
+    "description": "Separate event log window (requires AgentBus integration or log file monitoring).",
+    "status": "PENDING",
+    "source_file": "tools/task_list.md",
+    "module": "tools",
+    "original_line": 17,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "331a4559-f645-474b-a3c2-9255e6fc19ad",
+    "description": "**Task Injection Tool:** Implement the task injection script discussed in `/d:/Dream.os/scripts/task_list.md` (could potentially live here or in `scripts`).",
+    "status": "PENDING",
+    "source_file": "tools/task_list.md",
+    "module": "tools",
+    "original_line": 21,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "17b1c532-d029-490d-8dc7-3f6d57b426da",
+    "description": "**Agent Simulation/Debugging Tools:** Consider tools to simulate `AgentBus` events or inspect agent states for easier debugging.",
+    "status": "PENDING",
+    "source_file": "tools/task_list.md",
+    "module": "tools",
+    "original_line": 22,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "983ed07a-99cb-426c-8a8c-dd27748fd68a",
+    "description": "**Log Viewer/Analyzer:** A tool specifically for viewing/filtering system or agent logs.",
+    "status": "PENDING",
+    "source_file": "tools/task_list.md",
+    "module": "tools",
+    "original_line": 23,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "7ebb4586-1851-49a2-a4b9-bfad9d7aead1",
+    "description": "**Review Existing Tools:** Check code quality, dependencies, and usability of any other tools in `/d:/Dream.os/tools/`.",
+    "status": "PENDING",
+    "source_file": "tools/task_list.md",
+    "module": "tools",
+    "original_line": 27,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "747ad592-2aee-4a3a-b030-b4cda0478307",
+    "description": "**Refactor Common Code:** Identify and refactor any shared logic between tools.",
+    "status": "PENDING",
+    "source_file": "tools/task_list.md",
+    "module": "tools",
+    "original_line": 28,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "ec8ee7b9-e956-4f58-9346-2af63c96cf0f",
+    "description": "**Testing:** Add tests for core tool logic (e.g., `load_tasks` in visualizer, task injection logic).",
+    "status": "PENDING",
+    "source_file": "tools/task_list.md",
+    "module": "tools",
+    "original_line": 29,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "3405e661-0812-494e-902d-439c34fbc1f2",
+    "description": "**Document `TaskListVisualizer`:** Add usage instructions to `/d:/Dream.os/docs/task_list.md`.",
+    "status": "PENDING",
+    "source_file": "tools/task_list.md",
+    "module": "tools",
+    "original_line": 33,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "95058299-14f8-4e4f-bd77-4fd7015c4ff7",
+    "description": "**Document Other Tools:** Provide clear usage instructions for any other developer tools.",
+    "status": "PENDING",
+    "source_file": "tools/task_list.md",
+    "module": "tools",
+    "original_line": 34,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "1c58284f-19af-412a-bb33-e51ee72615b8",
+    "description": "Commit changes to tool code.",
+    "status": "PENDING",
+    "source_file": "tools/task_list.md",
+    "module": "tools",
+    "original_line": 38,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "6503bcfc-1705-4774-8e46-92a03dc08ee8",
+    "description": "Ensure tools are functional and documented.",
+    "status": "PENDING",
+    "source_file": "tools/task_list.md",
+    "module": "tools",
+    "original_line": 39,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "cdab74b0-3ce3-466a-948d-62a4a3a49ca8",
+    "description": "**Catalog Utilities:** List the utility functions and classes within `/d:/Dream.os/utils/`.",
+    "status": "PENDING",
+    "source_file": "utils/task_list.md",
+    "module": "utils",
+    "original_line": 7,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "448b74e0-c9e2-471d-9bbb-1cc7ba7d1751",
+    "description": "**Assess Usage:** Determine where each utility is used across the project.",
+    "status": "PENDING",
+    "source_file": "utils/task_list.md",
+    "module": "utils",
+    "original_line": 8,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "23828215-b725-46bd-a26e-b20593e7513c",
+    "description": "**Identify Redundancy:** Check for duplicate or overlapping functionality with other utils or core components (e.g., in `/d:/Dream.os/_core/`).",
+    "status": "PENDING",
+    "source_file": "utils/task_list.md",
+    "module": "utils",
+    "original_line": 9,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "8c1fcd12-7583-4299-a12d-e23ae0b785c9",
+    "description": "**Organize Structure:** Ensure a logical organization (sub-modules or clear naming) if the number of utilities is large.",
+    "status": "PENDING",
+    "source_file": "utils/task_list.md",
+    "module": "utils",
+    "original_line": 10,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "2a2f7f6f-73b9-456a-94f4-345e542b3e0b",
+    "description": "**Code Quality:** Review utilities for clarity, efficiency, and adherence to coding standards.",
+    "status": "PENDING",
+    "source_file": "utils/task_list.md",
+    "module": "utils",
+    "original_line": 14,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "8bae502f-f7cf-4887-832f-58bddc902765",
+    "description": "**Error Handling:** Ensure utilities have robust error handling for expected failure modes.",
+    "status": "PENDING",
+    "source_file": "utils/task_list.md",
+    "module": "utils",
+    "original_line": 15,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "39a716c7-9444-443f-867c-4c203fa34702",
+    "description": "**Consolidation:** Move utilities to more specific modules (e.g., `/d:/Dream.os/_core/`, `/d:/Dream.os/_agent_coordination/core/utils/`) if they are not broadly applicable.",
+    "status": "PENDING",
+    "source_file": "utils/task_list.md",
+    "module": "utils",
+    "original_line": 16,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "88518245-7bb8-4157-8823-20b475e6b303",
+    "description": "**Task List Utils:** Review any utilities specifically designed for reading, writing, or manipulating `/d:/Dream.os/runtime/task_list.json`. Ensure they are consistent with the logic in `/d:/Dream.os/_agent_coordination/dispatchers/task_dispatcher.py` and use file locking (`portalocker`) correctly.",
+    "status": "PENDING",
+    "source_file": "utils/task_list.md",
+    "module": "utils",
+    "original_line": 20,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "5e6a0c70-3316-4a96-a44d-e98d3f2a9a7f",
+    "description": "**AgentBus Utils:** Review any helper functions related to `AgentBus` event creation or parsing.",
+    "status": "PENDING",
+    "source_file": "utils/task_list.md",
+    "module": "utils",
+    "original_line": 21,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "3411d17a-3c5b-44f5-aebd-3758ff51c731",
+    "description": "**Add Unit Tests:** Ensure all utility functions and classes have comprehensive unit tests covering various inputs and edge cases.",
+    "status": "PENDING",
+    "source_file": "utils/task_list.md",
+    "module": "utils",
+    "original_line": 25,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "6d5bdeca-f2e2-41d4-819f-d2d0f5a05222",
+    "description": "**Document Utilities:** Add clear docstrings to all functions and classes explaining their purpose, parameters, return values, and any exceptions raised.",
+    "status": "PENDING",
+    "source_file": "utils/task_list.md",
+    "module": "utils",
+    "original_line": 29,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "18fcf6cb-0c76-4dd6-8046-c25867e4d36b",
+    "description": "**Module README (Optional):** Consider a README in `/d:/Dream.os/utils/` if the organization is complex.",
+    "status": "PENDING",
+    "source_file": "utils/task_list.md",
+    "module": "utils",
+    "original_line": 30,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "a1b24dae-3c00-4aad-b778-9b14f0035ae9",
+    "description": "Commit changes to utility code and tests.",
+    "status": "PENDING",
+    "source_file": "utils/task_list.md",
+    "module": "utils",
+    "original_line": 34,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "7aaa313d-2641-4d94-86f7-48976b5e87e2",
+    "description": "Ensure utilities are well-tested, documented, and organized.",
+    "status": "PENDING",
+    "source_file": "utils/task_list.md",
+    "module": "utils",
+    "original_line": 35,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "b43fb9ac-85d5-4d1c-a8d5-92610b18860f",
+    "description": "**Verify Async `_dispatch_task`:** Confirm the refactored `_dispatch_task` method runs correctly within the `async` loop (`_process_pending_tasks`).",
+    "status": "PENDING",
+    "source_file": "_agent_coordination/task_list.md",
+    "module": "_agent_coordination",
+    "original_line": 7,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "099f42f5-8861-4d5a-8c38-a9d5811dc611",
+    "description": "**Verify `_infer_target_agent` Logic:** Ensure the routing map is correct and the inference mechanism functions as expected when `target_agent` is missing.",
+    "status": "PENDING",
+    "source_file": "_agent_coordination/task_list.md",
+    "module": "_agent_coordination",
+    "original_line": 8,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "d514afbb-a429-40a7-8c7a-f053a6809b3d",
+    "description": "**Confirm AgentBus Event Dispatch:** Verify that `agent_bus.dispatch_event` is called correctly with the appropriate `Event` structure (type `EventType.TASK`, correct `source_id`, and `data` payload).",
+    "status": "PENDING",
+    "source_file": "_agent_coordination/task_list.md",
+    "module": "_agent_coordination",
+    "original_line": 9,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "4abeaadd-6641-4e44-a2be-7cc98159eeaa",
+    "description": "**Test `_update_task_status` Integration:**",
+    "status": "PENDING",
+    "source_file": "_agent_coordination/task_list.md",
+    "module": "_agent_coordination",
+    "original_line": 10,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "41c9a642-151f-4a37-b8d2-3ada9839f80d",
+    "description": "**Verify File Locking (`portalocker`):** Review `_read_task_list`, `_write_task_list`, and `_update_task_status` (which likely uses write) to ensure `portalocker` is used correctly to prevent race conditions when accessing `/d:/Dream.os/runtime/task_list.json`.",
+    "status": "PENDING",
+    "source_file": "_agent_coordination/task_list.md",
+    "module": "_agent_coordination",
+    "original_line": 16,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "b3e9ca0b-8dea-4567-9b4f-f06e0dcda268",
+    "description": "**Verify AgentBus Availability Check:** Confirm the `if not AGENT_BUS_AVAILABLE:` check in `_dispatch_task` works correctly.",
+    "status": "PENDING",
+    "source_file": "_agent_coordination/task_list.md",
+    "module": "_agent_coordination",
+    "original_line": 20,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "25d7eac1-9a4a-4868-a5a7-38d065426ccc",
+    "description": "**(Optional) Trace Event Handling:** If possible, trace the `EventType.TASK` event dispatched by `TaskDispatcherAgent` through the `AgentBus` (potentially `/d:/Dream.os/_agent_coordination/core/agent_bus.py`) to the intended recipient agent.",
+    "status": "PENDING",
+    "source_file": "_agent_coordination/task_list.md",
+    "module": "_agent_coordination",
+    "original_line": 21,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "6a5daa36-5abd-4809-bfd3-cbad47186679",
+    "description": "**Unit/Integration Tests (Dispatcher):**",
+    "status": "PENDING",
+    "source_file": "_agent_coordination/task_list.md",
+    "module": "_agent_coordination",
+    "original_line": 25,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "7ed7f726-6b20-457e-9708-736990e127dc",
+    "description": "**Review Logging:** Ensure logs within `/d:/Dream.os/_agent_coordination/dispatchers/task_dispatcher.py` and potentially core AgentBus components are sufficient for debugging coordination issues.",
+    "status": "PENDING",
+    "source_file": "_agent_coordination/task_list.md",
+    "module": "_agent_coordination",
+    "original_line": 31,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "265a755b-9920-4a64-b6f0-a48e3086ea16",
+    "description": "**Review Error Handling:** Focus on error handling surrounding `agent_bus.dispatch_event` calls and file I/O within the dispatcher.",
+    "status": "PENDING",
+    "source_file": "_agent_coordination/task_list.md",
+    "module": "_agent_coordination",
+    "original_line": 32,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "8962f875-76dc-4019-a7a4-aee2c113a7f5",
+    "description": "**Add/Update Docstrings:** Ensure all public methods and classes within the dispatcher (`/d:/Dream.os/_agent_coordination/dispatchers/task_dispatcher.py`) and relevant core components (like `AgentBus` if modified) have comprehensive docstrings.",
+    "status": "PENDING",
+    "source_file": "_agent_coordination/task_list.md",
+    "module": "_agent_coordination",
+    "original_line": 33,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "48bb3e6a-07ec-4fdd-873b-f070057309a8",
+    "description": "**Module README:** Consider adding or updating a `README.md` within `/d:/Dream.os/_agent_coordination/` explaining the purpose of this module, especially the role of the dispatcher and the AgentBus.",
+    "status": "PENDING",
+    "source_file": "_agent_coordination/task_list.md",
+    "module": "_agent_coordination",
+    "original_line": 34,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "f9f2902a-2e1a-4265-9a64-d3269750d4d0",
+    "description": "**Commit Module Code:** Ensure all changes within `/d:/Dream.os/_agent_coordination/` are committed.",
+    "status": "PENDING",
+    "source_file": "_agent_coordination/task_list.md",
+    "module": "_agent_coordination",
+    "original_line": 38,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "380d7710-06a3-420c-8121-b42c4e601b67",
+    "description": "**Review BaseAgent Class:** Examine the base class for agents. Ensure it provides necessary common functionality (e.g., lifecycle methods, logging setup, basic AgentBus interaction).",
+    "status": "PENDING",
+    "source_file": "_core/task_list.md",
+    "module": "_core",
+    "original_line": 7,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "e90f547d-ceb0-4585-ab31-2cfae6bbd9d9",
+    "description": "**Review Core Data Structures:** Check definitions for fundamental data structures (e.g., Task representation if defined here, Message formats).",
+    "status": "PENDING",
+    "source_file": "_core/task_list.md",
+    "module": "_core",
+    "original_line": 8,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "8760cac1-d303-4e15-85b6-cc63a43ea873",
+    "description": "**Identify Shared Utilities:** Review utilities within `_core` for potential consolidation or improvement.",
+    "status": "PENDING",
+    "source_file": "_core/task_list.md",
+    "module": "_core",
+    "original_line": 9,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "2187a647-6bda-4bbd-ab44-f79b10f1ec01",
+    "description": "**BaseAgent `AgentBus` Integration:** Ensure the `BaseAgent` correctly handles registration and basic communication with `/d:/Dream.os/_agent_coordination/core/agent_bus.py`.",
+    "status": "PENDING",
+    "source_file": "_core/task_list.md",
+    "module": "_core",
+    "original_line": 13,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "6efacb6b-26c2-4f82-b4ff-901045da095c",
+    "description": "**Task Handling Utilities:** If task status update logic or task parsing helpers reside here, ensure they are compatible with `/d:/Dream.os/runtime/task_list.json` format and `/d:/Dream.os/_agent_coordination/dispatchers/task_dispatcher.py`.",
+    "status": "PENDING",
+    "source_file": "_core/task_list.md",
+    "module": "_core",
+    "original_line": 14,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "c05db3cb-23db-44f1-8b21-c661156a078b",
+    "description": "**Standardize Error Types:** Define common exception types for core errors.",
+    "status": "PENDING",
+    "source_file": "_core/task_list.md",
+    "module": "_core",
+    "original_line": 18,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "4ace12bd-f0df-4080-a370-8e1428cc589d",
+    "description": "**Logging Setup:** Verify the core logging configuration is robust and used consistently by inheriting classes/modules.",
+    "status": "PENDING",
+    "source_file": "_core/task_list.md",
+    "module": "_core",
+    "original_line": 19,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "0872c2c4-96a6-468a-b3de-dc6d7ea84adb",
+    "description": "**Add Unit Tests:** Ensure core abstractions and utilities have adequate unit test coverage.",
+    "status": "PENDING",
+    "source_file": "_core/task_list.md",
+    "module": "_core",
+    "original_line": 23,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "6ca3b64d-f003-4510-9737-f06eaded2fcc",
+    "description": "**Document Base Classes:** Provide clear documentation for base classes and core abstractions.",
+    "status": "PENDING",
+    "source_file": "_core/task_list.md",
+    "module": "_core",
+    "original_line": 27,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "979b27c3-43a0-4efb-bf2e-185ff161ed4b",
+    "description": "**Document Core Utilities:** Explain the purpose and usage of shared utilities.",
+    "status": "PENDING",
+    "source_file": "_core/task_list.md",
+    "module": "_core",
+    "original_line": 28,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "5acf4625-bfca-4ac4-b60f-e53fe67c7b51",
+    "description": "Commit changes to core components.",
+    "status": "PENDING",
+    "source_file": "_core/task_list.md",
+    "module": "_core",
+    "original_line": 32,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "16e414de-62fa-4b01-82d5-aaa226ca076c",
+    "description": "Resolve TODOs within the `_core` module.",
+    "status": "PENDING",
+    "source_file": "_core/task_list.md",
+    "module": "_core",
+    "original_line": 33,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  },
+  {
+    "task_id": "d52afa21-b64a-4e81-9a07-296a73faf1f3",
+    "description": "**Parameter Naming:** Verify consistent and clear naming conventions for configuration parameters.",
+    "status": "COMPLETED",
+    "assigned_to": "Agent_4",
+    "result_summary": "Reviewed dreamforge/core/config.py. Naming conventions are consistent and follow Python standards: UPPER_SNAKE_CASE for constants and env vars (with DREAM_OS_ prefix), lower_snake_case for dict keys.",
+    "source_file": "config/task_list.md",
+    "module": "config",
+    "original_line": 9,
+    "timestamp_aggregated_utc": "2025-04-15T20:55:26Z"
+  }
+]

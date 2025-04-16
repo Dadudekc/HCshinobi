@@ -1,0 +1,1 @@
+Task 707c4b57-7d0c-406e-9144-ce9050c94146 blocked. Inconsistent tool results: file_search found AgentMonitorAgent.py in agents/dreamforge/agents/, but read_file failed and list_dir confirmed file is not present in ../dreamforge/agents. Cannot access file to define tasks/events.

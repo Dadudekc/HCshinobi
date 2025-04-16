@@ -9,6 +9,7 @@ import sys
 import json
 import signal
 import threading
+import portalocker
 
 # Adjust path to import from core
 script_dir = os.path.dirname(__file__)
@@ -24,6 +25,9 @@ from agents.task_executor_agent import TaskExecutorAgent, DEFAULT_TASK_LIST_PATH
 from agents.agent_monitor_agent import AgentMonitorAgent, DEFAULT_LOG_PATH
 from agents.prompt_feedback_loop_agent import PromptFeedbackLoopAgent
 from agents.task_injector import TaskInjector
+from agents.social_media_agent import SocialMediaAgent
+from core.utils.task_status_updater import TaskStatusUpdater
+from agents.meredith_resonance_scanner import MeredithResonanceScanner
 
 # Setup Logging
 log_format = '%(asctime)s - %(threadName)s - %(levelname)s - %(name)s - %(message)s'
@@ -126,13 +130,20 @@ def main():
         return 1
 
     # Create shared lock for task list access
-    task_list_lock = threading.Lock()
+    task_list_lock = portalocker.Lock(task_list_path + ".lock", fail_when_locked=True, flags=portalocker.LOCK_EX)
 
     # --- Initialization ---
     try:
         logger.info(f"Initializing AgentBus (Mailbox Dir: {mailbox_dir})...")
         bus = AgentBus(mailbox_base_dir=mailbox_dir)
         global_bus = bus
+
+        logger.info("Initializing TaskStatusUpdater...")
+        task_status_updater = TaskStatusUpdater(
+            agent_bus=bus,
+            task_list_path=os.path.abspath(task_list_path), # Ensure absolute path
+            lock=task_list_lock
+        )
 
         logger.info("Initializing CursorControlAgent...")
         # Decide if you want to force a new instance or use existing
@@ -149,16 +160,38 @@ def main():
         # Monitor agent currently has no background thread, processes messages via main loop polling
 
         logger.info("Initializing TaskExecutorAgent...")
-        task_executor = TaskExecutorAgent(agent_bus=bus, task_list_path=task_list_path, task_list_lock=task_list_lock)
+        task_executor = TaskExecutorAgent(
+            agent_bus=bus,
+            task_status_updater=task_status_updater,
+            task_list_path=task_list_path,
+            task_list_lock=task_list_lock
+        )
         global_agents.append(task_executor)
 
         logger.info("Initializing PromptFeedbackLoopAgent...")
-        feedback_agent = PromptFeedbackLoopAgent(agent_bus=bus, task_list_path=task_list_path, task_list_lock=task_list_lock)
+        feedback_agent = PromptFeedbackLoopAgent(
+            agent_bus=bus,
+            task_list_path=task_list_path,
+            task_list_lock=task_list_lock
+        )
         global_agents.append(feedback_agent)
 
         logger.info("Initializing TaskInjector...")
-        task_injector = TaskInjector(task_list_path=task_list_path, input_task_file_path=input_tasks_path, task_list_lock=task_list_lock)
+        task_injector = TaskInjector(
+            agent_bus=bus,
+            task_list_path=task_list_path,
+            input_task_file_path=input_tasks_path,
+            task_list_lock=task_list_lock
+        )
         global_agents.append(task_injector)
+
+        logger.info("Initializing SocialMediaAgent...")
+        social_agent = SocialMediaAgent(agent_bus=bus)
+        global_agents.append(social_agent)
+
+        logger.info("Initializing MeredithResonanceScanner...")
+        meredith_scanner_agent = MeredithResonanceScanner(agent_name="MeredithResonanceScanner", bus=bus)
+        global_agents.append(meredith_scanner_agent)
 
     except Exception as e:
         logger.error(f"Fatal error during agent initialization: {e}", exc_info=True)
@@ -173,6 +206,13 @@ def main():
     task_injector.start() # Start the injector's file watching thread
     # CursorControlAgent currently processes messages directly when bus.process_messages is called,
     # but could be made multi-threaded if needed.
+    # SocialMediaAgent needs to be started if it has a background loop
+    if hasattr(social_agent, 'start') and callable(social_agent.start):
+        social_agent.start()
+
+    # Start MeredithResonanceScanner if it has a start method
+    if hasattr(meredith_scanner_agent, 'start') and callable(meredith_scanner_agent.start):
+        meredith_scanner_agent.start()
 
     # --- Main Loop ---
     logger.info("System running. Monitoring tasks and processing messages. Press Ctrl+C to exit.")
@@ -184,7 +224,15 @@ def main():
             # We process messages for the TaskExecutorAgent to handle responses
             # and CursorControlAgent to handle direct commands if any were sent outside the task list.
             # Add AgentMonitorAgent to the polling list to process events it subscribes to
-            agents_to_poll = [TaskExecutorAgent.AGENT_NAME, CursorControlAgent.AGENT_NAME, AgentMonitorAgent.AGENT_NAME]
+            # Add SocialMediaAgent if it needs polling
+            # Add MeredithResonanceScanner for polling
+            agents_to_poll = [
+                TaskExecutorAgent.AGENT_NAME,
+                CursorControlAgent.AGENT_NAME,
+                AgentMonitorAgent.AGENT_NAME,
+                SocialMediaAgent.AGENT_NAME,
+                meredith_scanner_agent.agent_name
+            ]
             total_processed = 0
             for agent_name in agents_to_poll:
                 processed_count = bus.process_messages(agent_name, max_messages=5) # Process up to 5 per agent per cycle

@@ -1,0 +1,37 @@
+{
+  "agent": "Social",
+  "priority": 2,
+  "tasks": [
+    {
+      "id": "SOCIAL-001",
+      "title": "Consolidate Test Fixtures",
+      "description": "Create shared test fixtures and mocks",
+      "targets": [
+        "tests/**/conftest.py",
+        "tests/**/fixtures.py",
+        "**/test_*.py"
+      ],
+      "output_path": "tests/fixtures/"
+    },
+    {
+      "id": "SOCIAL-002",
+      "title": "Unify Social Platform Tests",
+      "description": "Create common test base classes for social platforms",
+      "targets": [
+        "social/tests/strategies/",
+        "tests/social/strategies/"
+      ],
+      "output_path": "tests/social/base_tests.py"
+    },
+    {
+      "id": "SOCIAL-003",
+      "title": "Consolidate Test Data",
+      "description": "Create shared test data and snapshots",
+      "targets": [
+        "**/test_data/",
+        "**/snapshots/"
+      ],
+      "output_path": "tests/data/"
+    }
+  ]
+} 

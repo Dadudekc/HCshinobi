@@ -1,0 +1,59 @@
+{# templates/context_snapshot.j2 #}
+{# This template assumes 'supervisor_state' is injected into the context #}
+🧠 SYSTEM SNAPSHOT
+====================
+
+**Current Focus:** {{ supervisor_state.current_focus.purpose | default('N/A') }}
+→ {{ supervisor_state.current_focus.context_snippet | default('N/A') }}
+
+**Goals:**
+{% set goals = supervisor_state.active_goals | default([]) %}
+{% if goals %}
+{% for goal in goals %}
+- {{ goal }}
+{% endfor %}
+{% else %}
+- (No active goals)
+{% endif %}
+
+**Agents:**
+{% set agent_states = supervisor_state.agent_states | default({}) %}
+{% if agent_states %}
+{% for agent_id, info in agent_states.items() %}
+- **{{ agent_id }}** → Status: {{ info.status | default('N/A') }} | Task: {{ info.active_task_id or "None" }}
+{% endfor %}
+{% else %}
+- (No agents tracked)
+{% endif %}
+
+**Tasks:**
+{% set task_assignments = supervisor_state.task_assignments | default({}) %}
+{% if task_assignments %}
+{% for task_id, task in task_assignments.items() %}
+- {{ task_id }} → Agent: {{ task.agent_id | default('N/A') }}, Status: {{ task.status | default('N/A') }}
+{% endfor %}
+{% else %}
+- (No task assignments)
+{% endif %}
+
+**System Notes:**
+{% set notes = supervisor_state.system_notes | default([]) %}
+{% if notes %}
+{% for note in notes %}
+- {{ note }}
+{% endfor %}
+{% else %}
+- (None)
+{% endif %}
+
+**Project Scan Summary:**
+{% set scan_summary = project_scan.summary | default({}) %}
+{% if project_scan.error %}
+- Error: {{ project_scan.error }}
+{% elif scan_summary %}
+- Total Files Scanned: {{ scan_summary.total_files | default('N/A') }}
+- Total Code Complexity: {{ scan_summary.total_complexity | default('N/A') }}
+- Key Languages: {{ scan_summary.language_counts | default({}) | join(', ') }}
+{% else %}
+- (Scan data unavailable or empty)
+{% endif %} 

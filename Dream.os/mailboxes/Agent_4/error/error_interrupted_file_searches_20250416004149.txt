@@ -1,0 +1,1 @@
+Operation blocked on multiple tasks (c34cd058-..., c761de27-..., 373bbe93-...) because file searches for required agent code (CursorControlAgent.py, TaskDispatcherAgent.py/TaskExecutorAgent.py, MeredithResonanceScanner.py, FeedbackEngine.py/PromptFeedbackLoopAgent.py) were interrupted. Cannot analyze or execute these tasks without access to the agent source files.

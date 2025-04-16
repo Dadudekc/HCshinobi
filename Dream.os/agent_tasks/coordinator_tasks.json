@@ -1,0 +1,38 @@
+{
+  "agent": "Coordinator",
+  "priority": 1,
+  "tasks": [
+    {
+      "id": "COORD-001",
+      "title": "Consolidate Dispatcher Logic",
+      "description": "Merge duplicate dispatcher implementations into unified classes",
+      "targets": [
+        "dreamforge/agents/cursor_dispatcher.py",
+        "_agent_coordination/tools/cursor_dispatcher.py",
+        "_agent_coordination/tools/prompt_dispatcher.py",
+        "chat_scraper_dispatcher.py"
+      ],
+      "output_path": "core/coordination/dispatchers/"
+    },
+    {
+      "id": "COORD-002", 
+      "title": "Unify Configuration Management",
+      "description": "Create centralized config service and remove duplicate loaders",
+      "targets": [
+        "social/social_media_agent.py:_load_config",
+        "dreamforge/services/discord_service.py:load_config"
+      ],
+      "output_path": "core/config/config_service.py"
+    },
+    {
+      "id": "COORD-003",
+      "title": "Consolidate Agent Bus Implementation",
+      "description": "Ensure single source of truth for agent communication",
+      "targets": [
+        "core/coordination/agent_bus.py",
+        "agents/*/agent_bus.py"
+      ],
+      "output_path": "core/coordination/agent_bus.py"
+    }
+  ]
+} 

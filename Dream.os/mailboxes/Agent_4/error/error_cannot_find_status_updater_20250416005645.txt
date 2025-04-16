@@ -1,0 +1,1 @@
+Task 23b95365-68fd-454b-8aff-049ce9f94070 blocked. Cannot verify status update reliability because file search for core/utils/task_status_updater.py was interrupted.

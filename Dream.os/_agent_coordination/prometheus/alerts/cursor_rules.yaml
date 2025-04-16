@@ -1,0 +1,90 @@
+groups:
+  - name: cursor_listener_alerts
+    rules:
+      - alert: CursorErrorRateHigh
+        expr: rate(cursor_error_types[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          service: cursor_listener
+        annotations:
+          summary: "Cursor Listener Error Rate High"
+          description: "Error rate has exceeded 5% over 5 minutes"
+          runbook_url: "https://dream.os/docs/runbooks/cursor-listener#high-error-rate"
+
+      - alert: CursorQueueGrowth
+        expr: cursor_queue_size{queue_type="pending"} > 1000
+        for: 10m
+        labels:
+          severity: warning
+          service: cursor_listener
+        annotations:
+          summary: "Cursor Listener Queue Growing"
+          description: "Pending queue has over 1000 items for 10 minutes"
+          runbook_url: "https://dream.os/docs/runbooks/cursor-listener#queue-growth"
+
+      - alert: CursorMemoryUsageHigh
+        expr: (process_resident_memory_bytes{job="cursor_listener"} / 1024 / 1024) > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: cursor_listener
+        annotations:
+          summary: "Cursor Listener Memory Usage High"
+          description: "Memory usage has exceeded 85% for 5 minutes"
+          runbook_url: "https://dream.os/docs/runbooks/cursor-listener#memory-usage"
+
+      - alert: CursorProcessingDelay
+        expr: rate(cursor_processing_duration_seconds_sum[5m]) / rate(cursor_processing_duration_seconds_count[5m]) > 30
+        for: 5m
+        labels:
+          severity: warning
+          service: cursor_listener
+        annotations:
+          summary: "Cursor Listener Processing Delays"
+          description: "Average processing time exceeds 30 seconds"
+          runbook_url: "https://dream.os/docs/runbooks/cursor-listener#processing-delays"
+
+      - alert: CursorServiceDown
+        expr: up{job="cursor_listener"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: cursor_listener
+        annotations:
+          summary: "Cursor Listener Service Down"
+          description: "Service has been down for more than 1 minute"
+          runbook_url: "https://dream.os/docs/runbooks/cursor-listener#service-down"
+
+      - alert: CursorRetryRateHigh
+        expr: rate(cursor_retry_attempts[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: cursor_listener
+        annotations:
+          summary: "Cursor Listener High Retry Rate"
+          description: "Retry rate has exceeded 10% over 5 minutes"
+          runbook_url: "https://dream.os/docs/runbooks/cursor-listener#high-retry-rate"
+
+      - alert: CursorFeedbackFailure
+        expr: rate(cursor_execution_results{status="feedback_error"}[5m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: cursor_listener
+        annotations:
+          summary: "Cursor Listener Feedback Generation Failing"
+          description: "Feedback generation errors detected in last 5 minutes"
+          runbook_url: "https://dream.os/docs/runbooks/cursor-listener#feedback-failure"
+
+      - alert: CursorContextFileErrors
+        expr: rate(cursor_error_types{error_type="context_file_error"}[5m]) > 0
+        for: 5m
+        labels:
+          severity: critical
+          service: cursor_listener
+        annotations:
+          summary: "Cursor Listener Context File Errors"
+          description: "Context file operations failing in last 5 minutes"
+          runbook_url: "https://dream.os/docs/runbooks/cursor-listener#context-file-errors" 

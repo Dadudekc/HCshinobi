@@ -1,0 +1,34 @@
+{
+    "dispatcher_config": {
+        "task_directory": "agent_tasks",
+        "reporting_interval": 3600,
+        "report_destination": "reports/agent_progress",
+        "monitoring": {
+            "enabled": true,
+            "metrics_port": 9090,
+            "prometheus_endpoint": "/metrics"
+        },
+        "agents": {
+            "Agent Claude": {
+                "task_file": "claude.json",
+                "priority": 1,
+                "concurrent_tasks": 2
+            },
+            "Agent Social": {
+                "task_file": "social.json",
+                "priority": 2,
+                "concurrent_tasks": 1
+            },
+            "Agent AletheiaContentDispatcher": {
+                "task_file": "aletheia.json",
+                "priority": 1,
+                "concurrent_tasks": 1
+            }
+        },
+        "supervisor": {
+            "agent": "Agent Dream.OS",
+            "check_interval": 300,
+            "alert_threshold": 0.8
+        }
+    }
+} 

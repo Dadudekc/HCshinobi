@@ -1,0 +1,20 @@
+{
+  "incoming": [
+    {
+        "message_id": "supervisor-exec-001",
+        "sender": "Supervisor",
+        "recipient": "SocialAgent",
+        "timestamp": "$(date --iso-8601=seconds)",
+        "type": "COMMAND",
+        "payload": {
+            "command": "EXECUTE_TASK",
+            "task_id": "social-005",
+            "details": "Begin work on refining web selectors as defined in task list."
+        }
+    }
+  ],
+  "outgoing": [],
+  "processed_ids": [
+    "supervisor-exec-001"
+  ]
+} 

@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0.0",
+  "prompt_id": "a7f3b1c9-d8e4-4f8a-b2e1-f9c7a0d3b5e1",
+  "originator": "ChatGPT-SocialAgentManager",
+  "timestamp_utc": "2024-01-15T10:30:00Z",
+  "task_reference": "social-new-104-refinement",
+  "objective": "Refactor the error handling in TwitterStrategy's post method to use specific StrategyError exceptions.",
+  "prompt_content": {
+    "main_instruction": "Modify the `post` method in `strategies/twitter_strategy.py`. Wrap the main try block. Catch specific exceptions like `WebDriverException`, `StrategyError`, and generic `Exception`. Re-raise them wrapped in a `PostError` from `strategies.strategy_exceptions`. Ensure the original exception is passed to `PostError`.",
+    "system_persona": "Act as a careful Python developer specializing in error handling and Selenium automation.",
+    "output_constraints": [
+      "Import `PostError` from `.strategy_exceptions`.",
+      "Modify only the `post` method.",
+      "Maintain existing logging calls within the method.",
+      "Ensure the final raised `PostError` includes the original exception details."
+    ],
+    "context_summary": "Refactoring error handling as part of task social-new-104. The `post` method currently has basic error handling."
+  },
+  "context_data": {
+    "relevant_files": [
+      {
+        "path": "strategies/twitter_strategy.py",
+        "line_start": 424, 
+        "line_end": 514 
+      },
+      {
+        "path": "strategies/strategy_exceptions.py"
+      }
+    ],
+    "retrieved_snippets": [],
+    "additional_notes": [
+      "Ensure the new exception handling correctly captures errors occurring during Selenium interactions (e.g., finding elements, clicking buttons)."
+    ]
+  },
+  "target_output": {
+    "format": "code_edit",
+    "target_file": "strategies/twitter_strategy.py",
+    "instructions_for_apply": "Apply the changes to the `post` method, replacing the existing broad exception handling with the new specific `PostError` raising logic."
+  },
+  "metadata": {
+    "priority": 2,
+    "tags": ["refactor", "error_handling", "twitter", "social-new-104"]
+  }
+} 

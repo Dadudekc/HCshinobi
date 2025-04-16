@@ -1,0 +1,1 @@
+Task dffb8c48-633f-4fea-8054-d63cd0cc4e98 blocked. Cannot define specific task params because agent source code (needed to identify all task_types) is inaccessible due to persistent file search/access issues.

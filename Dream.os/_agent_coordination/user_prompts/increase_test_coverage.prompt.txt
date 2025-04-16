@@ -1,0 +1,48 @@
+# 🧪 TEST COVERAGE EXPANSION DIRECTIVE
+
+## 🎯 OBJECTIVE
+Increase overall test coverage of the codebase to **90%+**, prioritizing high-impact modules and logic-critical services.
+
+## 📦 CURRENT COVERAGE SNAPSHOT
+- Total Coverage: {{ current_coverage.total }}%
+- Files Below 90%:
+{% for file in current_coverage.below_threshold %}
+- `{{ file.path }}` — {{ file.coverage }}%
+{% endfor %}
+
+## 🔍 TARGET DIRECTORIES
+Focus testing on:
+- `dreamforge/core/`
+- `dreamforge/services/`
+- `micro_factories/`
+- `agent_dispatcher/`
+- `cursor_dispatcher.py`
+- Any file modified in the last {{ recent_file_days }} days
+
+## 🧠 STRATEGY
+For each under-tested file:
+
+1. Analyze uncovered lines.
+2. Write **unit tests** using mocks where needed.
+3. If external APIs, include **integration test stubs**.
+4. Apply **Red-Green-Refactor** when modifying or adding code to support testability.
+5. Emit `log_event("TEST_ADDED", agent_id, {...})` on every new test block created.
+
+## ✅ COMPLETION REQUIREMENTS
+A file is complete when:
+- It reaches **≥90%** coverage.
+- Edge cases, exception paths, and retries are tested.
+- Critical service paths emit correct log events during testing.
+
+## 🧪 EXAMPLE COMPLETION (INLINE FORMAT)
+```python
+# tests/core/test_template_engine.py
+def test_render_valid_template():
+    ...
+    assert result == "Expected Output"
+    log_event("TEST_PASSED", "CoverageAgent", {"test": "test_render_valid_template"})
+
+def test_render_missing_template_raises():
+    ...
+    with pytest.raises(TemplateNotFound):
+        ...

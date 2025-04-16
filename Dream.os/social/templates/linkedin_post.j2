@@ -1,0 +1,29 @@
+🚀 New Development Log: {{ post.title }}
+
+{{ post.description|truncate(250) }}
+
+{% if post.key_learnings %}
+Key Insights:
+{% for learning in post.key_learnings %}
+• {{ learning }}
+{% endfor %}
+{% endif %}
+
+{% if post.technical_details %}
+Technical Highlights:
+{% for detail in post.technical_details[:3] %}
+• {{ detail }}
+{% endfor %}
+{% endif %}
+
+{% if post.challenges %}
+Challenges Overcome:
+{% for challenge in post.challenges[:2] %}
+Problem: {{ challenge.problem }}
+Solution: {{ challenge.solution }}
+{% endfor %}
+{% endif %}
+
+Read the full post here: {{ post.url }}
+
+#SoftwareDevelopment {% for tag in post.tags[:5] %}#{{ tag }} {% endfor %} 

@@ -1,0 +1,72 @@
+{
+    "role": "Logic Deduplication + Utility Refactor",
+    "priority": 2,
+    "tasks": [
+        {
+            "id": "AGENT_001",
+            "title": "Merge Common Functions and Classes",
+            "description": "Identify and consolidate repeated functions/classes across services",
+            "target_files": [
+                "**/utils/*.py",
+                "**/helpers/*.py",
+                "**/common/*.py"
+            ],
+            "success_criteria": {
+                "reduced_duplication": true,
+                "test_coverage": 90,
+                "import_updates": true
+            }
+        },
+        {
+            "id": "AGENT_002",
+            "title": "Consolidate Metrics and Feedback",
+            "description": "Merge metrics gathering and feedback engine logic",
+            "target_files": [
+                "**/metrics/*.py",
+                "**/feedback/*.py",
+                "**/telemetry/*.py"
+            ],
+            "success_criteria": {
+                "unified_interface": true,
+                "data_consistency": true,
+                "backward_compatible": true
+            }
+        },
+        {
+            "id": "AGENT_003",
+            "title": "Standardize Error Handling",
+            "description": "Consolidate error classes and remove redundant exception trees",
+            "target_files": [
+                "**/exceptions/*.py",
+                "**/errors/*.py"
+            ],
+            "success_criteria": {
+                "hierarchy_simplified": true,
+                "consistent_patterns": true,
+                "documentation_updated": true
+            }
+        },
+        {
+            "id": "AGENT_004",
+            "title": "Unify Analysis Tools",
+            "description": "Ensure sentiment analyzer, logger, and performance tracker use shared interfaces",
+            "target_files": [
+                "**/analyzer/*.py",
+                "**/logger/*.py",
+                "**/performance/*.py"
+            ],
+            "success_criteria": {
+                "shared_interface": true,
+                "pluggable_components": true,
+                "test_coverage": 85
+            }
+        }
+    ],
+    "dependencies": ["COORD_001", "COORD_004"],
+    "validation_rules": {
+        "commit_format": "refactor(cleanup): {what} in {modules}",
+        "required_tests": ["unit", "integration", "performance"],
+        "changelog_update": true,
+        "performance_threshold": "no_regression"
+    }
+} 

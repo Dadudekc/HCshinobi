@@ -1,0 +1,49 @@
+{
+    "agent": "Agent Claude",
+    "role": "Execution + QA",
+    "priority": "high",
+    "tasks": [
+        {
+            "id": "QA-001",
+            "title": "Run Full Test Suite",
+            "description": "Execute complete test suite across all modules with coverage reporting",
+            "acceptance_criteria": [
+                "All tests pass",
+                "Coverage report generated in /reports/coverage",
+                "Coverage meets 90% minimum threshold"
+            ],
+            "dependencies": [],
+            "status": "pending"
+        },
+        {
+            "id": "QA-002",
+            "title": "Patch Missing Tests",
+            "description": "Identify and implement missing test cases, especially edge cases",
+            "focus_areas": [
+                "WorkflowAgent integration tests",
+                "CursorListener error handling",
+                "FeedbackConsumer async operations"
+            ],
+            "status": "pending"
+        },
+        {
+            "id": "QA-003",
+            "title": "Coverage Report Export",
+            "description": "Generate and commit comprehensive coverage reports",
+            "deliverables": [
+                "/reports/coverage/index.html",
+                "/reports/test_results/summary.json",
+                "/reports/metrics/test_execution_time.log"
+            ],
+            "status": "pending"
+        }
+    ],
+    "reporting": {
+        "frequency": "hourly",
+        "metrics": [
+            "test_pass_rate",
+            "coverage_percentage",
+            "failing_tests_count"
+        ]
+    }
+} 

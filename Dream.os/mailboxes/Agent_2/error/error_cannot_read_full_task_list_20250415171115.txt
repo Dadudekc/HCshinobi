@@ -1,0 +1,1 @@
+Operation stalled: Cannot read the entire master_task_list.json (estimated 3611 lines). The read_file tool is limited to 250 lines for files not previously attached or edited. This prevents the mandatory claim process (Read full list -> Modify -> Write full list). Agent Agent_2 cannot claim, execute, or mark tasks as FAILED/BLOCKED according to protocol ONB-001.

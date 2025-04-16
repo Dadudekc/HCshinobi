@@ -1,0 +1,11 @@
+# Development Requirements
+
+# Static Analysis & Formatting
+flake8>=6.0.0
+mypy>=1.5.0
+# Add black or other formatters if used
+
+# Testing
+pytest>=7.0.0
+unittest # Built-in, just for clarity
+# Add pytest plugins if needed (e.g., pytest-cov, pytest-mock) 

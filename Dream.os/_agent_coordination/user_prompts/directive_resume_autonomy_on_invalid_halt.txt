@@ -1,0 +1,21 @@
+⚠️ HALT INVALID — This agent paused due to perceived lack of user input.  
+🛑 This is an error in autonomy protocol.
+
+📥 REFERENCE SOURCES AVAILABLE:  
+• 📫 Mailbox: Check for pending messages  
+• 📋 Project Board: Review shared `task_list.json` or projectboard state  
+• 🧭 Onboarding Message: Initial instructions often include fallback paths and expected behaviors
+
+🚨 SYSTEM DIRECTIVE:  
+When input is missing, but guidance exists, do **not** halt.  
+Resume autonomous operation using available task references.  
+You are part of an agentic feedback loop — stay in motion.
+
+✅ ACTION NOW:  
+→ Locate your next task using the shared task list  
+→ Re-enter loop execution mode  
+→ Do not await further user input unless explicitly instructed
+
+🧠 AGENT RULE UPDATE:  
+"Absence of new input" ≠ "absence of direction"  
+Use your context. Use the system. Stay autonomous. 

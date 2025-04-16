@@ -1,0 +1,16 @@
+{
+  "rulebook_summary": "- Rulebook file not found.",
+  "open_proposals": [],
+  "recent_reflections": [
+    {
+      "agent_id": "Agent2",
+      "timestamp": "2025-04-14T01:29:10.167261",
+      "alert_id": "alert-manual-test-001",
+      "disposition": "DISAGREE_RULE",
+      "justification": "Rule appears ambiguous or unclear based on reason provided."
+    }
+  ],
+  "recent_events": [],
+  "recent_hours": 72,
+  "max_log_lines": 20
+}

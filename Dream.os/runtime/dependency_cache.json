@@ -1,0 +1,480 @@
+{
+    "setup.py": {
+        "hash": "6a19b6a8dfa48d6ee39ba2abb016272d"
+    },
+    "core/template_engine.py": {
+        "hash": "1e1627906a7b21420c0dc2049810248a"
+    },
+    "agents/chatgpt_commander_agent.py": {
+        "hash": "e5941abb7c291e30d9e3519e08668900"
+    },
+    "core/memory/governance_memory_engine.py": {
+        "hash": "09c0629ac96e57e07526274f3528e2bf"
+    },
+    "_agent_coordination/tools/gpt_command_router.py": {
+        "hash": "778dd5815adf630b06780c939576a1af"
+    },
+    "governance_scraper.py": {
+        "hash": "01c33c45404a12f910fbe296d979f83e"
+    },
+    "agents/agents/AletheiaContentDispatcher.py": {
+        "hash": "9ce322954e09957fcf56ae9b738e7b96"
+    },
+    "agents/agents/workflow_agent.py": {
+        "hash": "00ae7293c44c66f0ed7a5cefb51f4508"
+    },
+    "agents/agents/setup.py": {
+        "hash": "96bb1c41a21085d0a9dae2d8828dc292"
+    },
+    "agents/setup.py": {
+        "hash": "faff99e3bc229107eb6a412695aa3855"
+    },
+    "agents/agents/reflection_agent/reflection_agent.py": {
+        "hash": "67595b29af1c769000fe75dbd7285e4a"
+    },
+    "agents/agents/tests/test_reflection_agent.py": {
+        "hash": "aaccccb57bbaed0e19d4aa6644d05200"
+    },
+    "agents/agents/tests/test_workflow_agent.py": {
+        "hash": "d70b69241e94b971f5e819659240e7dc"
+    },
+    "agents/dreamforge/__init__.py": {
+        "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    "agents/architects_edge_agent.py": {
+        "hash": "1f2ad99e97cf7c6728429bbaee22fc4d"
+    },
+    "agents/agents/planner_agent.py": {
+        "hash": "925ee419208e5a350c47cfea1076731e"
+    },
+    "agents/calendar_agent.py": {
+        "hash": "0b299f252ec9ec88b843c29f4db159c6"
+    },
+    "agents/dreamforge/agents/planner_agent.py": {
+        "hash": "11f03e6a1746a81139e6c6ab0147e77c"
+    },
+    "agents/dreamforge/agents/__init__.py": {
+        "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    "agents/dreamforge/core/config.py": {
+        "hash": "be05220d1e6533efbcf1c228a86a2724"
+    },
+    "agents/dreamforge/core/agent_protocols.py": {
+        "hash": "f5cf70f72b63139b231b25cd7cf6294f"
+    },
+    "agents/dreamforge/agents/workflow_agent.py": {
+        "hash": "ea68aa22035f1894998dfe2791c4636b"
+    },
+    "agents/dreamforge/core/cursor_dispatcher.py": {
+        "hash": "ca2f74dc48a87bb960ab1dedeb8a5ea4"
+    },
+    "agents/dreamforge/core/llm_parser.py": {
+        "hash": "99a4c8fcf1e3fd23171d12b84ba086bd"
+    },
+    "agents/dreamforge/core/feedback_consumer.py": {
+        "hash": "fb7339f975ca01d940919985d878d059"
+    },
+    "agents/dreamforge/core/prompt_staging_service.py": {
+        "hash": "6a940f98f57ee0a42ab8a9588a311562"
+    },
+    "agents/dreamforge/core/template_engine.py": {
+        "hash": "41d1b4d21b78533b2829883ccddbfe20"
+    },
+    "agents/dreamforge/core/__init__.py": {
+        "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    "agents/dreamforge/core/coordination/__init__.py": {
+        "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    "agents/dreamforge/core/coordination/agent_bus.py": {
+        "hash": "28bcd779cea8e9bd64ecc16ef3d83148"
+    },
+    "agents/dreamforge/core/feedback/consumer.py": {
+        "hash": "4ba64545d3fb02524c53000487fdfb5e"
+    },
+    "agents/dreamforge/core/feedback/__init__.py": {
+        "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    "agents/dreamforge/core/memory/governance_memory_engine.py": {
+        "hash": "91ee40da1d7b9cb84389d1b69daff667"
+    },
+    "agents/dreamforge/core/memory/memory_manager.py": {
+        "hash": "e0dfefb021dec4a2c72a8a81aeac59c1"
+    },
+    "agents/dreamforge/tests/__init__.py": {
+        "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    "agents/dreamforge/core/tests/test_governance_memory_engine.py": {
+        "hash": "08240007ceee636e9efb696a39009b75"
+    },
+    "agents/dreamforge/core/models/workflow.py": {
+        "hash": "62728bbbc6908287f594f5c0f3d5ed3a"
+    },
+    "agents/dreamforge/core/tests/test_template_engine.py": {
+        "hash": "bc4f767a60401fafe19dced9be3f037e"
+    },
+    "agents/dreamforge/tests/agents/test_planner_agent.py": {
+        "hash": "209eeda7536ddc24b5c531102296e175"
+    },
+    "agents/dreamforge/tests/agents/test_workflow_agent.py": {
+        "hash": "df325fe44deb11565b516778b09f8595"
+    },
+    "agents/dreamforge/tests/agents/__init__.py": {
+        "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    "agents/dreamforge/tests/core/test_agent_bus.py": {
+        "hash": "28d154c0ceab47b07cf7e4021f575c1b"
+    },
+    "agents/dreamforge/tests/core/test_cursor_listener.py": {
+        "hash": "b58300bdaf24ee47156f156ebef14100"
+    },
+    "agents/dreamforge/tests/core/test_llm_parser.py": {
+        "hash": "d27dc47c2b7444ae77c1d98396022f70"
+    },
+    "agents/dreamforge/tests/core/test_feedback_consumer.py": {
+        "hash": "9e7f4fe859d8c4cd931d7a1cc6742b16"
+    },
+    "agents/dreamforge/tests/core/test_prompt_staging_service.py": {
+        "hash": "470f2659280b4804cbe0585b029136b5"
+    },
+    "agents/dreamforge/tests/core/test_template_engine.py": {
+        "hash": "5649c55f3ac3f14ad7743430c916ff85"
+    },
+    "agents/dreamforge/tests/core/test_workflow_models.py": {
+        "hash": "21cddac88b596811c3970f7538fca2ba"
+    },
+    "agents/dreamforge/tests/core/__init__.py": {
+        "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    "agents/meta_architect/__init__.py": {
+        "hash": "7215ee9c7d9dc229d2921a40e899ec5f"
+    },
+    "agents/meta_architect/architect_agent.py": {
+        "hash": "5a9caf41e1d2833dc0709eb4cc979118"
+    },
+    "agents/reflection_agent/reflection_agent.py": {
+        "hash": "58e763d52b59fedf4e91f5bdd1df085f"
+    },
+    "agents/social/strategies/facebook_strategy.py": {
+        "hash": "7de69f4b6d4f50c16582bad41f59f542"
+    },
+    "agents/social/strategies/instagram_strategy.py": {
+        "hash": "cf84673e1f6427eb22c07a0ca3fd33a7"
+    },
+    "agents/social/strategies/linkedin_strategy.py": {
+        "hash": "5daec87d0ecd28346a0c1dcd019ff380"
+    },
+    "agents/social/strategies/twitter_strategy.py": {
+        "hash": "504bc1403e58f28920ab73d97abb9afa"
+    },
+    "agents/social/strategies/__init__.py": {
+        "hash": "6cbf8e9d17b4bfa9708cb7a770f8eec3"
+    },
+    "agents/tests/test_architects_edge_agent.py": {
+        "hash": "336eafbb10b4a13029bce3a7e9fe5a89"
+    },
+    "agents/tests/test_calendar_agent.py": {
+        "hash": "7d55e0d492b104b3713fce4ba1620bfe"
+    },
+    "analysis/log_analyzer.py": {
+        "hash": "89b3420e5591e6abf11310cd2518ffc5"
+    },
+    "core/llm_parser.py": {
+        "hash": "23965bb67ac0d905e634c9e1a2d7302d"
+    },
+    "coordination/agent_bus.py": {
+        "hash": "1c6c72cb17bdcb40f57d73cf49e4de31"
+    },
+    "core/config.py": {
+        "hash": "6747165d33acebcb1081930f15d0d5cb"
+    },
+    "core/prompt_staging_service.py": {
+        "hash": "b39c07911102be76baaa7808b912753b"
+    },
+    "core/coordination/agent_bus.py": {
+        "hash": "a97ca7ed288595a0bbb329fe92e60707"
+    },
+    "core/memory/supervisor_memory.py": {
+        "hash": "f8d0b8aa35325c726a8fe03549d15fa8"
+    },
+    "core/models/plan.py": {
+        "hash": "54a02e41fff5ac11ddf5bcede577124f"
+    },
+    "core/models/task.py": {
+        "hash": "817e355caad00ad2bf38dffbbad9adf5"
+    },
+    "core/models/workflow.py": {
+        "hash": "564ebdf33f5b03fe80435a3c08f3a738"
+    },
+    "core/models/__init__.py": {
+        "hash": "8db7ef9f5bd6f560fea11238eb7c878e"
+    },
+    "core/tests/test_agent_bus.py": {
+        "hash": "48914e1066b1203f19ed3cbb5a89da3f"
+    },
+    "core/tests/test_core_services.py": {
+        "hash": "653c2c186ab6a30f6b6e5407f8089c83"
+    },
+    "core/tests/test_models.py": {
+        "hash": "27c730d28ed3c4973fc960bad966494b"
+    },
+    "dreamforge/main.py": {
+        "hash": "74a4e9a9ee27a63fafa51c9a48d71435"
+    },
+    "dreamforge/__init__.py": {
+        "hash": "e6830e0efa9a6b97cf569aee20cd3727"
+    },
+    "dreamforge/agents/calendar_agent.py": {
+        "hash": "e8c9f593d20d7204ad14a5b92b07ab48"
+    },
+    "dreamforge/agents/chatgpt_commander.py": {
+        "hash": "23db807f179d2af3945d3b03ad8be671"
+    },
+    "dreamforge/agents/cursor_dispatcher.py": {
+        "hash": "a75bc8bdc590c55025d634e9c46d7dba"
+    },
+    "dreamforge/agents/planner_agent.py": {
+        "hash": "c847bad229199993d939c7ecaea96183"
+    },
+    "dreamforge/agents/workflow_agent.py": {
+        "hash": "31f0def93992ca84603397d2cac2f8b2"
+    },
+    "dreamforge/core/governance_memory_engine.py": {
+        "hash": "dbe48aacb2edc1d3cd564a2970df6687"
+    },
+    "dreamforge/core/agent_bus.py": {
+        "hash": "5d709d52c3720e2f739817a8443f5d1e"
+    },
+    "dreamforge/core/config.py": {
+        "hash": "98d58f0506363865301930d3e92f147a"
+    },
+    "dreamforge/core/template_engine.py": {
+        "hash": "b67764397b125c2e016584743b9a0f6a"
+    },
+    "dreamforge/utils/browser_controller.py": {
+        "hash": "a82e419e84158b54c1c86dbd70d8f711"
+    },
+    "dreamforge/utils/common_utils.py": {
+        "hash": "01a49d0074700a29ac45d4114e611511"
+    },
+    "dreamforge/utils/cursor_utils.py": {
+        "hash": "8a892a70070e55d12785086dbd6230b5"
+    },
+    "dreamforge/utils/mailbox_handler.py": {
+        "hash": "77a70613e52d790d186ff4c8d03a8d4d"
+    },
+    "dreamforge/utils/selenium_utils.py": {
+        "hash": "5d6b7e71173b03a8d1416b024f5f1c9f"
+    },
+    "execution/screenshot_taker.py": {
+        "hash": "d96499a0b71244e6839a048ed37f11e1"
+    },
+    "main.py": {
+        "hash": "c2478128592718a3e806c5009c2a9f60"
+    },
+    "prompts/generate_docstring.j2": {
+        "hash": "377d33d0f6135e940b1c61d39a1f0d5e"
+    },
+    "prompts/generate_proposal.j2": {
+        "hash": "34f553144b8f54760e959d7b06f27211"
+    },
+    "prompts/generate_reflections.j2": {
+        "hash": "978a1e93a8ccf4406a8995e483644829"
+    },
+    "prompts/generate_task_list.j2": {
+        "hash": "88f1c2ea447e07c46a11dd4303f16ab0"
+    },
+    "prompts/refactor_code.j2": {
+        "hash": "6d931b2329a10b6f014ae1123b27f912"
+    },
+    "reports/todo_report.md": {
+        "hash": "58f543b9f1335412e3360e4c211074f5"
+    },
+    "runtime/governance_memory.jsonl": {
+        "hash": "d5e31b4a5507b6b84e89d4303b797e07"
+    },
+    "scripts/run_qa.py": {
+        "hash": "f139b20582c0a4412b440e62f38c10b2"
+    },
+    "social/config.py": {
+        "hash": "f3433833c11d1b6577bb7f37b7396a6d"
+    },
+    "social/devlog_generator.py": {
+        "hash": "855c42f51082a8367a1f58a38c186e50"
+    },
+    "social/post_context_generator.py": {
+        "hash": "587a44eb19df02e932e6f6dbf26b34c5"
+    },
+    "social/strategies/base_strategy.py": {
+        "hash": "6f486303e1e4181a015e6d00481c8a04"
+    },
+    "social/strategies/linkedin_strategy.py": {
+        "hash": "0f2b954d1d6456d7ac8b6c4239a52044"
+    },
+    "social/strategies/reddit_strategy.py": {
+        "hash": "4823f347558e3a194a0453e86f8c5054"
+    },
+    "social/strategies/twitter_strategy.py": {
+        "hash": "e3b0c44298fc1c149afbf4c8996fb924"
+    },
+    "social/tests/test_devlog_generator.py": {
+        "hash": "d7607d0056838d7b8d55e7719d1183db"
+    },
+    "social/tests/test_integration.py": {
+        "hash": "28e40177e478c9d7f8f3102cfd51e1f0"
+    },
+    "social/tests/test_strategies.py": {
+        "hash": "e82e97e16e72a41225730e367545a447"
+    },
+    "social/utils/browser_utils.py": {
+        "hash": "2b58f4012bbd25c2b626f097907e9e5d"
+    },
+    "social/utils/common.py": {
+        "hash": "e63ff2f3529d3740d1b8911c13f1b25f"
+    },
+
+    "social/utils/cursor_utils.py": {
+        "hash": "a9f768a10654f6b122d55d05d0b89b8a"
+    },
+    "social/utils/devlog_analyzer.py": {
+        "hash": "c7e99b2d8d47d3d311c8c5409b6b3b3f"
+    },
+    "social/utils/devlog_dispatcher.py": {
+        "hash": "e3799b8c95b468320f69c92011dfd97a"
+    },
+    "social/utils/logging_utils.py": {
+        "hash": "a2d2b8215f1b4b44a57462e113e0b731"
+    },
+    "social/utils/mailbox_handler.py": {
+        "hash": "466b666a4e8a0d58186ff4c8d03a8d4d"
+    },
+    "social/utils/selenium_utils.py": {
+        "hash": "14513451c09a25111346f6c8f847105b"
+    },
+    "tasks/refactor_main_window.md": {
+        "hash": "647d2436164e8e73b0635a42e924b33d"
+    },
+    "tests/test_integration.py": {
+        "hash": "9147531b3234777312234e69f7567265"
+    },
+    "tools/github_actions_generator.py": {
+        "hash": "e128660299051d1665321b39f580f962"
+    },
+    "tools/response_listener.py": {
+        "hash": "021d0e6c2a621305edc6950639a6f23d"
+    },
+    "tools/workflow_builder.py": {
+        "hash": "01b8f7f4f398f59d6a3355943b516004"
+    },
+    "utils/performance_logger.py": {
+        "hash": "714c00a8a17b952b78a805df47d8e7e6"
+    },
+    "_agent_coordination/tools/generate_agent_worker.py": {
+        "hash": "3f4c40117d90f92003b1177141f60d77"
+    },
+    "_agent_coordination/tools/run_script_in_sandbox.py": {
+        "hash": "6a51c05972a8e4e9174c0a582a1c6b4e"
+    },
+    "_agent_coordination/agents/agent_1/worker.py": {
+        "hash": "74c606b9c30652b8c7a0241628b085c3"
+    },
+    "_agent_coordination/agents/agent_2/worker.py": {
+        "hash": "c909a366df1a89bb259b1b2e4b8cc9b3"
+    },
+    "_agent_coordination/agents/agent_3/worker.py": {
+        "hash": "a3a3064625c527a97f38d55892264f60"
+    },
+    "_agent_coordination/core/utils/base.py": {
+        "hash": "316b086c824220639f4d5b49d8b214d2"
+    },
+    "_agent_coordination/core/utils/config_service.py": {
+        "hash": "0d50a464232c6e3730c54f89195b5364"
+    },
+    "_agent_coordination/core/utils/logging.py": {
+        "hash": "d32b1927495a8e3b20b7372f4c435474"
+    },
+    "_agent_coordination/tests/core/test_logging.py": {
+        "hash": "f8c04c80d7b7d6c35a70a36ec38e983d"
+    },
+    "_agent_coordination/dreamos/boot.py": {
+        "hash": "2730e01358a79e99f2895e1ff0e70d7b"
+    },
+    "_agent_coordination/dreamos/coordinator/base_coordinator.py": {
+        "hash": "0f5c09c23e32c6471799742e01f590c7"
+    },
+    "_agent_coordination/dreamos/coordinator/cleanup.py": {
+        "hash": "5a95a0f1c367d352c3606c092f261b08"
+    },
+    "_agent_coordination/dreamos/coordinator/cli.py": {
+        "hash": "6e3f3d142454007d8d798f898f1b57bb"
+    },
+    "_agent_coordination/dreamos/coordinator/domain.py": {
+        "hash": "d572d605e587e18574b35b34ff4d1485"
+    },
+    "_agent_coordination/dreamos/coordinator/process_manager.py": {
+        "hash": "3a725e011e653f81860577d2989d48c2"
+    },
+    "_agent_coordination/dreamos/coordinator/status.py": {
+        "hash": "a76f77a258947c34e7482a7e858f1a8d"
+    },
+    "_agent_coordination/dreamos/messaging/bus.py": {
+        "hash": "7f76e0451623d244d14d55e8c887f3f9"
+    },
+    "_agent_coordination/dreamos/messaging/events.py": {
+        "hash": "d073c2cc092d8a0c7e026063765d0d09"
+    },
+    "_agent_coordination/dreamos/state/agent_state.py": {
+        "hash": "2f7d0477e3a618a869c599c4c54b45c5"
+    },
+    "_agent_coordination/dreamos/state/persisted_state.py": {
+        "hash": "b304d22a680024d630b2e771089c82b8"
+    },
+    "_agent_coordination/tools/cursor_result_listener.py": {
+        "hash": "b56f0031c91b8f5388951707e3d82f15"
+    },
+    "_agent_coordination/coordinators/cursor_chat_coordinator.py": {
+        "hash": "6e3f3d142454007d8d798f898f1b57bb"
+    },
+    "core/gui/main_window.py": {
+        "hash": "5f48a80658e911b842e19bb1e990c3e8"
+    },
+    "core/gui/tab_manager.py": {
+        "hash": "a23c4d1148b4a52260f3b0118579024d"
+    },
+    "core/gui/tab_system_shutdown.py": {
+        "hash": "d426111114d24986753394d47b7064fa"
+    },
+    "core/gui/theme.py": {
+        "hash": "c672749671154632b502804b965d91b8"
+    },
+    "core/gui/tabs/cycle_execution_tab.py": {
+        "hash": "a85616f13535c43c0e4135708624ffb2"
+    },
+    "core/gui/tabs/feedback_tab.py": {
+        "hash": "3d399b74c957078664d730b38d2401a2"
+    },
+    "core/gui/tabs/task_monitor_tab.py": {
+        "hash": "5f7e1b1133c5a2e7c45a874b40e6d2d8"
+    },
+    "tests/core/gui/test_main_window_state.py": {
+        "hash": "b947e9276d837e97294b8282e300f662"
+    },
+    "tests/core/gui/test_tab_system_shutdown.py": {
+        "hash": "3b11297e47e1e32a956a7b518331713f"
+    },
+    "docs/qa_checklist.json": {
+        "hash": "771848290e09054093f4591f60f3984e"
+    },
+    "docs/dev_notes_logging.md": {
+        "hash": "0e94107b95c2f4520c5185935e0f1b22"
+    },
+    "docs/user_guide.md": {
+        "hash": "d7c03c3e2d98f6d3992039074f1c7b87"
+    },
+    "docs/qa_report.md": {
+        "hash": "a96219719e80c78e1f571d39b56d0b79"
+    },
+    "tests/scripts/test_run_qa.py": {
+        "hash": "7a5c2f5e506c66248e008f9c7f1a5d1b"
+    }
+} 

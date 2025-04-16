@@ -1,0 +1,221 @@
+"""
+🛑 DREAM.OS SHUTDOWN DIRECTIVE
+Version: 1.0.0
+Priority: CRITICAL
+Type: SYSTEM_DIRECTIVE
+
+---
+
+## 🎯 OBJECTIVE
+Orchestrate graceful system-wide shutdown of all Dream.OS agents with state preservation and cleanup.
+
+## 📋 DIRECTIVE SPECIFICATION
+
+{
+    "directive_id": "SYSTEM_SHUTDOWN_SEQUENCE",
+    "version": "1.0.0",
+    "priority": "CRITICAL",
+    "execution_mode": "SYNCHRONIZED",
+    "timeout_seconds": 30,
+    "required_acknowledgment": true
+}
+
+## 🔄 EXECUTION SEQUENCE
+
+1. PREPARATION PHASE
+   ```json
+   {
+       "phase": "prep",
+       "actions": [
+           "pause_new_tasks",
+           "freeze_task_queue",
+           "snapshot_memory_state"
+       ],
+       "timeout": "5s"
+   }
+   ```
+
+2. STATE PERSISTENCE
+   ```json
+   {
+       "phase": "persist",
+       "required_files": {
+           "task_state": "./task_list.json",
+           "agent_state": "./mailbox.json",
+           "memory_snapshot": "./memory/snapshot.json"
+       },
+       "formats": {
+           "task_list": {
+               "type": "List[Dict]",
+               "required_fields": [
+                   "task_id",
+                   "status",
+                   "priority",
+                   "checkpoint_data",
+                   "resume_strategy"
+               ]
+           },
+           "mailbox": {
+               "type": "Dict",
+               "required_fields": [
+                   "agent_id",
+                   "status",
+                   "pending_operations",
+                   "last_checkpoint",
+                   "recovery_instructions"
+               ]
+           }
+       },
+       "timeout": "10s"
+   }
+   ```
+
+3. CLEANUP PHASE
+   ```json
+   {
+       "phase": "cleanup",
+       "actions": [
+           "close_file_handles",
+           "terminate_subprocesses",
+           "clear_temp_files",
+           "flush_logs"
+       ],
+       "verification": {
+           "check_resources": true,
+           "validate_persistence": true
+       },
+       "timeout": "10s"
+   }
+   ```
+
+4. FINAL BROADCAST
+   ```json
+   {
+       "phase": "broadcast",
+       "event": "shutdown_ready",
+       "payload": {
+           "agent_id": "$AGENT_ID",
+           "status": "SHUTDOWN_READY",
+           "timestamp": "$TIMESTAMP",
+           "verification_token": "$TOKEN"
+       },
+       "timeout": "5s"
+   }
+   ```
+
+## 📝 REQUIRED OUTPUT FORMATS
+
+### task_list.json
+```json
+[
+    {
+        "task_id": "task_xyz",
+        "status": "paused",
+        "priority": "high",
+        "checkpoint_data": {
+            "step": "validation",
+            "progress": 0.75,
+            "resume_point": "validate_output"
+        },
+        "resume_strategy": {
+            "type": "checkpoint_restore",
+            "file": "checkpoints/task_xyz_75.json"
+        }
+    }
+]
+```
+
+### mailbox.json
+```json
+{
+    "agent_id": "AgentXYZ",
+    "status": "shutdown_ready",
+    "pending_operations": [
+        {
+            "op_id": "op_123",
+            "type": "task_sync",
+            "state": "paused",
+            "resume_data": {}
+        }
+    ],
+    "last_checkpoint": "2024-02-14T08:30:00Z",
+    "recovery_instructions": {
+        "sequence": [
+            "restore_checkpoint",
+            "validate_state",
+            "resume_operations"
+        ],
+        "dependencies": [
+            "MessageBus",
+            "StateManager"
+        ]
+    }
+}
+```
+
+## ⚡ VERIFICATION REQUIREMENTS
+
+1. Resource Cleanup
+   - All file handles closed
+   - Subprocesses terminated
+   - Temporary files cleared
+   - Logs flushed and rotated
+
+2. State Verification
+   - Task list persisted and validated
+   - Mailbox state saved and verified
+   - Memory snapshots completed
+   - Checkpoint files secured
+
+3. System Readiness
+   - All agents reported ready
+   - No pending critical operations
+   - State files accessible
+   - Cleanup verified
+
+## 🔒 COMPLIANCE REQUIREMENTS
+
+1. Timeout Adherence
+   - Each phase must complete within specified timeout
+   - Total shutdown sequence < 30 seconds
+
+2. Data Integrity
+   - All state files must be valid JSON
+   - Required fields must be present
+   - Checksums must be verified
+
+3. Error Handling
+   - Failed operations must be logged
+   - Partial shutdowns must be reported
+   - Recovery data must be preserved
+
+## 📊 SHUTDOWN METRICS
+
+Track and report:
+- Shutdown duration
+- Success rate
+- Resource cleanup stats
+- State persistence verification
+- Agent compliance rate
+
+## 🔄 RECOVERY PREPARATION
+
+Ensure:
+1. Checkpoint files are versioned
+2. State files are backed up
+3. Recovery instructions are clear
+4. Dependencies are documented
+
+## ⚠️ FAILURE HANDLING
+
+On timeout or error:
+1. Log error details
+2. Force cleanup critical resources
+3. Save emergency state snapshot
+4. Report failure to supervisor
+5. Execute emergency shutdown
+
+---
+
+EXECUTE SHUTDOWN SEQUENCE.
+""" 

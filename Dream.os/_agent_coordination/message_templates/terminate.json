@@ -1,0 +1,10 @@
+{
+  "message_id": "terminate_cmd_1715115000",
+  "sender": "SupervisorCLI",
+  "timestamp_utc": "2024-05-07T20:50:00Z",
+  "command": "terminate",
+  "params": {
+    "reason": "Scheduled system maintenance window.",
+    "delay_seconds": 5 
+  }
+} 

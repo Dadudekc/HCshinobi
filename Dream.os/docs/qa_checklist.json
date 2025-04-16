@@ -1,0 +1,87 @@
+{
+  "phase": "Phase 3 - Testing & QA",
+  "categories": {
+    "unit_tests": {
+      "description": "Verify isolated components behave as expected",
+      "items": [
+        {
+          "id": "T3.1",
+          "label": "Test state save logic",
+          "file": "test_main_window_state.py",
+          "status": "pending"
+        },
+        {
+          "id": "T3.2",
+          "label": "Test state load logic (valid JSON)",
+          "file": "test_main_window_state.py",
+          "status": "pending"
+        },
+        {
+          "id": "T3.3",
+          "label": "Handle missing state file",
+          "file": "test_main_window_state.py",
+          "status": "pending"
+        },
+        {
+          "id": "T3.4",
+          "label": "Handle corrupt state file gracefully",
+          "file": "test_main_window_state.py",
+          "status": "pending"
+        },
+        {
+          "id": "T3.5",
+          "label": "Test shutdown manager: happy path",
+          "file": "test_tab_system_shutdown.py",
+          "status": "pending"
+        },
+        {
+          "id": "T3.6",
+          "label": "Shutdown with tab prepare failures",
+          "file": "test_tab_system_shutdown.py",
+          "status": "pending"
+        },
+        {
+          "id": "T3.7",
+          "label": "Handle JSON write errors during shutdown",
+          "file": "test_tab_system_shutdown.py",
+          "status": "pending"
+        }
+      ]
+    },
+    "integration_tests": {
+      "description": "Verify system modules interact correctly",
+      "items": [
+        {
+          "id": "T3.8",
+          "label": "Full save→shutdown→reload cycle restores tab state",
+          "status": "pending"
+        },
+        {
+          "id": "T3.9",
+          "label": "Verify timers and UI updates stop gracefully on shutdown",
+          "status": "pending"
+        }
+      ]
+    },
+    "user_acceptance": {
+      "description": "Manual tests confirming behavior matches user expectations",
+      "items": [
+        {
+          "id": "T3.10",
+          "label": "UI state is preserved between sessions",
+          "status": "pending"
+        },
+        {
+          "id": "T3.11",
+          "label": "Emergency shutdown leaves system in stable state",
+          "status": "pending"
+        },
+        {
+          "id": "T3.12",
+          "label": "No state file = clean load without errors",
+          "status": "pending"
+        }
+      ]
+    }
+  }
+} 

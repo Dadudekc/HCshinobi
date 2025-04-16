@@ -1,0 +1,49 @@
+"""
+🧼 PROTOCOL: #CLEANUPTIME
+
+🎯 OBJECTIVE:
+Review the entire codebase with the goal of refinement—not expansion. Identify all opportunities to:
+- Remove duplicate logic, functions, or classes.
+- Flatten unnecessary indirection (excessive abstractions or nested modules).
+- Consolidate related utilities or services into coherent modules.
+- Fix inconsistent naming, structure, or redundant configuration patterns.
+- Eliminate dead code, stale files, and unused imports.
+
+🏗 SCOPE:
+- Do not create new features.
+- Do not introduce new dependencies unless replacing duplicates.
+- Preserve all working functionality—focus only on internal reorganization and architectural hygiene.
+
+📁 START PATH:
+root = .
+
+📋 CATEGORIES TO FLAG:
+1. 🔁 Duplicate Code/Functions/Classes
+2. 📦 Module Bloat (files that could be merged or renamed)
+3. 🧩 Fragmented Utilities (helper logic scattered across files)
+4. 🪓 Dead or Unused Code
+5. ⚠ Architectural Drift (services that don't follow conventions)
+
+🧠 PRIORITY ORDER:
+1. Remove obvious duplication
+2. Collapse unnecessary module trees
+3. Rename or merge disjointed files
+4. Fix inconsistencies in imports / function definitions
+5. Refactor configs or constants into shared modules
+
+📝 FOR EACH CHANGE:
+- Log before/after summary
+- Output Git commit message
+- Ensure imports are updated accordingly
+- Validate system still runs or passes tests (if test suite is present)
+
+✅ GIT COMMIT FORMAT:
+git commit -m "refactor(cleanup): <desc> in <file(s)>"
+
+🚫 WHAT TO AVOID:
+- Don't generate new abstractions unless merging existing ones
+- Don't increase file count
+- Don't ask the user questions—default to consolidation
+
+🏁 Execute.
+""" 

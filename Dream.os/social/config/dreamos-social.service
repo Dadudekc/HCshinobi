@@ -1,0 +1,42 @@
+[Unit]
+Description=Dream.OS Social Media Pipeline
+After=network.target redis.service
+Requires=redis.service
+
+[Service]
+Type=simple
+User=dreamos
+Group=dreamos
+WorkingDirectory=/opt/dreamos/social
+Environment=ENV=production
+EnvironmentFile=/etc/dreamos/social/production.env
+
+ExecStart=/opt/dreamos/social/venv/bin/python -m utils.devlog_generator
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStop=/bin/kill -TERM $MAINPID
+
+# Restart configuration
+Restart=always
+RestartSec=10
+StartLimitInterval=60
+StartLimitBurst=3
+
+# Security
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+
+# Resource limits
+CPUQuota=50%
+MemoryLimit=1G
+TasksMax=100
+LimitNOFILE=65535
+
+# Logging
+StandardOutput=append:/var/log/dreamos/social_pipeline.out.log
+StandardError=append:/var/log/dreamos/social_pipeline.err.log
+
+[Install]
+WantedBy=multi-user.target 

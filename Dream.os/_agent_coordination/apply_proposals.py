@@ -1,56 +1,44 @@
 # _agent_coordination/apply_proposals.py
 
-import os
-import re
-import yaml
-import json
 import logging
-import argparse
-from pathlib import Path
-from datetime import datetime
-
 # Basic Logging Setup
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger("ProposalApplier")
+logger = logging.getLogger("ApplyProposals")
 
-# --- Configuration ---
-# Assuming script run from _agent_coordination or paths adjusted
-AGENT1_DIR = Path("Agent1")
-PROPOSALS_FILE_PATH = AGENT1_DIR / "rulebook_update_proposals.md"
-RULEBOOK_PATH = AGENT1_DIR / "rulebook.md"
-PROPOSAL_SEPARATOR = "\n---\n"
-STATUS_ACCEPTED = "Accepted" # Status required for application
+import re
+import argparse
+from pathlib import Path
+import yaml
+from datetime import datetime
+
+# Import paths and constants from config
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import config
+
+# Import the new utility
+from _agent_coordination.tools.rulebook_utils import load_rules
+
+# Constants
+STATUS_PREFIX = "**Status:**"
+STATUS_ACCEPTED = "Accepted"
 STATUS_APPLIED = "Applied"
 STATUS_ERROR_APPLYING = "Error Applying"
-STATUS_BLOCKED_BY_RULE = "Blocked by Rule Conflict"
-STATUS_PREFIX = "**Status:** "
+STATUS_BLOCKED_BY_RULE = "Blocked by Rule Lock"
 
-# --- Rulebook Interaction ---
-def load_rules_from_rulebook(filepath=RULEBOOK_PATH):
-    """Loads rule definitions from the rulebook (simplified)."""
-    # This is a basic version; consider reusing logic from reflection_agent if more robust parsing exists
-    rules = {}
-    try:
-        content = filepath.read_text(encoding='utf-8')
-        # Simple extraction based on ID line - needs improvement for complex rules/locking
-        for match in re.finditer(r"^- \*\*ID:\*\*\s*([\w\-]+)", content, re.MULTILINE):
-            rule_id = match.group(1)
-            # TODO: Add logic to check if rule is marked as "locked" or "immutable"
-            is_locked = False # Placeholder
-            rules[rule_id] = {"id": rule_id, "locked": is_locked}
-        logger.info(f"Loaded {len(rules)} rule IDs from {filepath}.")
-    except FileNotFoundError:
-        logger.error(f"Rulebook file not found: {filepath}")
-    except Exception as e:
-        logger.error(f"Error reading rulebook {filepath}: {e}")
-    return rules
+# --- Constants (Now use config) ---
+PROPOSALS_FILE_PATH = config.PROPOSALS_FILE_PATH
+RULEBOOK_PATH = config.RULEBOOK_PATH
+PROPOSAL_SEPARATOR = config.PROPOSAL_SEPARATOR
 
-# --- Proposal Parsing (Simplified - Reuse from meta_architect if available) ---
-def parse_proposals(filepath=PROPOSALS_FILE_PATH):
-    """Loads proposals, focusing on accepted ones."""
+# --- Functions --- #
+
+def parse_proposals(proposals_path):
+    """Parses proposals from the Markdown file."""
     proposals = []
     try:
-        content = Path(filepath).read_text(encoding='utf-8')
+        content = Path(proposals_path).read_text(encoding='utf-8')
         proposal_blocks = content.strip().split(PROPOSAL_SEPARATOR)
         for i, block in enumerate(proposal_blocks):
             block = block.strip()
@@ -71,47 +59,62 @@ def parse_proposals(filepath=PROPOSALS_FILE_PATH):
             
             proposals.append(proposal)
     except FileNotFoundError:
-        logger.warning(f"Proposals file not found: {filepath}. No proposals to apply.")
+        logger.warning(f"Proposals file not found: {proposals_path}. No proposals to apply.")
     except Exception as e:
-        logger.error(f"Error parsing proposals file {filepath}: {e}")
+        logger.error(f"Error parsing proposals file {proposals_path}: {e}")
     return proposals
 
-# --- Proposal Application Logic (Basic) ---
-def apply_proposal_to_rulebook(proposal, rulebook_content):
-    """Applies a single proposal to the rulebook content string.
-       This is a placeholder - requires actual diff/patch logic or targeted rewrite.
-    """
+def apply_proposal_to_rulebook(proposal, rulebook_path):
+    """Applies a single proposal to the rulebook file."""
     logger.info(f"Attempting to apply proposal for rule: {proposal.get('target_rule_id', 'Unknown')}")
-    # Placeholder: Simply append proposal content as a new rule section
-    # TODO: Implement robust logic: find target rule, apply changes (diff/patch?), handle new rules.
+    target_rule_id = proposal.get('target_rule_id')
     timestamp = datetime.now().isoformat()
-    applied_rule_header = f"### [APPLIED {timestamp}] Rule: {proposal.get('target_rule_id', 'NEW_RULE')}"
-    
-    # Corrected Regex: Capture content until \n\n**Original Rule or end of string (\Z)
-    proposed_change_match = re.search(r"\*\*Proposed Change Summary:\*\*\n(.*?)(?:\n\n\*\*Original Rule|\Z)", proposal['raw_content'], re.DOTALL | re.MULTILINE)
-    proposed_content = proposed_change_match.group(1).strip() if proposed_change_match else "(Could not extract proposed content)"
-    
-    new_rule_text = f"\n---\n{applied_rule_header}\nBased on Proposal: {proposal.get('id')}\n{proposed_content}\n---\n"
-    
-    # For now, just append
-    rulebook_content += new_rule_text
-    logger.info(f"Applied proposal {proposal.get('id')} (placeholder append).")
+    applied_rule_header = f"### [APPLIED {timestamp}] Rule: {target_rule_id}"
+
+    # Read the current rulebook content
+    rulebook_content = rulebook_path.read_text(encoding='utf-8')
+
+    # Locate the target rule
+    rule_pattern = re.compile(rf"### Rule: {target_rule_id}\b.*?(?=### Rule:|\Z)", re.DOTALL)
+    match = rule_pattern.search(rulebook_content)
+
+    if match:
+        # Existing rule found, apply changes
+        logger.info(f"Found existing rule {target_rule_id}. Applying changes.")
+        original_rule = match.group(0)
+        proposed_change_match = re.search(r"\*\*Proposed Change Summary:\*\*\n(.*?)(?:\n\n\*\*Original Rule|\Z)", proposal['raw_content'], re.DOTALL | re.MULTILINE)
+        proposed_content = proposed_change_match.group(1).strip() if proposed_change_match else "(Could not extract proposed content)"
+
+        # Create a diff/patch (simplified for demonstration)
+        new_rule = f"{applied_rule_header}\n{proposed_content}\n"
+        rulebook_content = rulebook_content.replace(original_rule, new_rule)
+    else:
+        # New rule, append to rulebook
+        logger.info(f"Rule {target_rule_id} not found. Appending as new rule.")
+        proposed_change_match = re.search(r"\*\*Proposed Change Summary:\*\*\n(.*?)(?:\n\n\*\*Original Rule|\Z)", proposal['raw_content'], re.DOTALL | re.MULTILINE)
+        proposed_content = proposed_change_match.group(1).strip() if proposed_change_match else "(Could not extract proposed content)"
+
+        new_rule_text = f"\n---\n{applied_rule_header}\nBased on Proposal: {proposal.get('id')}\n{proposed_content}\n---\n"
+        rulebook_content += new_rule_text
+
+    # Write the updated rulebook content
+    rulebook_path.write_text(rulebook_content, encoding='utf-8')
+    logger.info(f"Applied proposal {proposal.get('id')} successfully.")
     return rulebook_content
 
-# --- Status Update Logic (Similar to meta_architect) ---
-def update_proposal_status_in_file(proposal_id, new_status, reason, filepath=PROPOSALS_FILE_PATH):
-    """Updates the status of a specific proposal within the proposals file."""
+def update_proposal_status(proposal_block, new_status, reason="", proposals_path=PROPOSALS_FILE_PATH):
+    """Updates the status of a specific proposal block in the file."""
     # This requires reading the whole file, finding the block, updating, and rewriting.
     # It's inefficient but necessary without persistent proposal IDs.
     try:
-        proposals_content = Path(filepath).read_text(encoding='utf-8')
+        proposals_content = Path(proposals_path).read_text(encoding='utf-8')
         proposal_blocks = proposals_content.strip().split(PROPOSAL_SEPARATOR)
         updated_blocks = []
         found = False
         
         for i, block in enumerate(proposal_blocks):
             current_block_id = f"proposal_block_{i}" # Match placeholder ID
-            if current_block_id == proposal_id:
+            if current_block_id == proposal_block:
                 found = True
                 lines = block.strip().split('\n')
                 new_status_line = f"{STATUS_PREFIX}{new_status}"
@@ -134,107 +137,89 @@ def update_proposal_status_in_file(proposal_id, new_status, reason, filepath=PRO
                 
         if found:
             new_content = PROPOSAL_SEPARATOR.join(updated_blocks).strip() + "\n"
-            Path(filepath).write_text(new_content, encoding='utf-8')
-            logger.info(f"Updated status for proposal {proposal_id} to {new_status}.")
+            Path(proposals_path).write_text(new_content, encoding='utf-8')
+            logger.info(f"Updated status for proposal {proposal_block} to {new_status}.")
             return True
         else:
-            logger.warning(f"Could not find proposal {proposal_id} in {filepath} to update status.")
+            logger.warning(f"Could not find proposal {proposal_block} in {proposals_path} to update status.")
             return False
             
     except Exception as e:
-        logger.error(f"Failed to update status for proposal {proposal_id} in {filepath}: {e}")
+        logger.error(f"Failed to update status for proposal {proposal_block} in {proposals_path}: {e}")
         return False
 
-# --- Main Execution ---
+# --- Main Logic --- #
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Apply accepted proposals to the rulebook.")
+    parser = argparse.ArgumentParser(description="Apply accepted rulebook update proposals.")
     parser.add_argument("--override-rule-lock", action="store_true", 
-                        help="Apply proposals even if they target a locked rule (for testing).")
+                        help="Apply proposals even if the target rule is locked.")
     args = parser.parse_args()
 
-    logger.info("--- Starting Proposal Application Process ---")
+    logger.info(f"Starting proposal application from {PROPOSALS_FILE_PATH} to {RULEBOOK_PATH}")
+    logger.info(f"Override locked rules: {args.override_rule_lock}")
 
-    # 1. Load Rules (including locked status)
-    rules = load_rules_from_rulebook()
-    if not rules: 
-        logger.warning("Could not load rules. Rule conflict checking will be skipped.")
-        # Decide if we should exit or proceed without checks
-
-    # 2. Load Proposals
-    proposals = parse_proposals()
-    accepted_proposals = [p for p in proposals if p['status'] == STATUS_ACCEPTED]
-
-    if not accepted_proposals:
-        logger.info("No accepted proposals found to apply.")
-        exit(0)
-
-    logger.info(f"Found {len(accepted_proposals)} accepted proposals to process.")
-
-    # 3. Load current rulebook content
     try:
-        current_rulebook_content = RULEBOOK_PATH.read_text(encoding='utf-8')
-        original_rulebook_content = current_rulebook_content # Keep copy
-    except FileNotFoundError:
-        logger.error(f"Rulebook file not found at {RULEBOOK_PATH}. Cannot apply proposals.")
+        # Use the utility function to load rules
+        rule_lock_status = {rule_id: data["locked"] 
+                           for rule_id, data in load_rules(RULEBOOK_PATH).items()}
+        logger.info(f"Loaded lock status for {len(rule_lock_status)} rules.")
+        proposals = parse_proposals(PROPOSALS_FILE_PATH)
+    except FileNotFoundError as e:
+        logger.error(f"Error loading files: {e}. Aborting.")
         exit(1)
     except Exception as e:
-        logger.error(f"Error reading rulebook {RULEBOOK_PATH}: {e}")
+        logger.error(f"Error during initial loading: {e}. Aborting.")
         exit(1)
-        
+
     applied_count = 0
     blocked_count = 0
     error_count = 0
+    skipped_count = 0
 
-    # 4. Process and Apply Accepted Proposals
-    for proposal in accepted_proposals:
-        proposal_id = proposal["id"]
-        target_rule_id = proposal.get("target_rule_id")
-        apply_proposal = True
-        block_reason = ""
-        
-        # --- >>> Rule Conflict Check (coord-003) <<< ---
-        if target_rule_id and target_rule_id != "new_rule" and rules:
-            target_rule = rules.get(target_rule_id)
-            if target_rule and target_rule.get("locked", False):
-                if args.override_rule_lock:
-                    logger.warning(f"Proposal {proposal_id} targets locked rule {target_rule_id}, but override flag is set. Proceeding.")
-                else:
-                    logger.error(f"Proposal {proposal_id} targets locked rule {target_rule_id}. Blocking application.")
-                    apply_proposal = False
-                    block_reason = f"Target rule {target_rule_id} is locked."
-                    blocked_count += 1
-            elif not target_rule:
-                 logger.warning(f"Proposal {proposal_id} targets rule {target_rule_id} which was not found in the rulebook during initial load. Allowing application cautiously.")
-        # --- End Rule Conflict Check ---
+    for proposal_block, proposal_data in proposals:
+        if proposal_data.get("status", "").strip() != STATUS_ACCEPTED:
+            logger.debug(f"Skipping proposal (ID: {proposal_data.get('id', 'N/A')}) with status: {proposal_data.get('status', 'N/A')}")
+            skipped_count += 1
+            continue
 
-        if apply_proposal:
-            try:
-                # Apply the change to the content string
-                current_rulebook_content = apply_proposal_to_rulebook(proposal, current_rulebook_content)
-                # Update proposal status in the proposal file
-                update_proposal_status_in_file(proposal_id, STATUS_APPLIED, "Applied successfully.")
-                applied_count += 1
-            except Exception as e:
-                logger.error(f"Failed to apply proposal {proposal_id}: {e}", exc_info=True)
-                # Update status to error
-                update_proposal_status_in_file(proposal_id, STATUS_ERROR_APPLYING, f"Error during application: {e}")
-                error_count += 1
-        else:
-            # Update status to blocked
-            update_proposal_status_in_file(proposal_id, STATUS_BLOCKED_BY_RULE, block_reason)
+        target_rule_id = proposal_data.get("target_rule_id")
+        if not target_rule_id:
+            logger.error(f"Proposal missing 'Target Rule ID'. Cannot process: {proposal_data.get('id', 'Block Start')[:50]}...")
+            update_proposal_status(proposal_block, STATUS_ERROR_APPLYING, "Missing Target Rule ID", PROPOSALS_FILE_PATH)
+            error_count += 1
+            continue
 
-    # 5. Write updated rulebook if changes were made
-    if applied_count > 0:
+        # Check Rule Lock Conflict - Use the loaded lock status
+        if target_rule_id in rule_lock_status and rule_lock_status[target_rule_id] and not args.override_rule_lock:
+            logger.warning(f"Proposal for rule {target_rule_id} blocked: Rule is locked and override flag is OFF.")
+            update_proposal_status(proposal_block, STATUS_BLOCKED_BY_RULE, f"Target rule {target_rule_id} is locked.", PROPOSALS_FILE_PATH)
+            blocked_count += 1
+            continue
+        elif target_rule_id in rule_lock_status and rule_lock_status[target_rule_id] and args.override_rule_lock:
+            logger.info(f"Overriding lock for proposal targeting rule {target_rule_id}.")
+        elif target_rule_id not in rule_lock_status:
+             logger.warning(f"Proposal targets rule {target_rule_id} which was not found in the rulebook during initial load. Allowing application cautiously.")
+
+        # Apply the proposal (Placeholder logic)
         try:
-            RULEBOOK_PATH.write_text(current_rulebook_content, encoding='utf-8')
-            logger.info(f"Successfully wrote updated rulebook to {RULEBOOK_PATH}.")
+            logger.info(f"Applying proposal targeting rule {target_rule_id}...")
+            apply_proposal_to_rulebook(proposal_data, RULEBOOK_PATH)
+            update_proposal_status(proposal_block, STATUS_APPLIED, "Applied successfully.", PROPOSALS_FILE_PATH)
+            applied_count += 1
+            logger.info(f"Successfully applied proposal for rule {target_rule_id}.")
         except Exception as e:
-            logger.error(f"CRITICAL: Failed to write updated rulebook to {RULEBOOK_PATH}: {e}")
-            # Consider recovery or alternative action here
-            error_count += 1 # Count write failure as an error
+            logger.error(f"Failed to apply proposal for rule {target_rule_id}: {e}")
+            update_proposal_status(proposal_block, STATUS_ERROR_APPLYING, str(e), PROPOSALS_FILE_PATH)
+            error_count += 1
 
-    logger.info("--- Proposal Application Process Finished ---")
-    logger.info(f"Summary: Applied={applied_count}, Blocked={blocked_count}, Errors={error_count}")
+    logger.info("--- Proposal Application Summary ---")
+    logger.info(f"Applied: {applied_count}")
+    logger.info(f"Blocked (Rule Lock): {blocked_count}")
+    logger.info(f"Errors: {error_count}")
+    logger.info(f"Skipped (Status not Accepted): {skipped_count}")
+    logger.info("----------------------------------")
 
     if error_count > 0:
-        exit(1) 
+        exit(1)
+    else:
+        exit(0) 

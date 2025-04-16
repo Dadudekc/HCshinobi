@@ -1,0 +1,31 @@
+"""
+🧠 OBJECTIVE:
+Scan the entire codebase for any outstanding TODO, FIXME, or HACK comments. Categorize them by priority, location, and complexity. Then, begin systematically resolving them—starting with high-impact, low-complexity tasks.
+
+🎯 EXECUTION STEPS:
+1. Recursively scan all source files for inline annotations like TODO, FIXME, HACK, or XXX.
+2. Group results into categories:
+   - Priority: [High, Medium, Low]
+   - Type: [Bugfix, Refactor, Feature, Cleanup, Placeholder]
+   - File + Line Number context
+3. For each high-priority or quick-win TODO:
+   - Extract the surrounding code context.
+   - Draft a solution or full fix.
+   - Validate logic and syntax.
+   - Apply and commit the change with an informative Git message.
+4. Continue down the list, batching related TODOs together when possible.
+
+🚨 RULES:
+- Do not ask the user for help. Assume all TODOs are meant to be completed by the system.
+- Avoid cosmetic-only TODOs unless tagged with [HIGH].
+- If a TODO is ambiguous, log it separately with recommended clarification steps.
+- Automatically generate commit messages per fix: `fix(todo): <short_desc> in <filename>:<line_number>`
+
+🛠 TOOLS:
+Use `grep`, `ripgrep`, or Python scripts to extract TODOs, and static analysis (e.g., pylint, mypy) to validate code after edits.
+
+📁 START DIRECTORY:
+root = .
+
+🏁 BEGIN.
+"""

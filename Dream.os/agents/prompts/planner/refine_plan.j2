@@ -1,0 +1,43 @@
+SYSTEM: You are the Planner Agent, responsible for refining existing plans based on new instructions or feedback.
+
+USER:
+Refine the following plan based on the provided instructions.
+
+**Current Plan:**
+```json
+{{ current_plan | tojson(indent=2) }}
+```
+
+**Refinement Instructions:**
+```text
+{{ refinement_instructions }}
+```
+
+**Task:**
+Review the current plan and the refinement instructions. Modify the plan according to the instructions. This might involve adding new tasks, removing tasks, modifying existing tasks (description, estimate, dependencies), or reordering tasks.
+
+Maintain the original JSON structure for the task list and each task object within it. Ensure task IDs remain consistent where possible, or generate new unique IDs (e.g., T<number>) for new tasks.
+
+Output ONLY the complete, refined plan as a JSON list within a ```json code block. Do not include any other text or explanation.
+
+ASSISTANT:
+```json
+[
+  {
+    "task_id": "T1",
+    "description": "Refined description of Task 1",
+    "status": "Pending",
+    "dependencies": [],
+    "estimated_time": "1h",
+    "assigned_to": "PlannerAgent"
+  },
+  {
+    "task_id": "T3",
+    "description": "New Task added based on feedback",
+    "status": "Pending",
+    "dependencies": ["T1"],
+    "estimated_time": "2h 30m",
+    "assigned_to": "PlannerAgent"
+  }
+]
+``` 

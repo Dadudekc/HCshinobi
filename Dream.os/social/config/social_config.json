@@ -1,0 +1,30 @@
+{
+  "common_settings": {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36",
+    "timeout_seconds": 30
+  },
+  "twitter": {
+    "username": "YOUR_TWITTER_USERNAME",
+    "password": "YOUR_TWITTER_PASSWORD",
+    "email_for_verification": "YOUR_ASSOCIATED_EMAIL (optional, only if Twitter prompts for it during login)",
+    "api_key": "YOUR_API_KEY (if using API)",
+    "api_secret": "YOUR_API_SECRET (if using API)",
+    "access_token": "YOUR_ACCESS_TOKEN (if using API)",
+    "access_token_secret": "YOUR_ACCESS_TOKEN_SECRET (if using API)"
+  },
+  "reddit": {
+    "client_id": "YOUR_REDDIT_APP_CLIENT_ID",
+    "client_secret": "YOUR_REDDIT_APP_CLIENT_SECRET",
+    "user_agent": "YOUR_CUSTOM_USER_AGENT (e.g., ScriptName/v1.0 by u/YourUsername)",
+    "username": "YOUR_REDDIT_USERNAME",
+    "password": "YOUR_REDDIT_PASSWORD"
+  },
+  "linkedin": {
+    "client_id": "YOUR_LINKEDIN_APP_CLIENT_ID",
+    "client_secret": "YOUR_LINKEDIN_APP_CLIENT_SECRET",
+    "redirect_uri": "YOUR_LINKEDIN_APP_REDIRECT_URI",
+    "authorization_code": "GET_EXTERNALLY",
+    "api_version": "202305",
+    "post_visibility": "CONNECTIONS"
+  }
+} 

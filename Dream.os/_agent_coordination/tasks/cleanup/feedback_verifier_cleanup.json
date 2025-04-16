@@ -1,0 +1,12 @@
+{
+    "name": "Feedback Verifier Cleanup",
+    "domain": "feedback_verifier",
+    "description": "Removes old verification results and feedback history",
+    "dependencies": ["cursor_executor"],
+    "impact_level": "low",
+    "target_files": [
+        "verifier/results/*.json",
+        "verifier/feedback/*.hist",
+        "verifier/metrics/*.csv"
+    ]
+} 

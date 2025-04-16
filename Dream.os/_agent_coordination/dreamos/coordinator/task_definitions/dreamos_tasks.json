@@ -1,0 +1,77 @@
+{
+    "role": "Supervisor",
+    "priority": 3,
+    "tasks": [
+        {
+            "id": "DREAM_001",
+            "title": "Integration Test Validation",
+            "description": "Ensure all deduplicated files pass integration and system tests",
+            "target_files": [
+                "tests/integration/*.py",
+                "tests/system/*.py"
+            ],
+            "success_criteria": {
+                "all_tests_pass": true,
+                "coverage_maintained": true,
+                "no_regressions": true
+            }
+        },
+        {
+            "id": "DREAM_002",
+            "title": "Async Validation Coordination",
+            "description": "Coordinate async validation for cursor_dispatcher loop and feedback",
+            "target_files": [
+                "**/cursor_dispatcher.py",
+                "**/feedback_loop.py",
+                "**/async_validator.py"
+            ],
+            "success_criteria": {
+                "async_compatible": true,
+                "performance_improved": true,
+                "error_handling": true
+            }
+        },
+        {
+            "id": "DREAM_003",
+            "title": "Git Commit Verification",
+            "description": "Verify Git commit format and changelog updates",
+            "target_files": [
+                "CHANGELOG.md",
+                ".git/*",
+                "docs/changes/*"
+            ],
+            "success_criteria": {
+                "commit_format": true,
+                "changelog_updated": true,
+                "docs_synced": true
+            }
+        },
+        {
+            "id": "DREAM_004",
+            "title": "Final Snapshot and Tag",
+            "description": "Create final snapshot and tag after consolidation",
+            "target_files": [
+                "**/VERSION",
+                "docs/releases/*",
+                "snapshots/*"
+            ],
+            "success_criteria": {
+                "version_bumped": true,
+                "tag_created": true,
+                "snapshot_saved": true
+            }
+        }
+    ],
+    "dependencies": [
+        "COORD_001", "COORD_002", "COORD_003", "COORD_004",
+        "AGENT_001", "AGENT_002", "AGENT_003", "AGENT_004",
+        "SOCIAL_001", "SOCIAL_002", "SOCIAL_003", "SOCIAL_004"
+    ],
+    "validation_rules": {
+        "commit_format": "refactor(cleanup): {what} in {modules}",
+        "required_tests": ["unit", "integration", "system", "performance"],
+        "changelog_update": true,
+        "snapshot_required": true,
+        "tag_format": "v{major}.{minor}.{patch}-cleanup"
+    }
+} 

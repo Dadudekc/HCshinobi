@@ -1,0 +1,36 @@
+{
+  "agent": "Agents",
+  "priority": 2,
+  "tasks": [
+    {
+      "id": "AGENTS-001",
+      "title": "Consolidate Social Strategy Logic",
+      "description": "Merge duplicate social media posting strategies",
+      "targets": [
+        "agents/social/strategies/*.py",
+        "social/strategies/*.py"
+      ],
+      "output_path": "core/social/strategies/"
+    },
+    {
+      "id": "AGENTS-002",
+      "title": "Unify Error Handling",
+      "description": "Create common error classes and handlers",
+      "targets": [
+        "**/*_error.py",
+        "**/*exception*.py"
+      ],
+      "output_path": "core/errors/"
+    },
+    {
+      "id": "AGENTS-003",
+      "title": "Consolidate Utility Functions",
+      "description": "Merge common utilities into shared modules",
+      "targets": [
+        "**/utils/*.py",
+        "tools/*.py"
+      ],
+      "output_path": "core/utils/"
+    }
+  ]
+} 

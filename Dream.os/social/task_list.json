@@ -1,0 +1,321 @@
+{
+  "task_list_id": "merged_social_agent_tasks",
+  "agent_id": "SocialAgent",
+  "project_context": "Dream.OS SocialAgent integration and testing. Includes two core streams: (1) Cursor ↔ ChatGPT sync for autonomous prompt feedback, and (2) social module tests covering scraping, posting, fallback strategies, engagement metrics, and CI integration.",
+  "tasks": [
+    {
+      "task_id": "social-cursor-001",
+      "status": "completed",
+      "priority": 1,
+      "description": "Define Prompt Exchange Format for SocialAgent",
+      "details": {
+        "action": "Design a JSON schema that supports transmitting prompt content, file context, and target outputs from ChatGPT to Cursor for social automation tasks.",
+        "validation_method": "Create a sample prompt_payload_example.json and validate it with Cursor."
+      }
+    },
+    {
+      "task_id": "social-cursor-002",
+      "status": "needs_review",
+      "priority": 1,
+      "description": "Implement ChatGPT Prompt Export System",
+      "details": {
+        "action": "Build a function that exports rendered ChatGPT prompts into the .cursor/queued_tasks directory or .prompt.md format compatible with Cursor workflows.",
+        "target_code": [
+          "/d:/Dream.os/social/post_context_generator.py",
+          "/d:/Dream.os/social/social_media_agent.py",
+          "/d:/Dream.os/social/utils/cursor_utils.py"
+        ],
+        "validation_method": "Run a full prompt cycle from ChatGPT and verify that the prompt JSON appears in the .cursor/social_queued_prompts/ directory."
+      }
+    },
+    {
+      "task_id": "social-cursor-003",
+      "status": "needs_review",
+      "priority": 2,
+      "description": "Add Auto-Dispatch Hook to SocialMediaAgent",
+      "details": {
+        "action": "Enable SocialMediaAgent to monitor .cursor/social_queued_prompts/ and optionally dispatch prompts via cursor_dispatcher.py.",
+        "target_code": [
+          "/d:/Dream.os/social/social_media_agent.py",
+          "/d:/Dream.os/social/tools/cursor_dispatcher.py"
+        ],
+        "validation_method": "When a new prompt is placed in the queue, the agent automatically triggers dispatch."
+      }
+    },
+    {
+      "task_id": "social-cursor-004",
+      "status": "needs_review",
+      "priority": 2,
+      "description": "Parse Cursor Results for Social Prompt Responses",
+      "details": {
+        "action": "Implement a parser for Cursor-generated result files saved in outputs/social_cursor/ and feed them back into ChatGPT's feedback loop.",
+        "target_code": [
+          "/d:/Dream.os/social/post_context_generator.py",
+          "/d:/Dream.os/social/utils/common_utils.py"
+        ],
+        "validation_method": "After dispatch, the JSON result is correctly parsed and logged for follow-up prompt refinement."
+      }
+    },
+    {
+      "task_id": "social-cursor-005",
+      "status": "blocked",
+      "priority": 3,
+      "description": "GUI Preview of Outgoing Social Prompts",
+      "details": {
+        "action": "Develop a PyQt tab or CLI interface to show a preview of social-related prompt payloads and include a manual 'Accept' button before dispatch.",
+        "target_code": ["/d:/Dream.os/social/interfaces/pyqt/tabs/social_prompt_tab.py"],
+        "validation_method": "User sees a live preview of each prompt before it is dispatched.",
+        "notes": "Blocked: Target directory '/d:/Dream.os/social/interfaces/pyqt/tabs/' does not exist and cannot be created by the agent."
+      }
+    },
+    {
+      "task_id": "social-cursor-006",
+      "status": "pending",
+      "priority": 5,
+      "description": "Activate Full Cursor–ChatGPT Feedback Loop",
+      "details": {
+        "action": "Conduct a complete test cycle: ChatGPT prompt → Cursor execution → feedback return → auto-refinement of prompts.",
+        "validation_method": "Logs confirm a complete round trip with no manual intervention."
+      }
+    },
+    {
+      "task_id": "social-new-101",
+      "status": "needs_manual_review",
+      "priority": 1,
+      "description": "Test and Refine Twitter Scraping Selectors",
+      "details": {
+        "platform": "Twitter/X",
+        "action": "Conduct focused tests of the Twitter scraping functions to verify that current CSS/XPath selectors correctly capture mentions, trends, and community posts. Document any discrepancies in a detailed test log.",
+        "validation_method": "Manual inspection using live Twitter/X UI and visual logs."
+      }
+    },
+    {
+      "task_id": "social-new-102",
+      "status": "needs_manual_review",
+      "priority": 1,
+      "description": "Validate Twitter Scraping Selectors in Live Environment",
+      "details": {
+        "platform": "Twitter/X",
+        "action": "Perform comprehensive live validation of Twitter scraping selectors by comparing scraped element details with expected UI components. Update selectors and record test outcomes.",
+        "validation_method": "Manual testing and side-by-side screenshot comparisons."
+      }
+    },
+    {
+      "task_id": "social-new-103",
+      "status": "completed",
+      "priority": 2,
+      "description": "Extend Reddit Posting Workflow with LLM Integration",
+      "details": {
+        "platform": "Reddit",
+        "action": "Enhance the RedditStrategy by integrating LLM-generated post context. Modify the post_content workflow to automatically fetch supplemental context from the LLM and include it in posts.",
+        "deliverable": "Updated RedditStrategy code and a brief report on LLM integration test results."
+      }
+    },
+    {
+      "task_id": "social-new-104",
+      "status": "needs_review",
+      "priority": 2,
+      "description": "Implement Fallback Strategies for API Failures",
+      "details": {
+        "platform": "All",
+        "action": "Add and test fallback logic in all platform strategy methods (Twitter, Reddit, LinkedIn) to handle intermittent API or network failures more gracefully. This may include re‑tries or alternate execution paths.",
+        "deliverable": "Updated error handling code with documented fallback behavior."
+      }
+    },
+    {
+      "task_id": "social-new-105",
+      "status": "needs_review",
+      "priority": 2,
+      "description": "Develop Aggregated Engagement Dashboard",
+      "details": {
+        "platform": "SocialAgent",
+        "action": "Design and implement a lightweight dashboard module that aggregates and displays engagement metrics (upvotes, comments, sentiments) across Twitter, Reddit, and LinkedIn. Ensure real‑time update capability.",
+        "deliverable": "Prototype dashboard code and a brief demonstration document."
+      }
+    },
+    {
+      "task_id": "social-new-106",
+      "status": "needs_review",
+      "priority": 2,
+      "description": "Implement Community Feedback Loop Mechanism",
+      "details": {
+        "platform": "SocialAgent",
+        "action": "Create a feature that automatically parses community feedback (from mentions and comments), identifies common suggestions, and triggers the creation of new tasks or proposals. Consider natural language processing for detection.",
+        "deliverable": "New feedback loop module and automated task creation test results."
+      }
+    },
+    {
+      "task_id": "social-new-107",
+      "status": "needs_review",
+      "priority": 2,
+      "description": "Centralize SocialAgent Configuration Overrides",
+      "details": {
+        "platform": "SocialAgent",
+        "action": "Refactor SocialMediaAgent's configuration loading to centralize environment variable overrides and default settings. Ensure that settings can be adjusted without modifying the source code.",
+        "deliverable": "Refactored config management code and updated documentation."
+      }
+    },
+    {
+      "task_id": "social-new-108",
+      "status": "needs_review",
+      "priority": 2,
+      "description": "Integrate Cross‑Platform Engagement Tracking",
+      "details": {
+        "platform": "SocialAgent",
+        "action": "Combine engagement data from Twitter, Reddit, and LinkedIn into a unified metric to improve forecasting and strategy adaptation. Develop an algorithm or formula that integrates metrics from all platforms.",
+        "deliverable": "Design document and prototype implementation."
+      }
+    },
+    {
+      "task_id": "social-new-109",
+      "status": "needs_review",
+      "priority": 2,
+      "description": "Automate Agent Feedback Processing for Task Creation",
+      "details": {
+        "platform": "SocialAgent",
+        "action": "Implement a mechanism that monitors community or agent feedback (via mailbox or log entries) and automatically triggers the creation of new tasks (e.g., for strategy improvement or bug fixes).",
+        "deliverable": "Prototype code for feedback-to-task automation and sample task output."
+      }
+    },
+    {
+      "task_id": "social-new-110",
+      "status": "needs_review",
+      "priority": 3,
+      "description": "Unit Test MailboxHandler Extended Scenarios",
+      "details": {
+        "target_code": ["/d:/Dream.os/social/utils/mailbox_handler.py"],
+        "action": "Expand the current test suite for MailboxHandler to cover edge cases (corrupt files, concurrent file access simulation, and fallback defaults).",
+        "validation_method": "Automated unit tests using pytest and mocks."
+      }
+    },
+    {
+      "task_id": "social-new-111",
+      "status": "needs_review",
+      "priority": 3,
+      "description": "Integration Test for End-to-End Social Posting Workflow",
+      "details": {
+        "target_code": [
+          "/d:/Dream.os/social/social_media_agent.py",
+          "/d:/Dream.os/social/strategies/twitter_strategy.py",
+          "/d:/Dream.os/social/strategies/reddit_strategy.py",
+          "/d:/Dream.os/social/strategies/linkedin_strategy.py"
+        ],
+        "action": "Develop integration tests that simulate a full posting cycle for each supported platform. Include error cases and measure recovery behavior.",
+        "validation_method": "Automated integration testing with simulated agent interactions."
+      }
+    },
+    {
+      "task_id": "social-new-112",
+      "status": "needs_review",
+      "priority": 3,
+      "description": "Regression Test for Sentiment Analysis Integration",
+      "details": {
+        "target_code": [
+          "/d:/Dream.os/social/strategies/twitter_strategy.py",
+          "/d:/Dream.os/social/strategies/reddit_strategy.py"
+        ],
+        "action": "Write regression tests to compare sentiment scores against a benchmark set of test cases. Ensure consistency even if minor library updates occur.",
+        "validation_method": "Automated unit/regression tests with expected score ranges."
+      }
+    },
+    {
+      "task_id": "social-new-113",
+      "status": "needs_review",
+      "priority": 3,
+      "description": "Load Test for SocialAgent Operational Loop",
+      "details": {
+        "target_code": ["/d:/Dream.os/social/social_media_agent.py"],
+        "action": "Develop a load test that simulates high-frequency task processing and message I/O. Measure the impact on response times and system resource usage.",
+        "validation_method": "Automated load testing script with performance metrics logging."
+      }
+    },
+    {
+      "task_id": "social-new-114",
+      "status": "needs_review",
+      "priority": 3,
+      "description": "End-to-End Test for Error Recovery Mechanisms",
+      "details": {
+        "target_code": [
+          "/d:/Dream.os/social/strategies/twitter_strategy.py",
+          "/d:/Dream.os/social/strategies/reddit_strategy.py",
+          "/d:/Dream.os/social/strategies/linkedin_strategy.py"
+        ],
+        "action": "Simulate errors (e.g., network failures, invalid selectors) during posting and scraping and verify that error recovery mechanisms trigger correctly with proper logging and fallback behavior.",
+        "validation_method": "Automated integration tests with fault injection."
+      }
+    },
+    {
+      "task_id": "social-new-115",
+      "status": "needs_review",
+      "priority": 3,
+      "description": "Unit Tests for TemplateEngine Rendering in Social Context",
+      "details": {
+        "target_code": ["/d:/Dream.os/core/template_engine.py"],
+        "action": "Develop unit tests that validate the rendering of social media templates (e.g., for governance event posts) using a set of sample templates and contexts.",
+        "validation_method": "Automated unit tests verifying rendered output against expected results."
+      }
+    },
+    {
+      "task_id": "social-new-116",
+      "status": "needs_review",
+      "priority": 3,
+      "description": "Static Analysis and Type Checking for Social Module",
+      "details": {
+        "target_code": [
+          "/d:/Dream.os/social/",
+          "/d:/Dream.os/core/"
+        ],
+        "action": "Integrate static analysis tools (e.g., flake8, mypy) into the social module build process. Fix any detected issues and enforce coding standards.",
+        "validation_method": "Automated static analysis and type check reports."
+      }
+    },
+    {
+      "task_id": "social-new-117",
+      "status": "pending",
+      "priority": 3,
+      "description": "Integrate SocialAgent Test Suite into CI/CD Pipeline",
+      "details": {
+        "target_code": ["/d:/Dream.os/social/"],
+        "action": "Update the CI/CD configuration (e.g., GitHub Actions) to include the execution of SocialAgent tests (unit, integration, regression). Ensure test coverage reports are generated.",
+        "validation_method": "Successful CI test runs with coverage metrics published."
+      }
+    },
+    {
+      "task_id": "social-new-118",
+      "status": "pending",
+      "priority": 3,
+      "description": "Benchmark SocialAgent API Call Performance",
+      "details": {
+        "target_code": [
+          "/d:/Dream.os/social/strategies/twitter_strategy.py",
+          "/d:/Dream.os/social/strategies/reddit_strategy.py",
+          "/d:/Dream.os/social/strategies/linkedin_strategy.py"
+        ],
+        "action": "Develop performance tests that measure the latency and throughput of API calls on each platform. Identify any bottlenecks and suggest improvements.",
+        "validation_method": "Automated benchmarks with recorded response times and analysis report."
+      }
+    },
+    {
+      "task_id": "social-new-119",
+      "status": "pending",
+      "priority": 3,
+      "description": "Automated Test for Governance Memory Engine Integration",
+      "details": {
+        "target_code": ["/d:/Dream.os/core/memory/governance_memory_engine.py"],
+        "action": "Write end-to-end tests that simulate a series of governance events being logged by SocialAgent and verify that the log file maintains the correct format and order.",
+        "validation_method": "Automated tests that parse the log file and compare its entries against expected results."
+      }
+    },
+    {
+      "task_id": "social-new-120",
+      "status": "pending",
+      "priority": 3,
+      "description": "Comprehensive Test Suite for SocialAgent Features",
+      "details": {
+        "target_code": ["/d:/Dream.os/social/"],
+        "action": "Build a full-featured test suite covering all aspects of SocialAgent (mailbox processing, posting, scraping, error recovery, config loading, etc.), with test coverage reports.",
+        "validation_method": "Continuous integration of tests with a coverage percentage target and regression reports."
+      }
+    }
+  ]
+}

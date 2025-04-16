@@ -1,0 +1,32 @@
+[flake8]
+# Increase default line length (adjust as needed)
+max-line-length = 120 
+
+# Ignore specific errors (examples - customize as needed):
+# E203 - whitespace before ':' (often conflicts with black)
+# W503 - line break before binary operator (often conflicts with black)
+# E501 - line too long (handled by max-line-length, but sometimes needed explicitly)
+# ignore = E203, W503, E501
+ignore =
+    E203,
+    W503
+
+# Exclude directories (add others like venv, .git, build, etc.)
+exclude =
+    .git,
+    __pycache__,
+    docs/,
+    build/,
+    dist/,
+    *.egg-info,
+    venv/,
+    .venv/
+    # Add specific large data files or vendor directories if necessary
+
+# Optional plugins (install separately if used):
+# Select plugins:
+# select = B,C,E,F,W,T4,B9
+
+# Per-file ignores (example):
+# [flake8:*/tests/*]
+# ignore = E501 # Allow longer lines in tests if needed 

@@ -1,0 +1,1 @@
+Task c34cd058-6919-4b68-aa68-0dac2ed7ef5c blocked. File search failed to locate CursorControlAgent.py and TaskDispatcherAgent.py/TaskExecutorAgent.py, preventing analysis of task_type alignment.

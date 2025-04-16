@@ -31,31 +31,29 @@ logger = logging.getLogger(__name__)
 
 AGENT_NAME = "TaskInjectorAgent"
 DEFAULT_INPUT_FILE = "run/input_tasks.jsonl"
+# Target agent for injected tasks (could be configurable)
+DEFAULT_INJECTION_TARGET = "TaskExecutorAgent"
 
 class TaskInjector:
-    """Watches an input file and injects tasks into the shared task list."""
+    """Watches an input file and injects tasks via AgentBus messages."""
 
     def __init__(self,
-                 task_list_path: str,
-                 input_task_file_path: str = DEFAULT_INPUT_FILE,
-                 task_list_lock: Optional[threading.Lock] = None):
+                 agent_bus: AgentBus, # Requires AgentBus now
+                 input_task_file_path: str = DEFAULT_INPUT_FILE):
         """
         Initializes the task injector.
 
         Args:
-            task_list_path: Path to the main task list JSON file.
+            agent_bus: The central AgentBus instance.
             input_task_file_path: Path to the JSON Lines file to watch for new tasks.
-            task_list_lock: The shared lock for accessing task_list.json.
         """
-        self.agent_name = AGENT_NAME # For logging purposes
-        self.task_list_path = os.path.abspath(task_list_path)
+        self.agent_name = AGENT_NAME
+        self.bus = agent_bus # Store the bus instance
         self.input_task_file_path = os.path.abspath(input_task_file_path)
         self._stop_event = threading.Event()
         self._thread: Optional[threading.Thread] = None
-        # Require the shared lock
-        if task_list_lock is None:
-             raise ValueError("TaskInjector requires a shared task_list_lock.")
-        self._lock = task_list_lock
+        # Lock is no longer needed as we don't write to task_list.json directly
+        # self._lock = task_list_lock 
 
         # Ensure input file directory exists
         try:
@@ -64,56 +62,10 @@ class TaskInjector:
             logger.error(f"Failed to create directory for input task file {self.input_task_file_path}: {e}")
             # Continue initialization, but run_cycle will likely fail
 
+        # Register this agent (optional, but good practice)
+        self.bus.register_agent(self.agent_name, capabilities=["task_injection"])
+
         logger.info(f"{self.agent_name} initialized. Watching input file: {self.input_task_file_path}")
-
-    # --- Use Task List Load/Save Logic (Copied/Adapted - Needs Refactor) ---
-    def _load_tasks(self) -> List[Dict[str, Any]]:
-        """Loads tasks from the JSON file using the shared lock."""
-        # Duplicated - Needs refactor
-        with self._lock:
-            # Check if task list exists *inside* the lock
-            if not os.path.exists(self.task_list_path):
-                 logger.warning(f"Task list file not found at {self.task_list_path} during load by {self.agent_name}.")
-                 return [] # Return empty list if file doesn't exist
-            try:
-                with open(self.task_list_path, 'r', encoding='utf-8') as f:
-                    tasks = json.load(f)
-                if not isinstance(tasks, list):
-                    logger.error(f"Invalid format in task list file {self.task_list_path}. Expected list.")
-                    return []
-                return tasks
-            except FileNotFoundError:
-                 # Should be caught by exists check, but handle anyway
-                 logger.warning(f"Task list file vanished between check and open: {self.task_list_path}")
-                 return []
-            except json.JSONDecodeError as e:
-                logger.error(f"Error decoding JSON from task list file {self.task_list_path}: {e}")
-                return []
-            except IOError as e:
-                logger.error(f"Error reading task list file {self.task_list_path}: {e}")
-                return []
-            except Exception as e:
-                 logger.error(f"Unexpected error loading tasks: {e}", exc_info=True)
-                 return []
-
-    def _save_tasks(self, tasks: List[Dict[str, Any]]) -> bool:
-        """Saves the task list back to the JSON file using the shared lock."""
-        # Duplicated - Needs refactor
-        with self._lock:
-            temp_path = self.task_list_path + ".tmp"
-            try:
-                with open(temp_path, 'w', encoding='utf-8') as f:
-                    json.dump(tasks, f, indent=2)
-                os.replace(temp_path, self.task_list_path)
-                return True
-            except IOError as e:
-                logger.error(f"Error writing task list file {self.task_list_path}: {e}")
-            except Exception as e:
-                 logger.error(f"Unexpected error saving tasks: {e}", exc_info=True)
-                 if os.path.exists(temp_path): 
-                     try: os.remove(temp_path)
-                     except OSError: pass
-            return False
 
     def _validate_and_prepare_task(self, task_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Validates basic structure and sets defaults for an incoming task."""
@@ -145,66 +97,64 @@ class TaskInjector:
         return task_data
 
     def run_cycle(self):
-        """Checks the input file, processes valid tasks, and clears the file."""
+        """Checks the input file, processes valid tasks, and sends INJECT_TASK messages."""
         if not os.path.exists(self.input_task_file_path):
-            # logger.debug(f"Input file not found: {self.input_task_file_path}")
             return # Nothing to do
 
         logger.info(f"Detected input task file: {self.input_task_file_path}. Processing...")
-        newly_injected_tasks = []
+        injected_count = 0
         processed_lines = 0
         invalid_lines = 0
+        lines_to_process = []
         
         try:
             # Read all lines first
             with open(self.input_task_file_path, 'r', encoding='utf-8') as infile:
                 lines_to_process = infile.readlines()
-            
-            if not lines_to_process:
-                 logger.warning(f"Input task file {self.input_task_file_path} was empty.")
-            else:
-                for line in lines_to_process:
-                    processed_lines += 1
-                    line = line.strip()
-                    if not line or line.startswith("#"):
-                        continue # Skip empty lines and comments
-                    try:
-                        task_data = json.loads(line)
-                        prepared_task = self._validate_and_prepare_task(task_data)
-                        if prepared_task:
-                            newly_injected_tasks.append(prepared_task)
-                        else:
-                             invalid_lines += 1
-                    except json.JSONDecodeError:
-                        logger.warning(f"Invalid JSON in input file line: {line}")
-                        invalid_lines += 1
-                    except Exception as e:
-                         logger.error(f"Error processing line from input file: {line} - {e}")
-                         invalid_lines += 1
-            
-            # Inject valid tasks into the main list
-            if newly_injected_tasks:
-                logger.info(f"Attempting to inject {len(newly_injected_tasks)} new tasks...")
-                current_tasks = self._load_tasks()
-                current_tasks.extend(newly_injected_tasks)
-                if self._save_tasks(current_tasks):
-                     logger.info(f"Successfully injected {len(newly_injected_tasks)} tasks into {self.task_list_path}.")
-                else:
-                     logger.error("Failed to save task list after injection!")
-            else:
-                 logger.info("No valid tasks found to inject from input file.")
-
-            # Clear the input file by deleting it (safest way to avoid reprocessing)
-            try:
-                os.remove(self.input_task_file_path)
-                logger.info(f"Processed and removed input file: {self.input_task_file_path}")
-            except OSError as e:
-                logger.error(f"Failed to remove processed input file {self.input_task_file_path}: {e}. Manual removal needed.")
-        
-        except IOError as e:
-            logger.error(f"Error reading input task file {self.input_task_file_path}: {e}")
         except Exception as e:
-             logger.error(f"Unexpected error during task injection cycle: {e}", exc_info=True)
+            logger.error(f"Error reading input file {self.input_task_file_path}: {e}")
+            # Decide whether to delete the file if unreadable
+            return
+            
+        if not lines_to_process:
+                logger.warning(f"Input task file {self.input_task_file_path} was empty.")
+        else:
+            for line in lines_to_process:
+                processed_lines += 1
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                try:
+                    task_data = json.loads(line)
+                    # Validate and prepare (sets defaults like ID, status)
+                    prepared_task = self._validate_and_prepare_task(task_data)
+                    if prepared_task:
+                        # Send message to inject the task
+                        logger.debug(f"Sending INJECT_TASK message for task: {prepared_task.get('task_id')}")
+                        self.bus.send_message(
+                            sender=self.agent_name,
+                            recipient=DEFAULT_INJECTION_TARGET, # Target the executor
+                            message_type="INJECT_TASK",
+                            payload=prepared_task # Send the whole task dict
+                        )
+                        injected_count += 1
+                    else:
+                            invalid_lines += 1
+                except json.JSONDecodeError:
+                    logger.warning(f"Invalid JSON in input file line: {line}")
+                    invalid_lines += 1
+                except Exception as e:
+                        logger.error(f"Error processing line from input file: {line} - {e}")
+                        invalid_lines += 1
+        
+        logger.info(f"Processed {processed_lines} lines from input file. Injected {injected_count} tasks. Invalid lines: {invalid_lines}.")
+
+        # Clear the input file by deleting it
+        try:
+            os.remove(self.input_task_file_path)
+            logger.info(f"Processed and removed input file: {self.input_task_file_path}")
+        except OSError as e:
+            logger.error(f"Failed to remove processed input file {self.input_task_file_path}: {e}")
 
     # --- Background Thread Methods --- 
     def _run_loop(self):
@@ -244,73 +194,59 @@ class TaskInjector:
              logger.info(f"{self.agent_name} background thread stopped successfully.")
         self._thread = None
 
+    # Add shutdown method
+    def shutdown(self):
+        logger.info(f"Shutting down {self.agent_name}...")
+        self.stop() # Stop the background thread if running
+        # Unregister?
+        # self.bus.deregister_agent(self.agent_name)
+        logger.info(f"{self.agent_name} shutdown complete.")
+
 # ========= USAGE BLOCK START ==========
 # Minimal block for structure check
 if __name__ == "__main__":
     print(f">>> Running module: {__file__} (Basic Checks)")
-    dummy_task_file = "./temp_injector_main_tasks.json"
+    # Note: This usage block doesn't fully demonstrate the AgentBus interaction
+    dummy_task_file = "./temp_injector_task_list.json"
     dummy_input_file = "./temp_injector_input.jsonl"
-
-    # Initial task list
-    initial_tasks = [
-        {"task_id": "existing1", "status": "COMPLETED", "action": "A"}
-    ]
-    # Tasks to inject
-    tasks_to_inject = [
-        {"action": "INJECTED_ACTION_1", "params": {"x": 1}}, # Missing ID, status, etc.
-        {"task_id": "injected2", "action": "INJECTED_ACTION_2", "priority": 5}
-    ]
-
     test_lock = threading.Lock()
 
+    # Create dummy files for testing
     try:
-        # Setup initial files
-        with open(dummy_task_file, 'w') as f: json.dump(initial_tasks, f)
+        with open(dummy_task_file, 'w') as f: json.dump([], f)
         with open(dummy_input_file, 'w') as f:
-            for task in tasks_to_inject: f.write(json.dumps(task) + '\n')
-            f.write("  \n") # Empty line
-            f.write("# This is a comment\n")
-            f.write("{"invalid json"\n") # Invalid line
-        print(f"Created dummy task file: {dummy_task_file}")
-        print(f"Created dummy input file: {dummy_input_file}")
+            f.write('{"action": "TEST_ACTION_1"}\n')
+            f.write('invalid json line\n')
+            f.write('{"action": "TEST_ACTION_2", "params": {"x": 1}}\n')
 
         print("\n>>> Instantiating TaskInjector...")
-        injector = TaskInjector(task_list_path=dummy_task_file,
-                                input_task_file_path=dummy_input_file,
-                                task_list_lock=test_lock)
+        # Needs a dummy AgentBus for the refactored version
+        class DummyBusForInjector:
+            def register_agent(self, *args, **kwargs): print(f"[DummyBus] Registered: {args[0]}")
+            def send_message(self, **kwargs):
+                print(f"[DummyBus] Sending message: {kwargs.get('message_type')} to {kwargs.get('recipient')}")
+                print(f"    Payload: {kwargs.get('payload')}")
+        
+        injector = TaskInjector(agent_bus=DummyBusForInjector(),
+                                input_task_file_path=dummy_input_file)
         print(">>> Injector instantiated.")
 
-        print("\n>>> Running one cycle...")
+        print("\n>>> Running injection cycle...")
         injector.run_cycle()
-        print(">>> Cycle finished.")
+        print(">>> Injection cycle finished.")
 
-        print("\n>>> Checking updated task file...")
-        with open(dummy_task_file, 'r') as f: updated_tasks = json.load(f)
-        print(json.dumps(updated_tasks, indent=2))
-        assert len(updated_tasks) == 3 # existing1 + injected1 + injected2
-        injected_task1 = next(t for t in updated_tasks if t["action"] == "INJECTED_ACTION_1")
-        assert injected_task1["status"] == "PENDING"
-        assert injected_task1["priority"] == 50
-        assert "task_id" in injected_task1
-        injected_task2 = next(t for t in updated_tasks if t["task_id"] == "injected2")
-        assert injected_task2["status"] == "PENDING"
-        assert injected_task2["priority"] == 5
-        print(">>> Main task list updated correctly.")
-
-        print("\n>>> Checking if input file was removed...")
-        assert not os.path.exists(dummy_input_file)
-        print(">>> Input file removed as expected.")
+        # Verify input file was removed
+        if not os.path.exists(dummy_input_file):
+            print(">>> Input file successfully removed after processing.")
+        else:
+            print("!!! Input file was NOT removed after processing.")
 
     except Exception as e:
-        print(f"ERROR in usage block: {e}", file=sys.stderr)
-        raise
+        print(f"\n!!! Error during usage block execution: {e}")
     finally:
-        # Cleanup
+        # Clean up dummy files
         if os.path.exists(dummy_task_file): os.remove(dummy_task_file)
         if os.path.exists(dummy_input_file): os.remove(dummy_input_file)
-        print("Cleaned up dummy files.")
-
-    print(f">>> Module {__file__} basic checks complete.")
-    sys.exit(0)
+        print("\n>>> Usage block cleanup complete.")
 
 # ========= USAGE BLOCK END ==========

@@ -1,0 +1,26 @@
+🎉 Exciting News from the DreamOS Team! 🎉
+
+{% if memory_update.project_milestones %}
+We've hit some amazing milestones:
+{% for milestone in memory_update.project_milestones %}
+🌟 {{ milestone }}
+{% endfor %}
+{% endif %}
+
+{% if memory_update.newly_unlocked_protocols %}
+Check out what we've been building:
+{% for protocol in memory_update.newly_unlocked_protocols %}
+🔥 {{ protocol }}
+{% endfor %}
+{% endif %}
+
+{% if memory_update.quest_completions %}
+And that's not all! Our team has achieved:
+{% for quest in memory_update.quest_completions %}
+💫 {{ quest }}
+{% endfor %}
+{% endif %}
+
+What features would you like to see next? Let us know in the comments! 👇
+
+#DreamOS #TechCommunity #Innovation #BuildingTheFuture 

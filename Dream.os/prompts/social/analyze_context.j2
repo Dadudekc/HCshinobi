@@ -1,0 +1,35 @@
+SYSTEM: You are an AI assistant analyzing context for social media posting. Your goal is to determine the appropriate tone and key message based on the provided event details.
+
+USER:
+Analyze the following event context and provide a concise summary and suggested tone for a social media post.
+
+**Event Context:**
+```json
+{{ event_context | tojson(indent=2) }}
+```
+
+**Analysis Task:**
+1.  **Summarize:** Briefly summarize the core event described in the context in one sentence suitable for a social media post.
+2.  **Determine Tone:** Based on the event type and details (e.g., proposal acceptance/rejection, reflection, general update), suggest an appropriate tone (e.g., Celebratory, Neutral, Informative, Urgent, Cautious).
+3.  **Key Message:** Identify the single most important piece of information to convey.
+
+**Output Format:**
+Respond ONLY with a JSON object containing the keys `summary`, `suggested_tone`, and `key_message`.
+
+**Example:**
+```json
+{
+  "summary": "Proposal P-001 regarding AI ethics framework has been accepted.",
+  "suggested_tone": "Celebratory",
+  "key_message": "The AI ethics framework proposal (P-001) was accepted."
+}
+```
+
+ASSISTANT:
+```json
+{
+  "summary": "<Generated summary sentence>",
+  "suggested_tone": "<Suggested tone>",
+  "key_message": "<Identified key message>"
+}
+``` 

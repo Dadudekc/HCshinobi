@@ -1,0 +1,36 @@
+{
+  "agent": "Dream.OS",
+  "priority": 1,
+  "tasks": [
+    {
+      "id": "DREAMOS-001",
+      "title": "Validate Core Services",
+      "description": "Ensure core services remain functional after consolidation",
+      "validation_targets": [
+        "core/coordination/agent_bus.py",
+        "core/config/config_service.py",
+        "core/social/strategies/"
+      ],
+      "test_command": "python -m pytest tests/core/"
+    },
+    {
+      "id": "DREAMOS-002",
+      "title": "Integration Test Suite",
+      "description": "Run full integration test suite after each major refactor",
+      "validation_targets": [
+        "tests/integration/"
+      ],
+      "test_command": "python -m pytest tests/integration/ -v"
+    },
+    {
+      "id": "DREAMOS-003",
+      "title": "Health Check System",
+      "description": "Monitor system health during cleanup process",
+      "targets": [
+        "runtime/health_check.py",
+        "core/monitoring/"
+      ],
+      "output_path": "core/monitoring/health_service.py"
+    }
+  ]
+} 

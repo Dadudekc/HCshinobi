@@ -1,0 +1,8 @@
+🧵 More key learnings from our dev session:
+
+{% for learning in learnings %}
+{{ loop.index }}/{{ learnings|length }} ✨ {{ learning|truncate(240) }}
+
+{% endfor %}
+
+{% for tag in tags[:3] %}#{{ tag }} {% endfor %} 

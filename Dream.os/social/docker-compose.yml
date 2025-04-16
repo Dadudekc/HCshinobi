@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    image: dreamos-social:latest
+    volumes:
+      - dreamos_content:/var/dreamos/content
+      - dreamos_db:/var/dreamos/db
+      - dreamos_logs:/var/dreamos/logs
+    env_file:
+      - config/production.env
+    depends_on:
+      - redis
+      - prometheus
+    ports:
+      - "8080:8080"  # Health check
+    networks:
+      - dreamos_net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1G
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+        window: 60s
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - dreamos_net
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"
+    networks:
+      - dreamos_net
+
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - ./config/grafana/provisioning:/etc/grafana/provisioning
+      - ./config/grafana/dashboards:/var/lib/grafana/dashboards
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - dreamos_net
+
+volumes:
+  dreamos_content:
+  dreamos_db:
+  dreamos_logs:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  dreamos_net:
+    driver: bridge 

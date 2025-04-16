@@ -1,0 +1,12 @@
+🔧 New DevLog: {{ post.title|truncate(100) }}
+
+{% if post.key_learnings %}
+Key takeaways:
+{% for learning in post.key_learnings[:2] %}
+✨ {{ learning|truncate(70) }}
+{% endfor %}
+{% endif %}
+
+Read more: {{ post.url }}
+
+{% for tag in post.tags[:4] %}#{{ tag }} {% endfor %} 

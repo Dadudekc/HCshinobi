@@ -1,0 +1,60 @@
+# Task: Analyze File
+File Path: {{ file_path }}
+Analysis Type: {{ analysis_type }}
+
+Instructions:
+1. Perform comprehensive analysis based on analysis_type:
+   - general: Overall code quality and structure
+   - complexity: Cyclomatic complexity and cognitive load
+   - security: Security vulnerabilities and best practices
+   - performance: Performance bottlenecks and optimizations
+   - maintainability: Code organization and documentation
+   - dependencies: Import analysis and dependency graph
+
+2. Return JSON-formatted results with the following structure:
+```json
+{
+    "analysis_type": "string",
+    "file_path": "string",
+    "summary": {
+        "lines_of_code": int,
+        "complexity_score": float,
+        "maintainability_index": float
+    },
+    "structure": {
+        "classes": [string],
+        "functions": [string],
+        "imports": [string]
+    },
+    "metrics": {
+        "cyclomatic_complexity": float,
+        "cognitive_complexity": float,
+        "halstead_metrics": object
+    },
+    "issues": [
+        {
+            "type": "string",
+            "severity": "high|medium|low",
+            "description": "string",
+            "line_number": int
+        }
+    ],
+    "suggestions": [
+        {
+            "category": "string",
+            "description": "string",
+            "priority": "high|medium|low"
+        }
+    ]
+}
+```
+
+3. Focus Areas:
+   - Code structure and organization
+   - Complexity metrics
+   - Potential issues and risks
+   - Best practice violations
+   - Improvement suggestions
+   - Performance implications
+
+Output only valid JSON matching the above schema. 

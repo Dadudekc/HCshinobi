@@ -1,0 +1,350 @@
+{
+    "agents/setup.py": {
+        "language": ".py",
+        "functions": [],
+        "classes": {},
+        "routes": [],
+        "complexity": 0
+    },
+    "core/memory/governance_memory_engine.py": {
+        "language": ".py",
+        "functions": [
+            "log_event"
+        ],
+        "classes": {},
+        "routes": [],
+        "complexity": 1
+    },
+    "agents/agents/AletheiaContentDispatcher.py": {
+        "language": ".py",
+        "functions": [
+            "__init__",
+            "execute_full_dispatch"
+        ],
+        "classes": {
+            "AletheiaContentDispatcher": {
+                "methods": [
+                    "__init__",
+                    "execute_full_dispatch"
+                ],
+                "docstring": null,
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 4
+    },
+    "agents/chatgpt_commander_agent.py": {
+        "language": ".py",
+        "functions": [
+            "save_log",
+            "process_single_task",
+            "run_chatgpt_commander_agent_loop",
+            "log_event",
+            "get_pending_tasks",
+            "claim_task",
+            "complete_task",
+            "__init__",
+            "login_via_cookies",
+            "find_chat_by_title",
+            "send_message",
+            "get_latest_response",
+            "close"
+        ],
+        "classes": {
+            "AgentBus": {
+                "methods": [
+                    "get_pending_tasks",
+                    "claim_task",
+                    "complete_task"
+                ],
+                "docstring": null,
+                "base_classes": []
+            },
+            "PerformanceLogger": {
+                "methods": [],
+                "docstring": null,
+                "base_classes": []
+            },
+            "BrowserController": {
+                "methods": [
+                    "__init__",
+                    "login_via_cookies",
+                    "find_chat_by_title",
+                    "send_message",
+                    "get_latest_response",
+                    "close"
+                ],
+                "docstring": null,
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 22
+    },
+    "governance_scraper.py": {
+        "language": ".py",
+        "functions": [
+            "load_recent_governance_events",
+            "load_recent_reflections",
+            "load_proposals",
+            "get_rulebook_summary",
+            "generate_governance_data"
+        ],
+        "classes": {},
+        "routes": [],
+        "complexity": 5
+    },
+    "agents/cursor_dispatcher.py": {
+        "language": ".py",
+        "functions": [
+            "execute_cursor_task",
+            "process_single_task",
+            "run_cursor_dispatcher_loop",
+            "log_event",
+            "get_pending_tasks",
+            "claim_task",
+            "complete_task"
+        ],
+        "classes": {
+            "AgentBus": {
+                "methods": [
+                    "get_pending_tasks",
+                    "claim_task",
+                    "complete_task"
+                ],
+                "docstring": null,
+                "base_classes": []
+            },
+            "PerformanceLogger": {
+                "methods": [],
+                "docstring": null,
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 10
+    },
+    "core/template_engine.py": {
+        "language": ".py",
+        "functions": [
+            "_log_engine_message",
+            "render_template",
+            "log_event"
+        ],
+        "classes": {},
+        "routes": [],
+        "complexity": 3
+    },
+    "_agent_coordination/tools/gpt_command_router.py": {
+        "language": ".py",
+        "functions": [
+            "read_gpt_response",
+            "parse_commands",
+            "update_proposal_status",
+            "execute_command",
+            "main",
+            "log_event"
+        ],
+        "classes": {},
+        "routes": [],
+        "complexity": 6
+    },
+    "agents/agents/setup.py": {
+        "language": ".py",
+        "functions": [],
+        "classes": {},
+        "routes": [],
+        "complexity": 0
+    },
+    "agents/agents/workflow_agent.py": {
+        "language": ".py",
+        "functions": [
+            "__init__",
+            "_get_workflow_path",
+            "create_workflow",
+            "list_workflows",
+            "delete_workflow",
+            "execute_workflow"
+        ],
+        "classes": {
+            "WorkflowAgent": {
+                "methods": [
+                    "__init__",
+                    "_get_workflow_path",
+                    "create_workflow",
+                    "list_workflows",
+                    "delete_workflow",
+                    "execute_workflow"
+                ],
+                "docstring": null,
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 12
+    },
+    "agents/agents/reflection_agent/reflection_agent.py": {
+        "language": ".py",
+        "functions": [
+            "__init__",
+            "_load_logs",
+            "analyze_logs",
+            "generate_insights",
+            "suggest_improvements"
+        ],
+        "classes": {
+            "ReflectionAgent": {
+                "methods": [
+                    "__init__",
+                    "_load_logs",
+                    "analyze_logs",
+                    "generate_insights",
+                    "suggest_improvements"
+                ],
+                "docstring": null,
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 10
+    },
+    "agents/agents/tests/test_workflow_agent.py": {
+        "language": ".py",
+        "functions": [
+            "setUp",
+            "tearDown",
+            "test_create_workflow_success",
+            "test_create_workflow_duplicate",
+            "test_execute_workflow_step_failure",
+            "test_workflow_validation",
+            "test_workflow_persistence_failure",
+            "test_concurrent_workflow_execution",
+            "test_workflow_timeout",
+            "test_create_workflow_invalid_definition",
+            "test_execute_workflow_success",
+            "test_execute_workflow_not_found",
+            "test_list_workflows_empty",
+            "test_list_workflows_with_items",
+            "test_delete_workflow_success",
+            "test_delete_workflow_not_found",
+            "test_workflow_persistence",
+            "test_workflow_step_retry_mechanism",
+            "test_workflow_conditional_execution",
+            "test_workflow_parallel_execution",
+            "test_workflow_resource_cleanup",
+            "test_workflow_version_compatibility",
+            "test_workflow_dynamic_step_generation",
+            "test_workflow_rollback_mechanism",
+            "test_workflow_state_persistence",
+            "test_workflow_metrics_collection",
+            "test_workflow_dependency_resolution",
+            "mock_execute",
+            "mock_execute_step",
+            "mock_execute_step"
+        ],
+        "classes": {
+            "TestWorkflowAgent": {
+                "methods": [
+                    "setUp",
+                    "tearDown",
+                    "test_create_workflow_success",
+                    "test_create_workflow_duplicate",
+                    "test_execute_workflow_step_failure",
+                    "test_workflow_validation",
+                    "test_workflow_persistence_failure",
+                    "test_concurrent_workflow_execution",
+                    "test_workflow_timeout",
+                    "test_create_workflow_invalid_definition",
+                    "test_execute_workflow_success",
+                    "test_execute_workflow_not_found",
+                    "test_list_workflows_empty",
+                    "test_list_workflows_with_items",
+                    "test_delete_workflow_success",
+                    "test_delete_workflow_not_found",
+                    "test_workflow_persistence",
+                    "test_workflow_step_retry_mechanism",
+                    "test_workflow_conditional_execution",
+                    "test_workflow_parallel_execution",
+                    "test_workflow_resource_cleanup",
+                    "test_workflow_version_compatibility",
+                    "test_workflow_dynamic_step_generation",
+                    "test_workflow_rollback_mechanism",
+                    "test_workflow_state_persistence",
+                    "test_workflow_metrics_collection",
+                    "test_workflow_dependency_resolution"
+                ],
+                "docstring": null,
+                "base_classes": [
+                    "unittest.TestCase"
+                ]
+            }
+        },
+        "routes": [],
+        "complexity": 60
+    },
+    "agents/agents/tests/test_reflection_agent.py": {
+        "language": ".py",
+        "functions": [
+            "setUp",
+            "tearDown",
+            "test_analyze_logs_with_date_range",
+            "test_analyze_logs_invalid_date_range",
+            "test_analyze_logs_corrupted_data",
+            "test_generate_insights_template_error",
+            "test_generate_insights_invalid_response",
+            "test_suggest_improvements_with_priority",
+            "test_memory_persistence",
+            "test_memory_corruption_handling",
+            "test_analyze_logs_success",
+            "test_analyze_logs_empty",
+            "test_generate_insights_success",
+            "test_generate_insights_no_data",
+            "test_suggest_improvements_success",
+            "test_suggest_improvements_no_insights",
+            "test_error_handling",
+            "test_insight_template_rendering",
+            "test_analyze_logs_with_complex_filtering",
+            "test_analyze_logs_rate_limiting",
+            "test_generate_insights_with_patterns",
+            "test_suggest_improvements_with_impact_analysis",
+            "test_memory_concurrent_access",
+            "simulate_concurrent_write"
+        ],
+        "classes": {
+            "TestReflectionAgent": {
+                "methods": [
+                    "setUp",
+                    "tearDown",
+                    "test_analyze_logs_with_date_range",
+                    "test_analyze_logs_invalid_date_range",
+                    "test_analyze_logs_corrupted_data",
+                    "test_generate_insights_template_error",
+                    "test_generate_insights_invalid_response",
+                    "test_suggest_improvements_with_priority",
+                    "test_memory_persistence",
+                    "test_memory_corruption_handling",
+                    "test_analyze_logs_success",
+                    "test_analyze_logs_empty",
+                    "test_generate_insights_success",
+                    "test_generate_insights_no_data",
+                    "test_suggest_improvements_success",
+                    "test_suggest_improvements_no_insights",
+                    "test_error_handling",
+                    "test_insight_template_rendering",
+                    "test_analyze_logs_with_complex_filtering",
+                    "test_analyze_logs_rate_limiting",
+                    "test_generate_insights_with_patterns",
+                    "test_suggest_improvements_with_impact_analysis",
+                    "test_memory_concurrent_access"
+                ],
+                "docstring": null,
+                "base_classes": [
+                    "unittest.TestCase"
+                ]
+            }
+        },
+        "routes": [],
+        "complexity": 52
+    }
+} 

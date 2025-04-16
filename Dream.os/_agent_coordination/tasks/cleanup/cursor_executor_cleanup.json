@@ -1,0 +1,12 @@
+{
+    "name": "Cursor Executor Cleanup",
+    "domain": "cursor_executor",
+    "description": "Cleans up temporary execution artifacts and old execution logs",
+    "dependencies": ["prompt_planner"],
+    "impact_level": "medium",
+    "target_files": [
+        "executor/temp/*.tmp",
+        "executor/logs/*.log",
+        "executor/backups/*.bak"
+    ]
+} 

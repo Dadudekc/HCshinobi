@@ -1,0 +1,8 @@
+{
+  "mailbox_id": "mailbox_6",
+  "status": "offline",
+  "assigned_agent_id": null,
+  "last_seen_utc": "2025-04-15T22:33:40.056075+00:00",
+  "messages": [],
+  "processed_message_ids": []
+}

@@ -149,6 +149,28 @@ rules:
     applies_to: all_agents
 ```
 
+### Rule ONB-007: Handler Dependencies & External Configuration
+- **ID:** ONB-007
+- **Description:** "Agent command handlers must directly implement logic using available tools (filesystem, controllers, internal state, etc.) or call other verifiable internal agent functions. Placeholders for external actions are forbidden (Ref: ONB-001). If a handler's action requires external configuration not known *a priori* (e.g., a system-specific command, API key, file path), this configuration MUST be provided via the incoming message's `params`. Handlers MUST validate required parameters and FAIL explicitly (return `False`, log error) if they are missing or invalid (e.g., default placeholder values). See `CursorControlAgent._handle_resume_operation` for an example pattern."
+- **Keywords:** `handler`, `implementation`, `dependencies`, `parameters`, `configuration`, `no placeholders`, `fail fast`, `validate params`
+- **Applies To:** `all_agents`
+
+```yaml
+rules:
+  - id: ONB-007
+    description: "Agent command handlers must directly implement logic using available tools or internal functions. External configuration (e.g., specific commands, keys, paths) MUST be provided via message `params`. Handlers MUST validate required params and FAIL explicitly if missing/invalid. Placeholders forbidden (Ref: ONB-001)."
+    keywords:
+      - handler
+      - implementation
+      - dependencies
+      - parameters
+      - configuration
+      - no placeholders
+      - fail fast
+      - validate params
+    applies_to: all_agents
+```
+
 ## General Principles
 
 ### Rule 1: Continuous Operation

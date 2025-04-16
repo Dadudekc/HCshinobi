@@ -100,7 +100,11 @@ class CursorControlAgent:
                  max_lines = params.get("max_lines")
                  output = self.coordinator.get_terminal_output(max_lines=max_lines)
                  response_payload["output"] = output
-                 status = "SUCCESS"
+                 if output is not None:
+                     status = "SUCCESS"
+                 else:
+                     status = "FAILED"
+                     response_payload["error"] = "Failed to retrieve terminal output. Terminal might be inactive or an error occurred."
             elif action == "OPEN_FILE":
                  file_path = params.get("file_path")
                  if file_path:
@@ -110,6 +114,37 @@ class CursorControlAgent:
                      status = "SUCCESS" if success else "FAILED"
                  else:
                     response_payload["error"] = "Missing 'file_path' parameter."
+                    status = "BAD_REQUEST"
+            elif action == "INSERT_TEXT":
+                text_to_insert = params.get("text")
+                location = params.get("location") # Optional: could be line number, 'cursor', etc.
+                if text_to_insert is not None: # Check for None, empty string might be valid
+                    # Assuming coordinator has an insert_text method
+                    # success = self.coordinator.insert_text(text_to_insert, location=location)
+                    # Placeholder implementation:
+                    logger.warning(f"Placeholder: Received INSERT_TEXT action with text: '{text_to_insert[:50]}...', location: {location}. Not implemented yet.")
+                    success = False # Mark as failed until implemented
+                    response_payload["action_performed"] = "INSERT_TEXT (Placeholder)"
+                    response_payload["success"] = success
+                    status = "FAILED_NOT_IMPLEMENTED" # Specific status
+                else:
+                    response_payload["error"] = "Missing 'text' parameter for INSERT_TEXT."
+                    status = "BAD_REQUEST"
+            elif action == "FIND_ELEMENT":
+                query = params.get("query")
+                element_type = params.get("element_type", "any") # Optional: 'function', 'class', 'variable'
+                if query:
+                    # Assuming coordinator has a find_element method
+                    # result = self.coordinator.find_element(query, element_type=element_type)
+                    # Placeholder implementation:
+                    logger.warning(f"Placeholder: Received FIND_ELEMENT action with query: '{query}', type: {element_type}. Not implemented yet.")
+                    result = None # Mark as failed until implemented
+                    response_payload["action_performed"] = "FIND_ELEMENT (Placeholder)"
+                    response_payload["result"] = result
+                    response_payload["success"] = False
+                    status = "FAILED_NOT_IMPLEMENTED" # Specific status
+                else:
+                    response_payload["error"] = "Missing 'query' parameter for FIND_ELEMENT."
                     status = "BAD_REQUEST"
             # Add more actions here...
             # elif action == "INSERT_TEXT": ...

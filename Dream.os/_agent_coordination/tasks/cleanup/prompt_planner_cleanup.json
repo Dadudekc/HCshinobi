@@ -1,0 +1,12 @@
+{
+    "name": "Prompt Planner Cleanup",
+    "domain": "prompt_planner",
+    "description": "Removes old prompt templates and cached planning results",
+    "dependencies": ["task_orchestrator"],
+    "impact_level": "low",
+    "target_files": [
+        "planner/templates/archived/*.txt",
+        "planner/cache/*.cache",
+        "planner/results/*.json"
+    ]
+} 

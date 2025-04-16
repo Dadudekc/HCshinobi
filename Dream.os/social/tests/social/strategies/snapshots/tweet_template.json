@@ -1,0 +1,10 @@
+{
+  "template_data": {
+    "content": "Hello Twitter!",
+    "hashtags": [
+      "#python",
+      "#testing"
+    ]
+  },
+  "expected_output": "Hello Twitter!\n\n#python #testing"
+}

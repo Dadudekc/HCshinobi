@@ -41,7 +41,7 @@ DEFAULT_TASK_LIST_PATH = "task_list.json"
 MAX_REPAIR_ATTEMPTS = 1 # Limit repair attempts per failed task
 
 class PromptFeedbackLoopAgent:
-    """Monitors for failed tasks and injects repair/diagnostic tasks."""
+    """Monitors for failed tasks via AgentBus messages and injects repair/diagnostic tasks."""
 
     def __init__(self, agent_bus: AgentBus, task_list_path: str = DEFAULT_TASK_LIST_PATH, task_list_lock: Optional[threading.Lock] = None):
         """
@@ -55,8 +55,6 @@ class PromptFeedbackLoopAgent:
         self.agent_name = AGENT_NAME
         self.bus = agent_bus
         self.task_list_path = os.path.abspath(task_list_path)
-        self._stop_event = threading.Event()
-        self._thread: Optional[threading.Thread] = None
         self._lock = task_list_lock if task_list_lock else threading.Lock()
 
         # Ensure task list file exists (though TaskExecutorAgent likely creates it)
@@ -72,7 +70,16 @@ class PromptFeedbackLoopAgent:
 
         # Register agent
         self.bus.register_agent(self.agent_name, capabilities=["feedback_loop", "task_injection"])
-        logger.info(f"{self.agent_name} initialized. Monitoring task list: {self.task_list_path}")
+        
+        # Register handler for relevant messages indicating failure
+        # Option 1: Listen to messages directed to TaskExecutorAgent with failed status
+        self.bus.register_handler("TaskExecutorAgent", self.handle_potential_failure)
+        # Option 2: Listen for specific ERROR messages (might be less reliable for task status)
+        self.bus.register_handler("ERROR", self.handle_potential_failure)
+        # Option 3: Define and listen for a specific TASK_FAILED message type (ideal)
+        # self.bus.register_handler("TASK_FAILED", self.handle_task_failure)
+        
+        logger.info(f"{self.agent_name} initialized. Listening for task failures on AgentBus.")
 
     # --- Use Task List Load/Save/Update Logic (Could be refactored to common utility) ---
     def _load_tasks(self) -> List[Dict[str, Any]]:
@@ -229,86 +236,76 @@ class PromptFeedbackLoopAgent:
              status="AUTO_REPAIR_TASK_CREATED"
          )
 
-    def run_cycle(self):
-        """Checks for failed tasks and injects repair tasks."""
-        logger.debug(f"{self.agent_name} checking for failed tasks...")
+    # --- New Message Handler --- 
+    def handle_potential_failure(self, message: Message):
+        """Handles messages that might indicate a task failure."""
+        # Check if message represents a failed task
+        task_id = getattr(message, 'task_id', None)
+        status = getattr(message, 'status', None)
+        
+        is_failure = status in [TaskStatus.FAILED, TaskStatus.ERROR]
+        # If listening to TaskExecutorAgent, check recipient
+        is_response_to_executor = message.recipient == "TaskExecutorAgent"
+
+        # Determine if this message signals a failure we should act on
+        # This logic might need refinement based on actual message flow
+        if task_id and is_failure and is_response_to_executor:
+             logger.info(f"Detected potential failure for task {task_id} via message {message.id} from {message.sender}.")
+             self.trigger_repair_task_injection(task_id)
+        elif message.type == "ERROR" and task_id: # Handle generic ERROR messages linked to a task
+             logger.info(f"Detected potential failure for task {task_id} via generic ERROR message {message.id} from {message.sender}.")
+             self.trigger_repair_task_injection(task_id)
+        # Add handling for specific TASK_FAILED event type if implemented later
+        # elif message.type == "TASK_FAILED":
+        #    self.trigger_repair_task_injection(task_id)
+
+    def trigger_repair_task_injection(self, failed_task_id: str):
+        """Loads tasks, checks repair attempts, creates, and injects a diagnostic task."""
         tasks = self._load_tasks()
-        if not tasks:
+        if not tasks: 
+            logger.error("Cannot trigger repair: Failed to load task list.")
             return
-        
-        tasks_to_add = []
-        tasks_updated = False
 
+        failed_task = None
         for task in tasks:
-            if not isinstance(task, dict): continue
-
-            task_id = task.get("task_id")
-            status = task.get("status")
-            repair_attempts = task.get("repair_attempts", 0)
-
-            # Check if task failed and hasn't exceeded repair attempts
-            if status in [TaskStatus.FAILED, TaskStatus.ERROR] and repair_attempts < MAX_REPAIR_ATTEMPTS:
-                 logger.warning(f"Detected failed task '{task_id}' with status '{status}'. Attempting repair injection (Attempt {repair_attempts + 1}).")
-                 
-                 # Generate the repair task
-                 new_task = self._create_diagnostic_task(task)
-                 tasks_to_add.append(new_task)
-                 
-                 # Mark the original task as having triggered a repair
-                 if self._mark_repair_triggered(tasks, task_id):
-                     tasks_updated = True
-                 
-                 # Log the injection event
-                 self._log_injection_event(task_id, new_task["task_id"])
-
-        # Add new tasks and save if changes were made
-        if tasks_to_add:
-             tasks.extend(tasks_to_add)
-             tasks_updated = True # Need to save the combined list
+             if isinstance(task, dict) and task.get("task_id") == failed_task_id:
+                 failed_task = task
+                 break
         
-        if tasks_updated:
-            if not self._save_tasks(tasks):
-                logger.error("Failed to save task list after injecting repair tasks!")
-
-        logger.debug(f"{self.agent_name} finished failure check cycle.")
-
-    # --- Background Thread Methods (Copied from TaskExecutorAgent) ---
-    def _run_loop(self):
-        """The main loop for the agent thread."""
-        logger.info(f"{self.agent_name} background thread started.")
-        while not self._stop_event.is_set():
-            try:
-                self.run_cycle()
-            except Exception as e:
-                 logger.error(f"Critical error in {self.agent_name} run loop: {e}", exc_info=True)
-            # Adjust sleep time as needed - check less frequently than executor?
-            time.sleep(15) # Check for failures every 15 seconds
-        logger.info(f"{self.agent_name} background thread stopped.")
-
-    def start(self):
-        """Starts the agent's task monitoring loop in a separate thread."""
-        if self._thread is not None and self._thread.is_alive():
-            logger.warning(f"{self.agent_name} is already running.")
-            return
-        self._stop_event.clear()
-        self._thread = threading.Thread(target=self._run_loop, name=f"{self.agent_name}Loop", daemon=True)
-        self._thread.start()
-        logger.info(f"{self.agent_name} started background thread.")
-
-    def stop(self):
-        """Signals the agent's background thread to stop and waits for it."""
-        if self._thread is None or not self._thread.is_alive():
-            logger.info(f"{self.agent_name} is not running.")
+        if not failed_task:
+            logger.warning(f"Cannot trigger repair: Failed task {failed_task_id} not found in list.")
             return
 
-        logger.info(f"Stopping {self.agent_name} background thread...")
-        self._stop_event.set()
-        self._thread.join(timeout=10)
-        if self._thread.is_alive():
-             logger.warning(f"{self.agent_name} background thread did not stop gracefully.")
+        # Check if max repair attempts exceeded
+        repair_attempts = failed_task.get("repair_attempts", 0)
+        if repair_attempts >= MAX_REPAIR_ATTEMPTS:
+            logger.info(f"Skipping repair for task {failed_task_id}: Max repair attempts ({MAX_REPAIR_ATTEMPTS}) reached.")
+            return
+
+        # Create the diagnostic/repair task
+        repair_task = self._create_diagnostic_task(failed_task)
+        logger.info(f"Generated repair task {repair_task['task_id']} for failed task {failed_task_id}.")
+
+        # Mark the original task as having triggered a repair
+        marked = self._mark_repair_triggered(tasks, failed_task_id)
+        
+        # Add the new repair task to the list
+        tasks.append(repair_task)
+
+        # Save the updated task list
+        if self._save_tasks(tasks):
+            logger.info(f"Successfully injected repair task {repair_task['task_id']} into task list.")
+            # Log the injection event separately? 
+            self._log_injection_event(failed_task_id, repair_task['task_id'])
         else:
-             logger.info(f"{self.agent_name} background thread stopped successfully.")
-        self._thread = None
+            logger.error(f"Failed to save task list after injecting repair task for {failed_task_id}.")
+
+    # Add shutdown method if needed for cleanup
+    def shutdown(self):
+        logger.info(f"Shutting down {self.agent_name}...")
+        # Unregister?
+        # self.bus.deregister_agent(self.agent_name)
+        logger.info(f"{self.agent_name} shutdown complete.")
 
 # ========= USAGE BLOCK START ==========
 # Minimal block, primarily for structure verification

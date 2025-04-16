@@ -1,0 +1,69 @@
+{
+    "role": "Flowmaster + Directory Refactor",
+    "priority": 1,
+    "tasks": [
+        {
+            "id": "COORD_001",
+            "title": "Consolidate AgentBus Implementations",
+            "description": "Merge all AgentBus implementations into core/coordination/agent_bus.py",
+            "target_files": [
+                "core/coordination/agent_bus.py",
+                "**/agent_bus*.py"
+            ],
+            "success_criteria": {
+                "single_implementation": true,
+                "test_coverage": 90,
+                "no_duplicates": true
+            }
+        },
+        {
+            "id": "COORD_002",
+            "title": "Collapse Dispatcher Logic",
+            "description": "Merge duplicate dispatcher logic from cursor_dispatcher.py and chat_dispatcher.py",
+            "target_files": [
+                "**/dispatcher*.py",
+                "**/cursor_dispatcher.py",
+                "**/chat_dispatcher.py"
+            ],
+            "success_criteria": {
+                "unified_interface": true,
+                "backwards_compatible": true,
+                "test_coverage": 85
+            }
+        },
+        {
+            "id": "COORD_003",
+            "title": "Unify File System Graph Traversal",
+            "description": "Consolidate PathManager logic and file system operations",
+            "target_files": [
+                "**/path_manager*.py",
+                "**/file_utils*.py"
+            ],
+            "success_criteria": {
+                "single_implementation": true,
+                "performance_maintained": true
+            }
+        },
+        {
+            "id": "COORD_004",
+            "title": "Config Service Consolidation",
+            "description": "Create unified config service and remove duplicated config loading patterns",
+            "target_files": [
+                "**/config*.py",
+                "**/*.env*",
+                "**/settings*.py"
+            ],
+            "success_criteria": {
+                "single_source": true,
+                "env_var_support": true,
+                "backward_compatible": true
+            }
+        }
+    ],
+    "dependencies": [],
+    "validation_rules": {
+        "commit_format": "refactor(cleanup): {what} in {modules}",
+        "required_tests": ["unit", "integration"],
+        "changelog_update": true
+    }
+} 

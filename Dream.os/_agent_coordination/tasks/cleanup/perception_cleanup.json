@@ -1,0 +1,12 @@
+{
+    "name": "Perception Cleanup",
+    "domain": "perception",
+    "description": "Removes outdated perception data and temporary sensor readings",
+    "dependencies": [],
+    "impact_level": "low",
+    "target_files": [
+        "perception/sensor_data/*.dat",
+        "perception/temp/*.bin",
+        "perception/snapshots/*.jpg"
+    ]
+} 

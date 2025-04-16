@@ -16,5 +16,115 @@
     },
     "target_agent": "CursorControlAgent",
     "timestamp_created": "2024-07-26T10:00:00Z"
+  },
+  {
+    "task_id": "infra_build_code_applicator_001",
+    "status": "PENDING",
+    "task_type": "develop_tool",
+    "action": "Build tools/code_applicator.py tool.",
+    "params": {
+      "target_file": "tools/code_applicator.py",
+      "description": "Create a robust tool that takes generated code content (e.g., via stdin, clipboard, or temp file) and a target file path, then safely applies the code to the specified file. Should handle creating new files and potentially merging/replacing existing content based on context or markers. Must include extensive logging and error handling. Needs rigorous testing.",
+      "requirements": [
+        "Accept code content and target file path as input.",
+        "Handle file creation and modification safely.",
+        "Log actions and results clearly.",
+        "Return appropriate exit codes.",
+        "Include unit tests."
+      ]
+    },
+    "target_agent": "CursorControlAgent", 
+    "priority": 1, 
+    "timestamp_created": "2024-07-26T12:00:00Z"
+  },
+  {
+    "task_id": "enable_code_apply_in_cursor_agent_001",
+    "status": "PENDING",
+    "task_type": "refactor_agent",
+    "action": "Enhance CursorControlAgent._handle_generate_code to use CodeApplicator.",
+    "params": {
+      "target_agent_file": "agents/cursor_control_agent.py",
+      "target_method": "_handle_generate_code",
+      "tool_to_use": "tools/code_applicator.py",
+      "description": "Modify the _handle_generate_code handler. After successfully sending a prompt via CursorPromptController, it needs a mechanism to retrieve the generated code (Assumption: For now, assume code is manually copied to clipboard or a known temp file). Then, invoke tools/code_applicator.py via CursorTerminalController to apply the retrieved code to the target file. The handler should only return True (leading to task COMPLETED status) if BOTH prompt sending AND code application succeed.",
+      "requirements": [
+        "Modify handler logic.",
+        "Add step to retrieve generated code (placeholder needed for retrieval method).",
+        "Call code_applicator.py tool via run_command.",
+        "Update success/failure logic based on application result."
+      ]
+    },
+    "target_agent": "CursorControlAgent",
+    "priority": 2, 
+    "timestamp_created": "2024-07-26T12:00:01Z",
+    "depends_on": ["infra_build_code_applicator_001"] 
+  },
+  {
+    "task_id": "build_feedback_mailbox_writer_001",
+    "status": "PENDING",
+    "task_type": "refactor_agent",
+    "action": "Ensure failed task messages include structured error context in error mailbox.",
+    "params": {
+      "target_component": "agents/cursor_control_agent.py or _agent_coordination/mailbox_utils.py",
+      "description": "When a task fails within an agent's message handler (_process_mailbox_message), ensure the message file moved to the agent's 'error/' directory contains not just the original message, but also structured error information (e.g., timestamp of failure, error message, relevant context/params). This might involve modifying the agent handler to write a new error file or enhancing mailbox_utils.process_directory_loop to capture exceptions and augment the file before moving.",
+      "requirements": [
+        "Determine best implementation location (agent handler vs. mailbox_utils).",
+        "Capture error details effectively.",
+        "Write augmented error message file to error directory."
+      ]
+    },
+    "target_agent": "CursorControlAgent", 
+    "priority": 3,
+    "timestamp_created": "2024-07-26T12:00:02Z"
+  }
+  import json
+
+# The new task definition provided by the user
+new_task = {
+  "task_id": "dsc-chronicle-init-001",
+  "title": "Create Dreamscape Chronicle System",
+  "description": "Design and implement the Dreamscape Chronicle system—a narrative overlay that translates real agent activity, task progression, and system events into a structured, lore-driven chronicle. The Chronicle will draw from agent logs, task metadata, and feedback loops to create dynamic Markdown-based entries or blog-like artifacts.",
+  "status": "PENDING",
+  "priority": "medium",
+  "type": "artifact_creation",
+  "realm": "Narrative Generation",
+  "tags": ["dreamscape", "logging", "lore", "storytelling", "meta-agent"],
+  "dependencies": ["core-agent-activation", "agentbus-import-fix"],
+  "validation_criteria": [
+    "Chronicle entries are generated automatically from task logs or agent output.",
+    "Each entry includes task ID, agent ID, outcome (success/failure), and realm reference.",
+    "Generated output saved to `Dreamscape_Chronicle.md` or equivalent location.",
+    "At least one test case where an agent completes a task and a chronicle entry is created from it."
+  ],
+  "owner": "SystemOrchestrator"
+}
+
+# Assuming 'current_task_list_json_string' contains the JSON read from the file
+# For this example, let's simulate loading from a string (in reality, use the file content)
+# In a real scenario, use the output from the previous read_file tool call
+current_task_list_json_string = """
+[
+  {
+    "task_id": "f8b1e2d0-c3a4-4b5e-9d6f-a1b2c3d4e5f6",
+    "description": "FLAMEPROOF Phase 2: Consolidate AgentBus implementations...",
+    "status": "FAILED",
+    "assigned_to": "agent1",
+    "priority": "CRITICAL",
+    "source_file": "supervisor/agent1",
+    "module": "core/coordination",
+    "depends_on": ["c5e8a3f9-1a0b-4d7e-8c1a-f0b1d2e3c4d5"],
+    "timestamp_created_utc": "2023-10-27T10:30:00Z"
+  },
+  {
+    "task_id": "c5e8a3f9-1a0b-4d7e-8c1a-f0b1d2e3c4d5",
+    "description": "Systematically test core agent coordination tools...",
+    "status": "BLOCKED",
+    "assigned_to": "agent1",
+    "priority": "CRITICAL",
+    "source_file": "supervisor/agent1",
+    "module": "_agent_coordination/supervisor_tools",
+    "original_line": null,
+    "timestamp_aggregated_utc": null,
+    "timestamp_created_utc": "2023-10-27T10:00:00Z"
   }
 ] 

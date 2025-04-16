@@ -1,0 +1,30 @@
+{% set max_len = 280 %} {# Twitter Max Length #}
+
+{# --- Title / Header --- #}
+{% if title %}
+**{{ title | truncate(max_len - 100) }}**
+{% else %}
+Dream.OS Update:
+{% endif %}
+
+{# --- Core Content (Select ONE based on availability) --- #}
+{% if proposal_summary %}
+Proposal Focus: {{ proposal_summary | truncate(max_len - 150) }}
+{% elif reflection_snippet %}
+Recent Reflection: {{ reflection_snippet | truncate(max_len - 150) }}
+{% elif general_update %}
+{{ general_update | truncate(max_len - 100) }}
+{% else %}
+Monitoring system activity...
+{% endif %}
+
+{# --- Optional Details --- #}
+{% if gpt_decision %}
+*GPT Suggests:* {{ gpt_decision | truncate(max_len - 180) }}
+{% endif %}
+{% if status_update %}
+*Status:* {{ status_update }}
+{% endif %}
+
+{# --- Hashtags --- #}
+#DreamOS #AI #Automation {% if governance_update %}#Governance{% endif %} 
