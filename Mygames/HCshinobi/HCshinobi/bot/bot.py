@@ -104,6 +104,17 @@ class HCBot(commands.Bot):
         self._initialized_services = False # Flag to track service init
         self._clan_data = None # This might be needed if ClanData init fails
         self._initial_shop_posted = False # Flag for initial Jutsu shop post
+
+    async def setup_events(self) -> None:
+        """Set up basic event handlers for tests."""
+        async def on_message(message: discord.Message):
+            if getattr(message.author, "bot", False):
+                return
+            await self.process_commands(message)
+
+        if not hasattr(self, "extra_events"):
+            self.extra_events = {}
+        self.extra_events.setdefault("on_message", []).append(on_message)
     
     async def setup_hook(self) -> None:
         """Overrides commands.Bot.setup_hook. Called before on_ready."""

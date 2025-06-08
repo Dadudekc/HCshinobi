@@ -13,6 +13,7 @@ def mock_config():
     return BotConfig(
         token="test_token",
         guild_id=123456789,
+        application_id=987654321,
         battle_channel_id=987654322,
         online_channel_id=987654323,
         announcement_channel_id=987654324,

@@ -69,7 +69,8 @@ def character_commands():
     clan_data.get_clan.side_effect = lambda name: mock_clan_info_hyuga if name == 'Hyuga' else mock_clan_info_uchiha if name == 'Uchiha' else None
     clan_data.get_all_clans.return_value = {'Uchiha': mock_clan_info_uchiha, 'Hyuga': mock_clan_info_hyuga}
 
-    return CharacterCommands(bot=mock_bot, character_system=character_system, clan_data=clan_data)
+    mock_progression = Mock()
+    return CharacterCommands(bot=mock_bot, character_system=character_system, clan_data=clan_data, progression_engine=mock_progression)
 
 @pytest.fixture
 def mock_bot():
