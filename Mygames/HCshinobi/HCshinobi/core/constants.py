@@ -37,6 +37,8 @@ MISSION_DEFINITIONS_FILE = "mission_definitions.json" # Resides in MISSIONS_SUBD
 
 # --- Core Data Filenames (Relative to DATA_DIR or subdir) --- 
 CLANS_FILE = "clans.json"  # Legacy format - being phased out
+# Backwards compatibility alias used by older tests
+CLAN_FILE = CLANS_FILE
 NPC_FILE = "npcs.json"  # Resides in DATA_DIR root
 MODIFIERS_FILE = "modifiers.json"  # Resides in DATA_DIR root
 CLAN_POPULATION_FILE = "clan_populations.json"

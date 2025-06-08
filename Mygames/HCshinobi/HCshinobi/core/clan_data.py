@@ -20,6 +20,20 @@ from ..utils.file_io import load_json, save_json, async_save_json
 from ..utils.logging import get_logger
 from HCshinobi.utils.config import DEFAULT_CLANS_PATH # Added import
 
+
+class ClanDict(dict):
+    """Dictionary behaving like a list for backwards compatibility."""
+
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return list(self.values())[key]
+        return super().__getitem__(key)
+
+    def __eq__(self, other):
+        if isinstance(other, list):
+            return list(self.values()) == other
+        return dict.__eq__(self, other)
+
 logger = logging.getLogger(__name__)
 
 class ClanData:
@@ -36,15 +50,19 @@ class ClanData:
         
         # Construct full file path for the main clans data file
         self.clans_file_path = os.path.join(self.clans_data_dir, CLANS_FILE)
-        
-        self.clans: Dict[str, Dict[str, Any]] = {} # Key: clan_id, Value: clan details dict
+
+        self.clans: Dict[str, Dict[str, Any]] = ClanDict()  # Keyed by clan name
         self.using_legacy_format = False
         logger.info(f"ClanData initialized. Data dir: {self.clans_data_dir}")
         # Loading is handled by an explicit async call
 
+    def initialize(self) -> None:
+        """Synchronously load clan data for tests."""
+        asyncio.run(self.load_clan_data())
+
     async def load_clan_data(self):
         """Loads clan data from village-specific clan files with legacy fallback to clans.json."""
-        self.clans = {}  # Reset clan data before loading
+        self.clans = ClanDict()  # Reset clan data before loading
         self.using_legacy_format = False  # Reset legacy format flag
         legacy_clans_loaded = False
         
@@ -141,7 +159,7 @@ class ClanData:
                 logger.warning(f"No clan data found in village-specific files. Falling back to legacy {CLANS_FILE} (DEPRECATED)")
                 loaded_data = load_json(self.clans_file_path)
                 if loaded_data is None:
-                    logger.warning(f"Legacy clan file not found: {self.clans_file_path}. Using default clans.")
+                    logger.error(f"Legacy clan file not found: {self.clans_file_path}. Using default clans.")
                     self.clans = self.create_default_clans()
                     # Save these default clans to new format files
                     self._migrate_clans_to_new_format()
@@ -484,9 +502,9 @@ class ClanData:
 
     # --- Public Access Methods ---
 
-    def get_all_clans(self) -> Dict[str, Dict[str, Any]]:
-        """Return a copy of the list of all clan data."""
-        return self.clans.copy()
+    def get_all_clans(self) -> List[Dict[str, Any]]:
+        """Return a list of all clan data."""
+        return list(self.clans.values())
 
     def get_clan_by_name(self, clan_name: str) -> Optional[Dict[str, Any]]:
         """Retrieve data for a specific clan by name (case-insensitive)."""
@@ -503,13 +521,12 @@ class ClanData:
              return []
         return [clan.copy() for clan in self.clans.values() if clan['rarity'] == rarity.value]
 
-    def add_clan(self, clan_id: str, clan_data: Dict[str, Any]) -> bool:
+    def add_clan(self, clan_data: Dict[str, Any]) -> bool:
         """
         Add a new clan to the data. Validates required fields.
         Saves the updated list to the file.
 
         Args:
-            clan_id: The ID of the new clan
             clan_data: Dictionary containing the new clan's information.
                        Required keys: 'name', 'rarity', 'lore', 'base_weight'.
 
@@ -531,6 +548,7 @@ class ClanData:
             logger.warning(f"Attempted to add duplicate clan: {clan_data['name']}")
             return False # Or update existing?
 
+        clan_id = clan_data['name']
         self.clans[clan_id] = clan_data
         logger.info(f"Added new clan: {clan_data['name']}")
         # Await the async save method
@@ -543,7 +561,7 @@ class ClanData:
         Saves the updated list to the file.
 
         Args:
-            clan_id: The ID of the clan to update.
+            clan_id: The name of the clan to update.
             update_data: Dictionary containing the fields to update.
 
         Returns:
