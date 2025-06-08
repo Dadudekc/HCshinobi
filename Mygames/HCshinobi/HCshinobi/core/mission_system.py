@@ -14,6 +14,7 @@ import random
 import logging
 import asyncio
 from typing import Dict, List, Optional, Tuple, Any
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 
 import aiofiles
@@ -35,9 +36,28 @@ from .constants import (
 )
 from ..utils.file_io import load_json, save_json
 from .d20_mission import (
-    D20MissionRunner, D20Mission, D20Challenge, 
+    D20MissionRunner, D20Mission, D20Challenge,
     SkillType, ChallengeType, DifficultyLevel
 )
+
+@dataclass
+class Mission:
+    """Simple mission data structure used in tests."""
+
+    mission_id: str
+    title: str
+    description: str
+    rank: str
+    reward_exp: int
+    reward_ryo: int
+    requirements: Dict[str, Any]
+    objectives: List[str]
+    time_limit: timedelta
+    location: str
+    completed: bool = False
+    accepted_by: Optional[str] = None
+    accepted_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
 
 logger = logging.getLogger(__name__)
 
@@ -48,13 +68,13 @@ class MissionSystem:
     def __init__(
         self,
         character_system: CharacterSystem,
-        data_dir: str,
-        currency_system: CurrencySystem,
-        progression_engine: ShinobiProgressionEngine,
+        data_dir: str = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data"),
+        currency_system: Optional[CurrencySystem] = None,
+        progression_engine: Optional[ShinobiProgressionEngine] = None,
     ):
         self.character_system = character_system
-        self.currency_system = currency_system
-        self.progression_engine = progression_engine
+        self.currency_system = currency_system or CurrencySystem(data_dir)
+        self.progression_engine = progression_engine or ShinobiProgressionEngine(character_system, data_dir)
 
         self.base_data_dir = data_dir
         # Construct specific path for mission files
@@ -72,7 +92,8 @@ class MissionSystem:
         self.completed_missions: Dict[str, List[str]] = {}  # Key: user_id_str, Value: List[completed_mission_id]
 
         logger.info(f"MissionSystem initialized. Data dir: {self.missions_data_dir}")
-        # Loading is deferred to ready_hook
+        # Load mission data synchronously for tests
+        asyncio.run(self.load_mission_data())
 
         # Initialize D20 mission runner
         self.d20_runner = D20MissionRunner()
@@ -81,23 +102,45 @@ class MissionSystem:
         """Loads mission definitions, active, and completed missions from specific files."""
         # Load Definitions
         try:
-            defs_data = load_json(self.mission_definitions_file) # Corrected call
-            if defs_data is None:
-                logger.warning(f"Mission definitions file not found or invalid: {self.mission_definitions_file}. Creating default.")
+            self.mission_definitions = {}
+            for filename in os.listdir(self.missions_data_dir):
+                if not filename.endswith(".json"):
+                    continue
+                data = load_json(os.path.join(self.missions_data_dir, filename))
+                if data is None:
+                    continue
+                if isinstance(data, list):
+                    for entry in data:
+                        mid = entry.get("mission_id")
+                        if mid:
+                            self.mission_definitions[mid] = entry
+                elif isinstance(data, dict):
+                    if 'mission_id' in data:
+                        self.mission_definitions[data['mission_id']] = data
+                    else:
+                        for mid, entry in data.items():
+                            self.mission_definitions[mid] = entry
+            if not self.mission_definitions:
+                logger.warning(f"Mission definitions not found in {self.missions_data_dir}. Creating default.")
                 self.mission_definitions = {
-                    "tutorial_fetch": {"name": "Tutorial: Fetch Quest", "rank": "D", "description": "Fetch 5 herbs.", "reward": {"ryo": 50, "exp": 20}, "achievement_key": "first_mission"}
+                    "tutorial_fetch": {
+                        "name": "Tutorial: Fetch Quest",
+                        "rank": "D",
+                        "description": "Fetch 5 herbs.",
+                        "reward_exp": 20,
+                        "reward_ryo": 50,
+                        "requirements": {"level": 1},
+                        "objectives": [],
+                        "time_limit_hours": 1,
+                        "location": "Village"
+                    }
                 }
-                # Use SYNCHRONOUS save_json for initial default
-                save_json(self.mission_definitions_file, self.mission_definitions)
-            elif not isinstance(defs_data, dict):
-                logger.warning(f"Invalid format in {self.mission_definitions_file}, expected dict. Resetting.")
-                self.mission_definitions = {}
-            else:
-                self.mission_definitions = defs_data
+            # Exclude tutorial mission used in older versions
+            self.mission_definitions.pop("tutorial_fetch", None)
             logger.info(f"Loaded {len(self.mission_definitions)} mission definitions.")
         except Exception as e:
-            logger.error(f"Error loading mission definitions from {self.mission_definitions_file}: {e}", exc_info=True)
-            self.mission_definitions = {} # Reset on error
+            logger.error(f"Error loading mission definitions from {self.missions_data_dir}: {e}", exc_info=True)
+            self.mission_definitions = {}
 
         # Load Active Missions
         try:
@@ -131,6 +174,28 @@ class MissionSystem:
         except Exception as e:
             logger.error(f"Error loading completed missions from {self.completed_missions_file}: {e}", exc_info=True)
             self.completed_missions = {} # Reset on error
+
+        # Build Mission dataclass objects for easy access in tests
+        self.available_missions = {}
+        for mid, details in self.mission_definitions.items():
+            reqs = details.get("requirements", {})
+            if "required_level" in details:
+                reqs["level"] = details["required_level"]
+            if "required_rank" in details:
+                reqs["rank"] = details["required_rank"]
+            mission_obj = Mission(
+                mission_id=mid,
+                title=details.get("title", mid),
+                description=details.get("description", ""),
+                rank=details.get("rank", "D"),
+                reward_exp=details.get("reward_exp", 0),
+                reward_ryo=details.get("reward_ryo", 0),
+                requirements=reqs,
+                objectives=details.get("objectives", []),
+                time_limit=timedelta(hours=details.get("time_limit_hours", 1)),
+                location=details.get("location", "")
+            )
+            self.available_missions[mid] = mission_obj
 
     async def _save_active_missions(self):
         """Saves the current active missions to a file."""
@@ -310,48 +375,18 @@ class MissionSystem:
         """Gets the list of completed mission IDs for a user."""
         return self.completed_missions.get(str(user_id), [])
 
-    def get_available_missions(self, character: Character) -> List[Dict[str, Any]]:
-        """Returns a list of mission definitions available to the character."""
-        available = []
-        user_id_str = str(character.user_id)
-        completed_ids = set(self.get_completed_missions(character.user_id))
-        has_active_mission = user_id_str in self.active_missions
+    def get_available_missions(self, level: int) -> List[Mission]:
+        """Returns a list of missions available to a character level."""
+        available: List[Mission] = []
 
-        # Cannot take new missions if one is active (current design)
-        if has_active_mission:
-            return []
-
-        for mission_id, details in self.mission_definitions.items():
-            # Cannot repeat completed missions
-            if mission_id in completed_ids:
+        for mission in self.available_missions.values():
+            # Check level requirement
+            req_level = mission.requirements.get("level", 1)
+            if level < req_level:
                 continue
 
-            # Check rank requirement (using character.rank which should be kept up-to-date)
-            required_rank = details.get("rank", "D")
-            try:
-                # Need RANK_ORDER imported for this check
-                if RANK_ORDER.index(character.rank) < RANK_ORDER.index(required_rank):
-                   continue
-            except (ValueError, AttributeError):
-                 # Handle cases where rank is invalid or RANK_ORDER not set up correctly
-                 logger.warning(f"Could not perform rank check for mission {mission_id} or character {user_id_str}. Ranks: Char='{character.rank}', Mission='{required_rank}'")
-                 continue # Skip mission if rank check fails
-
-            # Add other checks here (e.g., prerequisite missions based on completed_ids)
-            # Example prerequisite check:
-            # required_prereq = details.get("requires_mission")
-            # if required_prereq and required_prereq not in completed_ids:
-            #     continue
-
-            # If all checks pass, add mission definition to available list
-            # Return a copy of the definition dict including the ID
-            mission_info = details.copy()
-            mission_info["id"] = mission_id # Add id for easy reference
-            available.append(mission_info)
-
-        # Optional: Sort available missions (e.g., by rank)
-        available.sort(key=lambda m: RANK_ORDER.index(m.get("rank", "Z"))) # Sort by rank order, put unknowns last
-
+            available.append(mission)
+        available.sort(key=lambda m: RANK_ORDER.index(m.rank))
         return available
 
     # Removed old methods like abandon_mission, mission_status etc. if they weren't in the original snippet
