@@ -480,27 +480,23 @@ class ClanAssignmentEngine:
         return npc_data
 
     def get_player_clan(self, player_id: str) -> Optional[str]:
-        """
-        Get the clan assigned to a player.
-        
+        """Retrieve the assigned clan for a given player ID.
+
         Args:
             player_id: The Discord ID of the player.
-            
+
         Returns:
-            Optional[str]: The name of the clan assigned to the player, or None if no clan is assigned.
+            The assigned clan name if found, otherwise None.
         """
-        # Check if player exists in assignment history
-        if player_id not in self.assignment_history:
+        # Use self.player_clans which is initialized in __init__
+        if player_id not in self.player_clans:
+            # Log if a player is not found in the internal tracking
+            # logger.debug(f"Player {player_id} not found in internal clan assignments.")
             return None
-        
-        # Get the most recent assignment
-        player_history = self.assignment_history[player_id]
-        if not player_history:
-            return None
-        
-        # Sort by timestamp and get the most recent
-        latest_assignment = max(player_history, key=lambda x: x["timestamp"])
-        return latest_assignment.get("clan")
+            
+        assigned_clan = self.player_clans.get(player_id)
+        # logger.debug(f"Retrieved clan '{assigned_clan}' for player {player_id} from internal tracking.")
+        return assigned_clan
 
 # --- Simulation Function ---
 

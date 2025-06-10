@@ -2,6 +2,7 @@
 import uuid
 from typing import Dict, List, Optional, Any, Set
 from dataclasses import dataclass, field, fields
+from datetime import datetime
 
 @dataclass
 class Character:
@@ -27,17 +28,23 @@ class Character:
     willpower: int = 10
     chakra_control: int = 10
     intelligence: int = 10
-    perception: int = 10
+    perception: int = 0
+    stat_points: int = 0 # Added for level-up rewards
     
     # Combat stats
-    ninjutsu: int = 10
+    ninjutsu: int = 0
     taijutsu: int = 10
     genjutsu: int = 10
+    accuracy: int = 50  # Base accuracy
+    evasion: int = 50   # Base evasion
+    crit_chance: float = 0.05 # Base crit chance (5%)
+    crit_damage: float = 1.5  # Base crit damage multiplier (150%)
+    elemental_affinity: Optional[str] = None # Character's primary element for defense
     
     # Skills and Equipment
     jutsu: List[str] = field(default_factory=list)
     equipment: Dict[str, str] = field(default_factory=dict)
-    inventory: List[str] = field(default_factory=list)
+    inventory: Dict[str, int] = field(default_factory=dict)
     
     # Status
     is_active: bool = True
@@ -53,13 +60,23 @@ class Character:
     draws: int = 0
     wins_against_rank: Dict[str, int] = field(default_factory=dict)
     
-    # --- NEW Progression Fields ---
+    # Progression Fields
     achievements: Set[str] = field(default_factory=set)
     titles: List[str] = field(default_factory=list)
-    # --- END Progression Fields ---
+    equipped_title: Optional[str] = None
     
     # Mission tracking
     completed_missions: Set[str] = field(default_factory=set)
+    
+    # Clan Progression Fields
+    clan_rank: str = "Initiate"  # Rank within the clan
+    clan_exp: int = 0  # Experience earned for clan activities
+    clan_achievements: Set[str] = field(default_factory=set)  # Clan-specific achievements
+    clan_skills: Dict[str, int] = field(default_factory=dict)  # Clan-specific skill levels
+    clan_jutsu_mastery: Dict[str, Dict[str, Any]] = field(default_factory=dict)  # Mastery of clan-specific jutsu
+    clan_contribution_points: int = 0  # Points earned through clan activities
+    clan_role: str = "Member"  # Role within the clan (e.g., Member, Elder, Leader)
+    clan_joined_at: Optional[datetime] = None  # When the character joined their current clan
     
     # Derived stats
     max_hp: int = field(init=True, default=100)
@@ -91,6 +108,25 @@ class Character:
             if jutsu_name not in self.jutsu_mastery:
                 self.jutsu_mastery[jutsu_name] = {"level": 1, "gauge": 0}
     
+    @property
+    def stats(self) -> Dict[str, Any]:
+        """Return a mapping of character stats for update and lookup."""
+        return {
+            'hp': self.hp,
+            'chakra': self.chakra,
+            'stamina': self.stamina,
+            'strength': self.strength,
+            'speed': self.speed,
+            'defense': self.defense,
+            'willpower': self.willpower,
+            'chakra_control': self.chakra_control,
+            'intelligence': self.intelligence,
+            'perception': self.perception,
+            'ninjutsu': self.ninjutsu,
+            'taijutsu': self.taijutsu,
+            'genjutsu': self.genjutsu
+        }
+    
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'Character':
         """Create a character from a dictionary.
@@ -108,9 +144,17 @@ class Character:
         # Ensure wins_against_rank is initialized
         data['wins_against_rank'] = data.get('wins_against_rank', {})
         
-        # Filter data to only include fields defined in the dataclass
-        known_field_names = {f.name for f in fields(cls)}
-        filtered_data = {k: v for k, v in data.items() if k in known_field_names}
+        # Add defaults for potentially missing fields for backward compatibility
+        data["accuracy"] = data.get("accuracy", 50)
+        data["evasion"] = data.get("evasion", 50)
+        data["crit_chance"] = data.get("crit_chance", 0.05)
+        data["crit_damage"] = data.get("crit_damage", 1.5)
+        data["elemental_affinity"] = data.get("elemental_affinity", None)
+        data["stat_points"] = data.get("stat_points", 0) # Added
+        
+        # Filter out keys not present in Character fields
+        field_names = {f.name for f in fields(cls)}
+        filtered_data = {k: v for k, v in data.items() if k in field_names}
         
         return cls(**filtered_data)
     
@@ -139,6 +183,11 @@ class Character:
             "chakra_control": self.chakra_control,
             "intelligence": self.intelligence,
             "perception": self.perception,
+            "accuracy": self.accuracy,
+            "evasion": self.evasion,
+            "crit_chance": self.crit_chance,
+            "crit_damage": self.crit_damage,
+            "elemental_affinity": self.elemental_affinity,
             "ninjutsu": self.ninjutsu,
             "taijutsu": self.taijutsu,
             "genjutsu": self.genjutsu,
@@ -154,18 +203,26 @@ class Character:
             "wins": self.wins,
             "losses": self.losses,
             "draws": self.draws,
+            "stat_points": self.stat_points, # Added
             "wins_against_rank": self.wins_against_rank,
             "max_hp": self.max_hp,
             "max_chakra": self.max_chakra,
             "max_stamina": self.max_stamina,
-            "completed_missions": list(self.completed_missions),
+            "completed_missions": sorted(list(self.completed_missions)),
             "jutsu_mastery": self.jutsu_mastery,
             "last_daily_claim": self.last_daily_claim,
             "active_mission_id": self.active_mission_id,
-            # --- ADD Progression Fields --- #
-            "achievements": sorted(list(self.achievements)), # Serialize set as sorted list
-            "titles": self.titles, # Already a list
-            # --- END Progression Fields --- #
+            "achievements": sorted(list(self.achievements)),
+            "titles": self.titles,
+            "equipped_title": self.equipped_title,
+            "clan_rank": self.clan_rank,
+            "clan_exp": self.clan_exp,
+            "clan_achievements": sorted(list(self.clan_achievements)),
+            "clan_skills": self.clan_skills,
+            "clan_jutsu_mastery": self.clan_jutsu_mastery,
+            "clan_contribution_points": self.clan_contribution_points,
+            "clan_role": self.clan_role,
+            "clan_joined_at": self.clan_joined_at.isoformat() if self.clan_joined_at else None,
         }
         return data
     
@@ -315,49 +372,97 @@ class Character:
         self.jutsu.remove(jutsu)
         return True
     
-    def add_item(self, item: str) -> bool:
-        """Add an item to the character's inventory.
+    def add_item(self, item_id: str, quantity: int = 1) -> bool:
+        """Add an item (or stack) to the character's inventory.
         
         Args:
-            item: Name of item to add
+            item_id: ID of item to add
+            quantity: Number of items to add (default: 1)
             
         Returns:
-            True if item was added
+            True (always succeeds for now)
         """
-        self.inventory.append(item)
+        if quantity <= 0:
+            return False  # Cannot add zero or negative quantity
+        
+        current_quantity = self.inventory.get(item_id, 0)
+        self.inventory[item_id] = current_quantity + quantity
+        logger.debug(f"Added {quantity} of {item_id} to {self.id}. New count: {self.inventory[item_id]}")
         return True
     
-    def remove_item(self, item: str) -> bool:
-        """Remove an item from the character's inventory.
+    def remove_item(self, item_id: str, quantity: int = 1) -> bool:
+        """Remove an item (or stack) from the character's inventory.
         
         Args:
-            item: Name of item to remove
+            item_id: ID of item to remove
+            quantity: Number of items to remove (default: 1)
             
         Returns:
-            True if item was removed
+            True if items were successfully removed, False otherwise.
         """
-        if item not in self.inventory:
-            return False
-        self.inventory.remove(item)
+        if quantity <= 0:
+            return False  # Cannot remove zero or negative quantity
+        
+        current_quantity = self.inventory.get(item_id, 0)
+        
+        if current_quantity < quantity:
+            logger.warning(f"Cannot remove {quantity} of {item_id} from {self.id}. Only has {current_quantity}")
+            return False  # Not enough items to remove
+        
+        new_quantity = current_quantity - quantity
+        if new_quantity <= 0:
+            del self.inventory[item_id]
+            logger.debug(f"Removed {quantity} of {item_id} from {self.id}. Item removed from inventory.")
+        else:
+            self.inventory[item_id] = new_quantity
+            logger.debug(f"Removed {quantity} of {item_id} from {self.id}. New count: {new_quantity}")
+        
         return True
     
-    def equip_item(self, item: str, slot: str) -> bool:
+    def has_item(self, item_id: str, quantity: int = 1) -> bool:
+        """Check if the character has at least a certain quantity of an item.
+        
+        Args:
+            item_id: ID of item to check
+            quantity: Number of items to check for
+            
+        Returns:
+            True if the character has at least the specified quantity of the item, False otherwise.
+        """
+        return self.inventory.get(item_id, 0) >= quantity
+    
+    def equip_item(self, item_id: str, slot: str) -> bool:
         """Equip an item to a slot.
         
+        Assumes the item exists in inventory.
+        
         Args:
-            item: Name of item to equip
-            slot: Equipment slot to use
+            item_id: ID of item to equip
+            slot: Equipment slot to use (e.g., 'weapon', 'chest')
             
         Returns:
-            True if item was equipped
+            True if item was equipped, False otherwise.
         """
-        if item not in self.inventory:
+        if not self.has_item(item_id):
+            logger.warning(f"Attempted to equip {item_id} for {self.id}, but item not in inventory.")
             return False
+        
+        # Unequip existing item in the slot, if any
         if slot in self.equipment:
-            self.inventory.append(self.equipment[slot])
-        self.equipment[slot] = item
-        self.inventory.remove(item)
-        return True
+            old_item_id = self.equipment[slot]
+            self.add_item(old_item_id, 1)  # Add previously equipped item back to inventory
+            logger.debug(f"Unequipped {old_item_id} from {slot} for {self.id} to equip {item_id}.")
+        
+        # Remove one count of the item from inventory and equip it
+        if self.remove_item(item_id, 1):
+            self.equipment[slot] = item_id
+            logger.info(f"Equipped {item_id} to {slot} for {self.id}.")
+            return True
+        else:
+            # Should not happen if has_item passed, but log defensively
+            logger.error(f"Failed to remove {item_id} from inventory during equip for {self.id}, despite has_item check passing.")
+            # Need to potentially revert adding the old item back? Complex state.
+            return False
     
     def unequip_item(self, slot: str) -> bool:
         """Unequip an item from a slot.
@@ -366,12 +471,15 @@ class Character:
             slot: Equipment slot to unequip from
             
         Returns:
-            True if item was unequipped
+            True if item was unequipped, False if slot was empty.
         """
         if slot not in self.equipment:
             return False
-        self.inventory.append(self.equipment[slot])
+        
+        item_id = self.equipment[slot]
         del self.equipment[slot]
+        self.add_item(item_id, 1)  # Add unequipped item back to inventory
+        logger.info(f"Unequipped {item_id} from {slot} for {self.id}.")
         return True
     
     def add_status_effect(self, effect: str) -> bool:

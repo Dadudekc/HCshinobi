@@ -1,12 +1,15 @@
 """Room system for rank-based access and NPC battles."""
 import random
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, TYPE_CHECKING
 import logging
 from datetime import datetime
 
 from .character import Character
 from .character_system import CharacterSystem
-from .battle_system import BattleSystem
+
+# Add TYPE_CHECKING block for BattleSystem
+if TYPE_CHECKING:
+    from .battle_system import BattleSystem
 
 logger = logging.getLogger(__name__)
 
@@ -121,7 +124,7 @@ class RoomSystem:
         }
     }
     
-    def __init__(self, character_system: CharacterSystem, battle_system: BattleSystem):
+    def __init__(self, character_system: CharacterSystem, battle_system: 'BattleSystem'):
         """Initialize the room system.
         
         Args:
@@ -131,8 +134,9 @@ class RoomSystem:
         self.character_system = character_system
         self.battle_system = battle_system
         self.active_battles: Dict[str, str] = {}  # player_id -> room_id
+        self.player_locations: Dict[str, str] = {} # player_id -> room_id
         
-    def get_available_rooms(self, player_id: str) -> List[Dict]:
+    async def get_available_rooms(self, player_id: str) -> List[Dict]:
         """Get list of rooms available to a player.
         
         Args:
@@ -251,7 +255,7 @@ class RoomSystem:
             return None
             
         # Start battle
-        battle_id = self.battle_system.start_battle(player, npc)
+        battle_id = self.battle_system.start_battle([player], [npc])
         if battle_id:
             self.active_battles[player_id] = room_id
             
@@ -266,6 +270,23 @@ class RoomSystem:
         if player_id in self.active_battles:
             del self.active_battles[player_id]
             
+    async def get_current_room(self, player_id: str) -> Optional[Dict]:
+        """Get the room data for the player's current location."""
+        room_id = self.player_locations.get(player_id)
+        if not room_id:
+            logger.debug(f"Player {player_id} not found in player_locations.")
+            return None
+        
+        room_data = self.ROOMS.get(room_id)
+        if not room_data:
+            logger.warning(f"Player {player_id} location {room_id} not found in ROOMS.")
+            # Potentially remove invalid location?
+            # del self.player_locations[player_id] 
+            return None
+            
+        # Return a copy including the ID
+        return {"id": room_id, **room_data}
+        
     def is_in_battle(self, player_id: str) -> bool:
         """Check if a player is in battle.
         

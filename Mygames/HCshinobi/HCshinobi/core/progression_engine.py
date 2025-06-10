@@ -22,6 +22,9 @@ logger = logging.getLogger(__name__)
 class ShinobiProgressionEngine:
     """Handles EXP gain, rank progression, achievements, and titles."""
 
+    # --- Configuration --- #
+    STAT_POINTS_PER_LEVEL = 3 # Configurable stat points gained on level up
+
     def __init__(self, character_system: CharacterSystem, data_dir: str):
         """Initialize the progression engine."""
         self.character_system = character_system
@@ -35,6 +38,7 @@ class ShinobiProgressionEngine:
         self.ranks_data: Dict[str, Dict] = {}
         self.achievements_data: Dict[str, Dict] = {}
         self.titles_data: Dict[str, Dict] = {}
+        self.level_curve_data: Dict[str, int] = {} # Added for level EXP thresholds
         
         self.rank_order = {} # Initialize empty, generated in ready_hook
              
@@ -57,7 +61,8 @@ class ShinobiProgressionEngine:
         files_to_load = {
             "ranks": (RANKS_FILE, "ranks_data"),
             "achievements": (ACHIEVEMENTS_FILE, "achievements_data"),
-            "titles": (TITLES_FILE, "titles_data")
+            "titles": (TITLES_FILE, "titles_data"),
+            "level_curve": ("level_curve.json", "level_curve_data") # Added level curve
         }
 
         for data_key, (filename, attr_name) in files_to_load.items():
@@ -125,19 +130,18 @@ class ShinobiProgressionEngine:
         logger.info(f"Generated rank order mapping: {order_map}")
         return order_map
 
-    async def grant_exp(self, character_id: str, amount: int, source: str, character: Optional[Character]=None, messages: Optional[List[str]]=None) -> Optional[List[str]]:
-        """Grants EXP to a character, checks for rank up, and saves.
+    async def grant_exp(self, character_id: str, amount: int, source: str, character: Optional[Character]=None) -> Optional[Dict[str, Any]]:
+        """Grants EXP to a character, checks for level up and rank up, and saves.
         
         Args:
             character_id: The ID of the character receiving EXP.
             amount: The amount of EXP to grant.
             source: A string indicating the source of the EXP (e.g., 'mission', 'battle', 'achievement').
             character: Optional pre-loaded character object to avoid re-fetch.
-            messages: Optional list to append progression messages to.
 
         Returns:
-            The passed-in messages list (or a new list if None was passed) 
-            with added progression messages, or None if character not found.
+            A dictionary containing results like exp_gained, level_up, rank_up, 
+            new_level, stat_points_gained, and messages, or None if character not found.
         """
         if not character:
             character = await self.character_system.get_character(character_id)
@@ -147,21 +151,43 @@ class ShinobiProgressionEngine:
             return None
 
         if amount <= 0:
-            return messages or [] # Return existing or new empty list
+            # Return minimal info if no EXP granted
+            return {"exp_gained": 0, "level_up": False, "rank_up": False, "messages": []}
 
-        # Initialize messages list if it wasn't passed
-        if messages is None:
-            messages = []
-            
+        messages = []
         logger.info(f"Granting {amount} EXP to {character.name} (ID: {character_id}) from {source}.")
-        character.exp += amount
         
-        # Use a more user-friendly format, perhaps less verbose
-        messages.append(f"✨ Gained {amount} EXP from {source}!")
+        initial_level = character.level
+        initial_rank = character.rank
+        
+        character.exp += amount
+        messages.append(f"✨ Gained {amount} EXP from {source}! Current EXP: {character.exp}")
 
-        # --- Check for Rank Up --- #
-        rank_changed = False
-        while True: # Loop in case of multiple rank ups from massive EXP gain
+        # --- Check for Level Up (Cumulative EXP) --- #
+        level_up_occurred = False
+        stat_points_gained_total = 0
+        while True:
+            next_level = character.level + 1
+            required_exp = self.level_curve_data.get(str(next_level))
+            
+            if required_exp is None: # Reached max defined level or data missing
+                break 
+            
+            if character.exp >= required_exp:
+                character.level = next_level
+                stat_points_gained = self.STAT_POINTS_PER_LEVEL
+                character.stat_points += stat_points_gained
+                stat_points_gained_total += stat_points_gained
+                level_up_occurred = True
+                messages.append(f"🎉 **Level Up!** Reached **Level {character.level}**! Gained **{stat_points_gained}** Stat Point(s)! 🎉")
+                logger.info(f"Character {character.name} (ID: {character_id}) leveled up to {character.level}. Stat Points: {character.stat_points}")
+            else:
+                break # Not enough EXP for the next level
+        # --- End Level Up Check Loop --- #
+
+        # --- Check for Rank Up (Resets EXP) --- #
+        rank_up_occurred = False
+        while True: # Loop in case of multiple rank ups
             current_rank_info = self.ranks_data.get(character.rank)
             if not current_rank_info or not current_rank_info.get("next_rank"):
                 break # No next rank defined or current rank invalid
@@ -178,7 +204,8 @@ class ShinobiProgressionEngine:
                     character.exp = max(0, character.exp)
                     messages.append(f"🌟 **Rank Up!** You are now a **{next_rank_name}**! 🌟")
                     logger.info(f"Character {character.name} (ID: {character_id}) ranked up to {next_rank_name}. Remaining EXP: {character.exp}")
-                    rank_changed = True
+                    # rank_changed = True -- Replaced by rank_up_occurred
+                    rank_up_occurred = True
                     # Check for achievements tied to this specific new rank (using formatted key)
                     rank_ach_key = f"{next_rank_name.lower().replace(' ', '_')}_rank"
                     await self.award_achievement(character_id, rank_ach_key, character=character, messages=messages)
@@ -189,9 +216,23 @@ class ShinobiProgressionEngine:
                 break # Not enough EXP for the next rank
         # --- End Rank Up Check Loop --- #
 
-        # Save only if rank changed or EXP was added
-        await self.character_system.save_character(character)
-        return messages # Return the (potentially modified) list
+        # Save if level or rank changed, or EXP was added
+        if level_up_occurred or rank_up_occurred:
+             await self.character_system.save_character(character)
+        # else: If only EXP was added but no level/rank change, saving might be optional
+        # For consistency, let's always save if EXP was granted
+        # Re-enable saving if needed: await self.character_system.save_character(character)
+        # Decided against always saving on EXP gain; only save on level/rank change for now.
+        
+        return {
+            "exp_gained": amount,
+            "level_up": level_up_occurred,
+            "new_level": character.level if level_up_occurred else initial_level,
+            "stat_points_gained": stat_points_gained_total,
+            "rank_up": rank_up_occurred,
+            "new_rank": character.rank if rank_up_occurred else initial_rank,
+            "messages": messages
+        }
 
     async def award_achievement(self, character_id: str, achievement_key: str, character: Optional[Character]=None, messages: Optional[List[str]]=None) -> bool:
         """Awards an achievement to a character if they meet the criteria and haven't earned it yet."""
@@ -260,14 +301,17 @@ class ShinobiProgressionEngine:
         # Grant EXP reward if applicable
         exp_reward = achievement_data.get("exp_reward", 0)
         if exp_reward > 0:
-            # Pass messages list to potentially add rank up messages from exp gain
-            # grant_exp handles saving the character after adding EXP
-            await self.grant_exp(character_id, exp_reward, f"achievement: {achievement_name}", character=character, messages=messages)
-            # We might need to save again here IF grant_exp didn't run (e.g., 0 exp reward)
-            # to ensure the achievement itself is saved.
-            await self.character_system.save_character(character)
+            # Call grant_exp and handle its dictionary return value
+            grant_exp_result = await self.grant_exp(character_id, exp_reward, f"achievement: {achievement_name}", character=character)
+            if grant_exp_result and grant_exp_result.get("messages"):
+                 if messages is not None: # Only append if messages list was passed
+                      messages.extend(grant_exp_result["messages"]) # Add messages from grant_exp
+            
+            # Save only if grant_exp didn't already save (i.e., no level/rank up occurred)
+            if grant_exp_result and not grant_exp_result.get("level_up") and not grant_exp_result.get("rank_up"):
+                 await self.character_system.save_character(character)
         else:
-            # Save if no EXP was granted (grant_exp didn't save)
+            # Save if no EXP was granted (grant_exp didn't run)
             await self.character_system.save_character(character)
             
         return True
@@ -469,4 +513,128 @@ class ShinobiProgressionEngine:
         logger.debug(f"Checking 'battle_wins' (req: {required_count}). Actual: {actual_wins}.")
         return actual_wins >= required_count
 
-    # Add more achievement helper checks here... 
+    # Add more achievement helper checks here...
+
+    async def check_clan_achievements(self, character: Character) -> List[str]:
+        """Check for clan-related achievements."""
+        messages = []
+        try:
+            # Check clan rank achievements
+            if character.clan_rank == "Elder" and "clan_elder" not in character.achievements:
+                character.achievements.add("clan_elder")
+                messages.append("🏆 Achievement Unlocked: Clan Elder!")
+                await self._award_achievement_exp(character, "clan_elder")
+
+            elif character.clan_rank == "Elite" and "clan_elite" not in character.achievements:
+                character.achievements.add("clan_elite")
+                messages.append("🏆 Achievement Unlocked: Elite Member!")
+                await self._award_achievement_exp(character, "clan_elite")
+
+            # Check contribution achievements
+            if character.clan_contribution_points >= 10000 and "clan_pillar" not in character.achievements:
+                character.achievements.add("clan_pillar")
+                messages.append("🏆 Achievement Unlocked: Pillar of the Clan!")
+                await self._award_achievement_exp(character, "clan_pillar")
+                
+            elif character.clan_contribution_points >= 1000 and "clan_contributor" not in character.achievements:
+                character.achievements.add("clan_contributor")
+                messages.append("🏆 Achievement Unlocked: Clan Contributor!")
+                await self._award_achievement_exp(character, "clan_contributor")
+
+            # Check jutsu mastery achievements
+            mastered_jutsu = sum(1 for mastery in character.clan_jutsu_mastery.values() 
+                               if mastery.get('level', 0) >= 5)
+            if mastered_jutsu >= 5 and "clan_jutsu_master" not in character.achievements:
+                character.achievements.add("clan_jutsu_master")
+                messages.append("🏆 Achievement Unlocked: Clan Technique Master!")
+                await self._award_achievement_exp(character, "clan_jutsu_master")
+
+            # Check for new titles
+            title_messages = await self.check_and_assign_titles(character)
+            messages.extend(title_messages)
+
+        except Exception as e:
+            self.logger.error(f"Error checking clan achievements: {e}", exc_info=True)
+
+        return messages
+
+    async def check_clan_rank_achievements(self, character: Character) -> List[str]:
+        """Check for achievements related to clan rank changes."""
+        messages = []
+        try:
+            if character.clan_rank == "Elder" and "clan_elder" not in character.achievements:
+                character.achievements.add("clan_elder")
+                messages.append("🏆 Achievement Unlocked: Clan Elder!")
+                await self._award_achievement_exp(character, "clan_elder")
+                
+            elif character.clan_rank == "Elite" and "clan_elite" not in character.achievements:
+                character.achievements.add("clan_elite")
+                messages.append("🏆 Achievement Unlocked: Elite Member!")
+                await self._award_achievement_exp(character, "clan_elite")
+
+            # Check for new titles
+            title_messages = await self.check_and_assign_titles(character)
+            messages.extend(title_messages)
+
+        except Exception as e:
+            self.logger.error(f"Error checking clan rank achievements: {e}", exc_info=True)
+
+        return messages
+
+    def calculate_clan_bonus(self, character: Character) -> Dict[str, float]:
+        """Calculate clan-specific bonuses based on rank and titles."""
+        bonuses = {
+            "exp_gain": 1.0,
+            "jutsu_effectiveness": 1.0,
+            "stat_bonus": 1.0
+        }
+
+        try:
+            # Apply rank bonuses
+            rank_bonuses = {
+                "Initiate": {"exp_gain": 1.0},
+                "Member": {"exp_gain": 1.05},
+                "Veteran": {"exp_gain": 1.1, "jutsu_effectiveness": 1.05},
+                "Elite": {"exp_gain": 1.15, "jutsu_effectiveness": 1.1},
+                "Elder": {"exp_gain": 1.2, "jutsu_effectiveness": 1.15, "stat_bonus": 1.05}
+            }
+
+            if character.clan_rank in rank_bonuses:
+                for bonus_type, value in rank_bonuses[character.clan_rank].items():
+                    bonuses[bonus_type] = value
+
+            # Apply title bonuses
+            if character.equipped_title:
+                title_data = self.titles_data.get(character.equipped_title)
+                if title_data:
+                    if "clan_elder" in title_data.get("requirements", []):
+                        bonuses["jutsu_effectiveness"] *= 1.1
+                    elif "clan_prodigy" in title_data.get("requirements", []):
+                        bonuses["exp_gain"] *= 1.15
+                    elif "clan_pillar" in title_data.get("requirements", []):
+                        bonuses["stat_bonus"] *= 1.05
+
+        except Exception as e:
+            self.logger.error(f"Error calculating clan bonuses: {e}", exc_info=True)
+
+        return bonuses
+
+    async def _award_achievement_exp(self, character: Character, achievement_key: str):
+        """Grants EXP for a specific achievement."""
+        if not character:
+            logger.warning("award_achievement_exp called with None character.")
+            return
+        
+        achievement_data = self.achievements_data.get(achievement_key)
+        if not achievement_data:
+            logger.warning(f"Attempted to award EXP for non-existent achievement: {achievement_key}")
+            return
+
+        exp_reward = achievement_data.get("exp_reward", 0)
+        if exp_reward > 0:
+            await self.grant_exp(character.id, exp_reward, f"achievement: {achievement_key}", character=character)
+            await self.character_system.save_character(character)
+        else:
+            logger.warning(f"No EXP reward found for achievement: {achievement_key}")
+
+    # Add more methods and helper functions as needed... 

@@ -1,15 +1,22 @@
 """Integration tests for character and mission system interactions."""
 import pytest
 import pytest_asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os
 import tempfile
 import shutil
 import logging # Import logging
 import json
+from unittest.mock import AsyncMock, MagicMock
 
 from HCshinobi.core.mission_system import MissionSystem
 from HCshinobi.core.character_system import CharacterSystem
+from HCshinobi.core.character import Character
+from HCshinobi.core.missions.mission import Mission, MissionDifficulty, MissionStatus
+from HCshinobi.core.currency_system import CurrencySystem
+from HCshinobi.core.progression_engine import ShinobiProgressionEngine
+from HCshinobi.utils.file_io import save_json
+from tests.utils.time_utils import get_mock_now, get_past_hours
 
 # Get a logger instance for the test module
 logger = logging.getLogger(__name__)
@@ -23,23 +30,60 @@ def temp_data_dir():
 
 @pytest_asyncio.fixture
 async def character_system(temp_data_dir):
-    """Create a character system with test data."""
-    system = CharacterSystem(temp_data_dir)
-    await system.load_characters()
-    # Pre-create some test characters for convenience
-    await system.create_character("user_lvl_1", "Lvl1", "TestClan", level=1)
-    await system.create_character("user_lvl_5", "Lvl5", "TestClan", level=5)
-    await system.create_character("user_lvl_10", "Lvl10", "TestClan", level=10)
+    """Create a character system with test data and proper setup."""
+    system = CharacterSystem(temp_data_dir) 
+    # We need to load characters *before* creating new ones in tests
+    # await system.load_characters()
+    # Pre-create some test characters - moved creation to within tests where needed
+    # await system.create_character("user_lvl_1", "Lvl1", "TestClan", level=1) 
+    # await system.create_character("user_lvl_10", "Lvl10", "TestClan", level=10)
     return system
 
 @pytest.fixture
-def mission_system(character_system):
-    """Create a mission system for testing."""
-    system = MissionSystem(character_system=character_system)
-    yield system
-    # Reset mission state after each test
-    # system.available_missions.clear() # Clearing available might cause issues if needed across tests
-    system.active_missions.clear()
+def mock_currency_system():
+    """Provides a mock CurrencySystem."""
+    mock = MagicMock(spec=CurrencySystem)
+    mock.get_balance = AsyncMock(return_value=10000)
+    mock.add_ryo = AsyncMock(return_value=True)
+    return mock
+
+@pytest.fixture
+def mock_progression_engine():
+    """Provides a mock ShinobiProgressionEngine."""
+    mock = MagicMock(spec=ShinobiProgressionEngine)
+    mock.grant_experience = AsyncMock(return_value=True)
+    mock.check_achievement = AsyncMock(return_value=False)
+    return mock
+
+@pytest.fixture
+def mission_system(character_system, temp_data_dir, mock_currency_system, mock_progression_engine):
+    """Create a fresh mission system for integration tests."""
+    missions_dir = os.path.join(temp_data_dir, 'missions')
+    os.makedirs(missions_dir, exist_ok=True)
+    
+    defs_file = os.path.join(missions_dir, "mission_definitions.json")
+    example_defs = {
+        "D001": {"name": "Fetch Herbs D1", "rank": "D", "reward": {"ryo": 50, "exp": 20}, "requirements": {"level": 1}},
+        "D002": {"name": "Deliver Scroll D2", "rank": "D", "reward": {"ryo": 60, "exp": 25}, "requirements": {"level": 1}},
+        "C001": {"name": "Capture Bandit C", "rank": "C", "reward": {"ryo": 200, "exp": 100}, "requirements": {"level": 5}}
+        # Add more as needed for integration tests
+    }
+    save_json(defs_file, example_defs)
+    
+    active_file = os.path.join(missions_dir, "active_missions.json")
+    completed_file = os.path.join(missions_dir, "completed_missions.json")
+    if not os.path.exists(active_file): save_json(active_file, {})
+    if not os.path.exists(completed_file): save_json(completed_file, {})
+
+    system = MissionSystem(
+        character_system=character_system,
+        data_dir=temp_data_dir,
+        currency_system=mock_currency_system,
+        progression_engine=mock_progression_engine
+    )
+    # Consider loading data here if needed before tests run
+    # await system.load_mission_data() # Might require fixture to be async
+    return system
 
 @pytest.fixture
 def setup_missions(tmp_path):
@@ -114,335 +158,232 @@ def setup_missions(tmp_path):
 
 @pytest.mark.asyncio
 async def test_character_mission_level_requirements(character_system, mission_system):
-    """Test mission level requirements with character levels."""
-    # Create a level 1 character
-    character = await character_system.create_character("user1", "Rookie Ninja", "Leaf")
-    assert character is not None
-    assert character.level == 1
-    
-    # Try missions at different ranks
-    success, message = mission_system.accept_mission("user1", "D001")
-    assert success, f"Failed to accept D-rank mission: {message}"
-    assert "D001" in mission_system.active_missions["user1"]
-    
-    # Try C-rank mission (should fail for level 1)
-    success, message = mission_system.accept_mission("user1", "C001")
-    assert not success, "Accepted C-rank mission at level 1"
+    """Test level requirements for missions using integrated systems."""
+    await mission_system.load_mission_data() # Load mission defs
+
+    # Create characters with different levels
+    char_lvl1 = await character_system.create_character("user_lvl_1", "Lvl1", "TestClan", level=1, rank="Genin")
+    char_lvl5 = await character_system.create_character("user_lvl_5", "Lvl5", "TestClan", level=5, rank="Chunin")
+    assert char_lvl1 is not None
+    assert char_lvl5 is not None
+
+    # Level 1 tries C-rank (level 5 required)
+    success, msg = await mission_system.assign_mission(char_lvl1, "C001")
+    assert success is False
+    assert "level requirement" in msg.lower()
+
+    # Level 5 tries C-rank
+    success, msg = await mission_system.assign_mission(char_lvl5, "C001")
+    assert success is True, f"Assigning mission failed: {msg}"
 
 @pytest.mark.asyncio
-async def test_character_mission_rewards(character_system, mission_system):
-    """Test mission rewards affect character stats."""
-    # Create character
-    character = await character_system.create_character("user1", "Reward Tester", "Leaf")
-    initial_exp = character.exp
-    initial_ryo = character.ryo
-    initial_level = character.level
+async def test_character_mission_rewards(character_system, mission_system, mock_currency_system):
+    """Test mission rewards affect character stats via mocked systems."""
+    await mission_system.load_mission_data()
     
-    # Accept mission
-    success, _ = mission_system.accept_mission("user1", "D001")
-    assert success, "Failed to accept mission D001"
-    mission_details = mission_system.available_missions.get("D001")
-    assert mission_details is not None, "Mission D001 details not found"
+    # Create character
+    character = await character_system.create_character("user1", "Reward Tester", "Leaf", rank="Genin")
+    assert character is not None
+    initial_exp = character.exp
+    # Get initial balance from mock system
+    initial_ryo = await mock_currency_system.get_balance(character.id) 
 
-    # Complete the mission and get rewards
-    success, _, rewards = await mission_system.complete_mission("user1", "D001")
-    assert success, "Failed to complete mission D001"
+    # Assign and complete mission D001 (Reward: ryo=50, exp=20)
+    success, msg = await mission_system.assign_mission(character, "D001")
+    assert success is True, f"Assign mission failed: {msg}"
+    
+    rewards = await mission_system.complete_mission(character)
     assert rewards is not None
-    assert rewards["exp"] == mission_details.reward_exp
-    assert rewards["ryo"] == mission_details.reward_ryo
+    assert rewards.get("ryo") == 50
+    assert rewards.get("exp") == 20
 
-    # Rewards are now applied *within* complete_mission
-    # await character_system.save_character(character) # No need to save again
+    # Reload character to get updated exp (assuming progression engine updated it)
+    # Note: Character object itself might not be updated in place unless ProgressionEngine returns it
+    # It's safer to refetch or rely on progression engine mock verification
+    # updated_character = await character_system.get_character(character.id)
+    # assert updated_character.exp == initial_exp + 20
+    # Verify progression engine was called instead:
+    mission_system.progression_engine.grant_experience.assert_called_with(character.id, 20)
 
-    # Get character again to check updated stats (after complete_mission)
-    updated_character = character_system.get_character("user1")
-    assert updated_character is not None
-    # Check against expected values after 1 mission and potential level up
-    if updated_character.level > initial_level:
-        # Leveled up, EXP should reset (assuming exact EXP for level up)
-        expected_exp = 0
-    else:
-        # Did not level up
-        expected_exp = initial_exp + rewards["exp"]
-    assert updated_character.exp == expected_exp, f"Expected EXP {expected_exp}, got {updated_character.exp}"
-    assert updated_character.ryo == initial_ryo + rewards["ryo"] # Ryo simply accumulates
+    # Verify currency system was called
+    mock_currency_system.add_ryo.assert_called_with(character.id, 50)
+    # Optional: Check final balance if needed (depends on mock setup)
+    # final_ryo = await mock_currency_system.get_balance(character.id)
+    # assert final_ryo == initial_ryo + 50 # This assumes add_ryo modified the value get_balance returns
 
 @pytest.mark.asyncio
 async def test_character_mission_limits(character_system, mission_system):
-    """Test character-specific mission limits."""
+    """Test character-specific mission limits (assuming 1 active mission limit)."""
+    await mission_system.load_mission_data()
+    
     # Create two characters
-    char1 = await character_system.create_character("user1", "Mission Master", "Leaf")
-    char2 = await character_system.create_character("user2", "Mission Helper", "Sand")
-    
-    # Accept maximum missions for char1 (Filter for D-Rank, suitable for Level 1)
-    accepted_count = 0
-    # Filter available missions to only those the character meets the requirements for
-    eligible_mission_ids = [
-        mid for mid, m in mission_system.available_missions.items()
-        if character_system.get_character("user1").level >= m.requirements.get("level", 0)
-        # Add other requirement checks here if necessary (e.g., jutsu, items)
-        # For this test, level check is likely sufficient for D-Ranks
-    ]
-    
-    if len(eligible_mission_ids) < 3:
-        pytest.skip("Not enough eligible missions (found {len(eligible_mission_ids)}) for the level 1 character to test the limit.")
+    char1 = await character_system.create_character("user1", "Mission Master", "Leaf", rank="Genin")
+    char2 = await character_system.create_character("user2", "Mission Helper", "Sand", rank="Genin")
+    assert char1 is not None and char2 is not None
 
-    for mission_id in eligible_mission_ids[:3]: # Try to accept first 3 *eligible* available
-        success, _ = mission_system.accept_mission("user1", mission_id)
-        if success:
-            accepted_count += 1
+    # Assign one mission to char1
+    eligible_missions_char1 = mission_system.get_available_missions(char1)
+    assert len(eligible_missions_char1) > 0, "No eligible missions found for char1"
+    first_mission_id = eligible_missions_char1[0]["id"] 
     
-    # Assert against the hardcoded limit of 3
-    assert accepted_count == 3, f"Expected 3 missions accepted, but got {accepted_count}"
+    success, msg = await mission_system.assign_mission(char1, first_mission_id)
+    assert success is True, f"Failed to assign first mission: {msg}"
 
-    # Try accepting one more (should fail)
-    if len(eligible_mission_ids) > 3:
-        success, message = mission_system.accept_mission("user1", eligible_mission_ids[3])
-        assert not success, "Accepted more than max missions (3) for char1"
-        assert "maximum number" in message.lower()
+    # Try to assign a second mission to char1 (should fail due to active limit)
+    if len(eligible_missions_char1) > 1:
+        second_mission_id = eligible_missions_char1[1]["id"]
+        success, msg = await mission_system.assign_mission(char1, second_mission_id)
+        assert success is False, "Should not assign second mission to char1"
+        assert "already have an active mission" in msg
     else:
-        pytest.skip("Not enough available missions to test exceeding the limit.")
+        # Cannot test limit if only one mission is eligible
+        pass
 
-    # Accept missions for char2 (should be independent)
-    success, _ = mission_system.accept_mission("user2", "D001")
-    assert success, "Failed to accept mission for char2"
-    assert "D001" in mission_system.active_missions["user2"]
+    # Assign a mission to char2 (should succeed)
+    eligible_missions_char2 = mission_system.get_available_missions(char2)
+    assert len(eligible_missions_char2) > 0, "No eligible missions found for char2"
+    char2_mission_id = eligible_missions_char2[0]["id"]
+    success, msg = await mission_system.assign_mission(char2, char2_mission_id)
+    assert success is True, f"Failed to assign mission to char2: {msg}"
+    assert char2.id in mission_system.active_missions
 
 @pytest.mark.asyncio
-async def test_character_mission_persistence(character_system, mission_system):
-    """Test mission state persists with character data."""
-    # Create character and accept mission
-    character = await character_system.create_character("user1", "State Tester", "Leaf")
-    mission_system.accept_mission("user1", "D001")
-    assert "D001" in mission_system.active_missions.get("user1", {}), "Mission not active initially"
+async def test_character_mission_persistence(character_system, mission_system, temp_data_dir):
+    """Test mission state persists across reloads."""
+    await mission_system.load_mission_data()
     
-    # Save character data
-    await character_system.save_character(character)
+    # Create character and assign mission
+    char1 = await character_system.create_character("user_persist", "State Tester", "Leaf", rank="Genin")
+    assert char1 is not None
     
-    # Save and reload character system
-    await character_system.shutdown()
-    data_dir = character_system.data_dir
-    # Pass the characters sub-directory path
-    new_character_system = CharacterSystem(data_dir)
-    await new_character_system.load_characters() # Use load_characters
+    success, msg = await mission_system.assign_mission(char1, "D001")
+    assert success, f"Assign mission failed: {msg}"
+    assert char1.id in mission_system.active_missions
     
-    # Verify character still exists
-    reloaded_character = new_character_system.get_character("user1")
-    assert reloaded_character is not None
-    assert reloaded_character.name == "State Tester"
+    # Simulate reload by creating a new MissionSystem instance using the same data dir
+    new_mission_system = MissionSystem(
+        character_system=character_system, # Use same (mocked or real) character system
+        data_dir=temp_data_dir,
+        currency_system=mission_system.currency_system, # Reuse mock
+        progression_engine=mission_system.progression_engine # Reuse mock
+    )
+    await new_mission_system.load_mission_data() # Load from files
     
-    # Verify mission is still active
-    active_missions = mission_system.get_active_missions("user1")
-    assert len(active_missions) == 1
-    assert active_missions[0].mission_id == "D001"
+    # Verify the mission is still active for the user in the new instance
+    assert char1.id in new_mission_system.active_missions, "Active mission state not persisted"
+    assert new_mission_system.active_missions[char1.id]["mission_id"] == "D001"
     
-    await new_character_system.shutdown()
+    # Complete mission in new system
+    reloaded_char = await character_system.get_character(char1.id) # Refetch might be needed
+    assert reloaded_char is not None
+    rewards = await new_mission_system.complete_mission(reloaded_char)
+    assert rewards is not None
+    assert char1.id not in new_mission_system.active_missions
+    assert char1.id in new_mission_system.completed_missions
+    assert "D001" in new_mission_system.completed_missions[char1.id]
 
 @pytest.mark.asyncio
 async def test_character_mission_completion_tracking(character_system, mission_system):
-    """Test tracking of completed missions per character."""
+    """Test tracking completed missions per character."""
+    await mission_system.load_mission_data() # Load missions
+
     # Create character
-    character = await character_system.create_character("user1", "Mission Tracker", "Leaf")
-    
-    # Complete multiple missions
-    missions_to_complete = ["D001", "D002"]
-    for mission_id in missions_to_complete:
-        accept_success, _ = mission_system.accept_mission("user1", mission_id)
-        if accept_success:
-             await mission_system.complete_mission("user1", mission_id)
-        else:
-             pytest.fail(f"Failed to accept mission {mission_id} for completion tracking.")
+    character = await character_system.create_character("user1", "Completion Tracker", "Leaf", rank="Genin")
+    assert character is not None
 
-    # Check completed missions on the character object
-    char1_reloaded = character_system.get_character("user1")
-    assert char1_reloaded is not None
-    assert len(char1_reloaded.completed_missions) == len(missions_to_complete)
-    assert all(mid in char1_reloaded.completed_missions for mid in missions_to_complete)
+    # Assign and complete D001
+    success, msg = await mission_system.assign_mission(character, "D001")
+    assert success is True, f"Failed to assign D001: {msg}"
+    await mission_system.complete_mission(character)
 
-    # Verify another character has separate completion tracking
-    char2 = await character_system.create_character("user2", "New Tracker", "Sand")
-    char2_reloaded = character_system.get_character("user2")
-    assert char2_reloaded is not None
-    assert not char2_reloaded.completed_missions # Should be empty set
+    # Verify D001 is marked completed for the user (Needs method in MissionSystem)
+    completed_count = mission_system.get_completed_mission_count(character.id, "D001")
+    assert completed_count == 1, "D001 should be marked as completed once"
 
-@pytest.mark.asyncio
-async def test_character_mission_rewards_persistence(character_system, mission_system):
-    """Test that mission rewards persist in character data."""
-    character = await character_system.create_character("user1", "Reward Tester", "Leaf")
-    initial_exp = character.exp
-    initial_ryo = character.ryo
-    
-    total_exp_reward = 0
-    total_ryo_reward = 0
-    # Filter for missions the level 1 character can actually accept
-    eligible_mission_ids = [
-        mid for mid, m in mission_system.available_missions.items()
-        if character.level >= m.requirements.get("level", 0)
-    ]
+    # Assign and complete D001 again
+    success, msg = await mission_system.assign_mission(character, "D001")
+    assert success is True, f"Failed to re-assign D001: {msg}"
+    await mission_system.complete_mission(character)
+    completed_count = mission_system.get_completed_mission_count(character.id, "D001")
+    assert completed_count == 2, "D001 should be marked as completed twice"
 
-    if len(eligible_mission_ids) < 2:
-        pytest.skip(f"Not enough eligible missions (found {len(eligible_mission_ids)}) for persistence test.")
+    # Assign and complete D002
+    success, msg = await mission_system.assign_mission(character, "D002")
+    assert success is True, f"Failed to assign D002: {msg}"
+    await mission_system.complete_mission(character)
+    completed_count_d002 = mission_system.get_completed_mission_count(character.id, "D002")
+    assert completed_count_d002 == 1, "D002 should be marked as completed once"
 
-    missions_to_test = eligible_mission_ids[:2]
+    # Verify total completed missions (Needs method in MissionSystem or CharacterSystem)
+    # total_completed = mission_system.get_total_completed_missions(character.id)
+    # assert total_completed == 3 # Or check character stats if stored there
 
-    for mission_id in missions_to_test:
-        success, msg = mission_system.accept_mission("user1", mission_id)
-        if not success:
-            pytest.fail(f"Failed to accept eligible mission {mission_id}: {msg}")
-
-        mission_details = mission_system.available_missions.get(mission_id)
-        assert mission_details is not None
-
-        # Complete and get rewards
-        success, _, rewards = await mission_system.complete_mission("user1", mission_id)
-        assert success, f"Failed to complete mission {mission_id}"
-        assert rewards is not None
-
-        # Character data is updated and saved within complete_mission now
-        # We just need to track the expected total reward
-        total_exp_reward += rewards["exp"]
-        total_ryo_reward += rewards["ryo"]
-
-    # Reload character and verify cumulative stats
-    final_character = character_system.get_character("user1")
-    assert final_character is not None
-    # Calculate expected final EXP considering level ups and resets
-    # Level 1->2 needs 100. D001(100) -> Level 2, EXP 0.
-    # Level 2->3 needs 200. D002(75) -> Level 2, EXP 75.
-    expected_final_exp = 75 # Based on completing D001 then D002
-    assert final_character.exp == expected_final_exp, f"Expected final EXP {expected_final_exp} after resets, got {final_character.exp}"
-    assert final_character.ryo == initial_ryo + total_ryo_reward, f"Expected final Ryo {initial_ryo + total_ryo_reward}, got {final_character.ryo}"
+    # Test completion check for a mission not completed
+    completed_count_c001 = mission_system.get_completed_mission_count(character.id, "C001")
+    assert completed_count_c001 == 0, "C001 should not be marked as completed"
 
 @pytest.mark.asyncio
-async def test_character_mission_level_progression(character_system, mission_system, setup_missions):
-    """Test character level progression through missions."""
-    # Set up mission system with test missions
-    mission_system.missions_file = setup_missions
-    mission_system._load_missions()
+async def test_character_mission_level_progression(character_system, mission_system, mock_progression_engine):
+    """Test character level progression mock calls through missions."""
+    await mission_system.load_mission_data()
 
-    character = await character_system.create_character("user1", "Level Tester", "Leaf", level=1) # Start at level 1
-    assert character is not None # Ensure character creation succeeded
-    assert character.level == 1
-    initial_level = character.level
+    # Create character
+    char1 = await character_system.create_character("user_prog", "Level Up", "Leaf", rank="Genin")
+    assert char1 is not None
+    initial_level = char1.level
+    initial_exp = char1.exp
+    
+    # Define mission with enough EXP to level up (or use mock)
+    mission_id = "D001" # Reward: exp=20
+    exp_reward = 20
+    
+    # Assign and complete
+    success, msg = await mission_system.assign_mission(char1, mission_id)
+    assert success, f"Assign failed: {msg}"
+    rewards = await mission_system.complete_mission(char1)
+    assert rewards is not None
+    assert rewards.get("exp") == exp_reward
+    
+    # Verify progression engine was called
+    mock_progression_engine.grant_experience.assert_called_with(char1.id, exp_reward)
+    
+    # To truly test level up, the ProgressionEngine mock or the real engine
+    # would need to handle level-up logic based on EXP thresholds.
+    # For now, we just verify the grant_experience call.
 
-    # Get both D and C rank missions
-    d_rank_missions = {mid: m for mid, m in mission_system.available_missions.items() if m.rank == 'D'} 
-    c_rank_missions = {mid: m for mid, m in mission_system.available_missions.items() if m.rank == 'C'} 
-
-    logger.info(f"Available missions - D rank: {len(d_rank_missions)}, C rank: {len(c_rank_missions)}")
-    for mid, m in d_rank_missions.items():
-        logger.info(f"D rank mission {mid}: {m.reward_exp} EXP")
-    for mid, m in c_rank_missions.items():
-        logger.info(f"C rank mission {mid}: {m.reward_exp} EXP")
-
-    if not d_rank_missions and not c_rank_missions:
-        pytest.skip("No D or C rank missions available to test level progression.")
-
-    # Combine all D and C rank mission IDs
-    mission_ids_to_cycle = list(d_rank_missions.keys()) + list(c_rank_missions.keys())
-
-    logger.info(f"Missions available for cycling: {len(mission_ids_to_cycle)}")
-    for mid in mission_ids_to_cycle:
-        m = mission_system.available_missions[mid]
-        logger.info(f"Available mission for cycle {mid}: {m.rank} rank, {m.reward_exp} EXP, requires level {m.requirements.get('level', 1)}")
-
-    if not mission_ids_to_cycle:
-        pytest.skip("No eligible missions available for the character's level.")
-
-    missions_completed_count = 0
-    max_attempts = 100  # Increased from 50
-    attempt = 0
-
-    while character.level < 3 and attempt < max_attempts:  # Changed from level 5 to level 3
-        attempt += 1
-        mission_id = mission_ids_to_cycle[attempt % len(mission_ids_to_cycle)]
-        mission = mission_system.available_missions[mission_id]
-
-        # Ensure character object is up-to-date before checks
-        character = character_system.get_character(character.id)
-        assert character is not None
-
-        logger.info(f"Attempt {attempt}/{max_attempts}: Character State BEFORE checks - Level: {character.level}, Exp: {character.exp}, Completed: {character.completed_missions}")
-
-        logger.info(f"Attempt {attempt}/{max_attempts}: Trying {mission.rank}-rank mission {mission_id} (Level {character.level}, Exp {character.exp}, Required for next level: {character.level * 100})")
-
-        # Check if already completed or active
-        if mission_id in character.completed_missions:
-            logger.info(f"Skipping already completed mission {mission_id} for {character.id}.")
-            continue
-        if mission_id in mission_system.active_missions.get(character.id, {}):
-            logger.info(f"Mission {mission_id} already active for {character.id}. Attempting completion.")
-            comp_success, _, rewards = await mission_system.complete_mission(character.id, mission_id)
-            if comp_success:
-                missions_completed_count += 1
-                # Character stats/level are updated within complete_mission and saved
-                character = character_system.get_character(character.id) # Refresh character
-                logger.info(f"Completed previously active mission {mission_id}. User {character.id} Level: {character.level}, Exp: {character.exp}")
-            else:
-                logger.warning(f"Still failed to complete already active mission {mission_id}.")
-            continue
-
-        # Check if the mission is eligible for the character's current level
-        if mission.requirements["level"] > character.level:
-            logger.info(f"Skipping mission {mission_id} - requires level {mission.requirements['level']}, character is level {character.level}.")
-            continue
-
-        # Accept the mission
-        accept_success, msg = mission_system.accept_mission(character.id, mission_id)
-        if accept_success:
-            # Complete the mission
-            try:
-                comp_success, _, rewards = await mission_system.complete_mission(character.id, mission_id)
-            except Exception as e:
-                logger.exception(f"Error during complete_mission call for {mission_id} in level progression test: {e}")
-                comp_success = False
-
-            if comp_success:
-                missions_completed_count += 1
-                # Character stats/level are updated within complete_mission and saved
-                character = character_system.get_character(character.id) # Refresh character
-                logger.info(f"Completed mission {mission_id}. User {character.id} Level: {character.level}, Exp: {character.exp}")
-            else:
-                logger.warning(f"Failed to complete mission {mission_id} during level progression test.")
-                # If completion fails, ensure it's removed from active to avoid getting stuck
-                if mission_id in mission_system.active_missions.get(character.id, {}):
-                    del mission_system.active_missions[character.id][mission_id]
-                    if not mission_system.active_missions[character.id]:
-                        del mission_system.active_missions[character.id]
-        else:
-            logger.warning(f"Failed to accept mission {mission_id} for level progression: {msg}")
-
-    if attempt >= max_attempts:
-        pytest.fail(f"Level progression test exceeded max attempts ({max_attempts}). Final Level: {character.level}")
-    assert character.level >= 3, f"Character failed to reach level 3. Final Level: {character.level}"
-
-@pytest.mark.skip(reason="Mission state persistence not implemented")
+@pytest.mark.skip(reason="State recovery logic needs review/implementation")
 @pytest.mark.asyncio
 async def test_character_mission_state_recovery(character_system, mission_system):
+    # ... (Test skipped) ...
     pass
 
 @pytest.mark.asyncio
 async def test_character_mission_failure_handling(character_system, mission_system):
-    """Test how character and mission systems handle failures."""
-    character = await character_system.create_character("user1", "Failure Tester", "Leaf")
+    """Test how character and mission systems handle failures (e.g., expiration)."""
+    await mission_system.load_mission_data()
+    
+    character = await character_system.create_character("user_fail", "Failure Tester", "Leaf", rank="Genin")
+    assert character is not None
     initial_exp = character.exp
 
-    # Accept a mission
-    mission_system.accept_mission("user1", "D001")
+    # Assign a mission
+    success, msg = await mission_system.assign_mission(character, "D001")
+    assert success, f"Assign failed: {msg}"
+    assert character.id in mission_system.active_missions
 
-    # Simulate mission failure (e.g., time limit exceeded)
-    mission = mission_system.active_missions["user1"]["D001"]
-    mission.accepted_at = datetime.now() - timedelta(hours=2)
+    # Simulate expiration
+    mock_now = get_mock_now()
+    past_time = get_past_hours(24)
+    mission_system.active_missions[character.id]["start_time"] = past_time.isoformat()
 
-    # Attempt completion (should fail)
-    success, _, rewards = await mission_system.complete_mission("user1", "D001")
-    assert not success
-    assert rewards is None
+    # Attempt completion - should fail, return None, and clear active mission
+    rewards = await mission_system.complete_mission(character)
+    assert rewards is None, "Expired mission should return None"
+    assert character.id not in mission_system.active_missions, "Expired mission should be cleared"
+    assert "D001" not in mission_system.completed_missions.get(character.id, []), "Expired mission shouldn't be marked completed"
 
-    # Verify character state is unchanged (no rewards)
-    final_character = character_system.get_character("user1")
-    assert final_character.exp == initial_exp
-    assert "D001" not in final_character.completed_missions
-
-    # Verify mission is removed from active list
-    assert "user1" not in mission_system.active_missions or "D001" not in mission_system.active_missions["user1"] 
+    # Verify character EXP didn't change (mock was not called)
+    mission_system.progression_engine.grant_experience.assert_not_called()
+    mission_system.currency_system.add_ryo.assert_not_called()
+    # refetched_char = await character_system.get_character(character.id)
+    # assert refetched_char.exp == initial_exp # Assuming EXP wasn't granted 

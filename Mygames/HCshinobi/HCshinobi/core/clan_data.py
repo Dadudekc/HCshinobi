@@ -429,17 +429,15 @@ class ClanData:
         return None
 
     def get_clan_bonuses(self, clan_id: str) -> Dict[str, int]:
-        """Get clan attribute bonuses.
-        
-        Args:
-            clan_id: The ID of the clan
-            
-        Returns:
-            Dictionary of attribute bonuses
-        """
+        """Get clan attribute bonuses, preferring nested stat_bonuses."""
         clan = self.get_clan(clan_id)
         if not clan:
-            return {'strength': 0, 'defense': 0, 'speed': 0}
+            return {}
+        # Prefer nested 'stat_bonuses' mapping if present
+        bonuses = clan.get('stat_bonuses')
+        if isinstance(bonuses, dict):
+            return bonuses.copy()
+        # Fallback to legacy flat bonus keys
         return {
             'strength': clan.get('strength_bonus', 0),
             'defense': clan.get('defense_bonus', 0),

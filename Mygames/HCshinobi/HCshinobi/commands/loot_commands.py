@@ -2,6 +2,7 @@
 import discord
 from discord.ext import commands
 import logging
+import traceback
 from datetime import datetime
 
 from HCshinobi.core.loot_system import LootSystem
@@ -9,8 +10,10 @@ from HCshinobi.core.character_system import CharacterSystem
 from HCshinobi.utils.embed_utils import get_rarity_color
 from HCshinobi.database.loot_history import LootHistoryDB
 
+logger = logging.getLogger(__name__)
+
 class LootCommands(commands.Cog):
-    def __init__(self, bot, loot_system: LootSystem, character_system: CharacterSystem, data_dir: str):
+    def __init__(self, bot: 'HCShinobiBot', loot_system: LootSystem, character_system: CharacterSystem, data_dir: str):
         """Initialize loot commands.
         
         Args:
@@ -23,13 +26,14 @@ class LootCommands(commands.Cog):
         self.bot = bot
         self.loot_system = loot_system
         self.character_system = character_system
-        self.logger = logging.getLogger(__name__)
+        self.data_dir = data_dir
         try:
             self.loot_db = LootHistoryDB(data_dir=data_dir)
-            self.logger.info("LootHistoryDB initialized successfully within LootCommands.")
+            logger.info("LootHistoryDB initialized successfully within LootCommands.")
         except Exception as e:
-            self.logger.error(f"Failed to initialize LootHistoryDB in LootCommands: {e}", exc_info=True)
+            logger.error(f"Failed to initialize LootHistoryDB in LootCommands: {e}", exc_info=True)
             self.loot_db = None
+        logger.info("LootCommands Cog initialized.")
 
     async def cog_command_error(self, ctx, error):
         """Handle errors for all commands in this cog."""
@@ -41,8 +45,11 @@ class LootCommands(commands.Cog):
             await ctx.send(f"❌ Missing required argument: {error.param.name}")
         elif isinstance(error, commands.BotMissingPermissions):
             await ctx.send("❌ I don't have permission to do that!")
+        elif isinstance(error, commands.UserInputError):
+            await ctx.send(f"❌ Invalid input. Use `!help {ctx.command.name}` for details.")
         else:
-            self.logger.error(f"Error in {ctx.command.name}: {error}", exc_info=True)
+            logger.error(f"Error in {ctx.command.name}: {error}", exc_info=True)
+            traceback.print_exception(type(error), error, error.__traceback__)
             await ctx.send("❌ An unexpected error occurred. Please try again later.")
 
     @commands.command(
@@ -62,7 +69,7 @@ class LootCommands(commands.Cog):
             player_id = str(ctx.author.id)
             
             # Try to generate loot drop
-            success, loot_data, message = self.loot_system.generate_loot_drop(player_id)
+            success, loot_data, message = await self.loot_system.generate_loot_drop(player_id)
             
             if not success:
                 await ctx.send(message or "❌ Failed to generate loot drop!")
@@ -126,19 +133,19 @@ class LootCommands(commands.Cog):
                         f"{ctx.author} gained {loot_data['amount']:,} Ryō ({loot_data['rarity']})"
                     )
                 except Exception as e:
-                    self.logger.warning(f"Devlog logging failed for loot event: {e}")
+                    logger.warning(f"Devlog logging failed for loot event: {e}")
             
             # 🔄 Persist loot drop to storage
             if self.loot_db:
                 try:
                     self.loot_db.log_loot(player_id, loot_data['amount'], loot_data['rarity'])
                 except Exception as db_err:
-                    self.logger.error(f"Failed to log loot history: {db_err}", exc_info=True)
+                    logger.error(f"Failed to log loot history: {db_err}", exc_info=True)
             else:
-                self.logger.warning("LootHistoryDB not available, skipping loot history logging.")
+                logger.warning("LootHistoryDB not available, skipping loot history logging.")
             
         except Exception as e:
-            self.logger.error(f"Error in loot command: {e}", exc_info=True)
+            logger.error(f"Error in loot command: {e}", exc_info=True)
             await ctx.send("❌ An unexpected error occurred. Please try again later.")
             
     @commands.command(
@@ -158,7 +165,7 @@ class LootCommands(commands.Cog):
             player_id = str(ctx.author.id)
             
             # Get next drop time
-            next_drop = self.loot_system.get_next_drop_time(player_id)
+            next_drop = await self.loot_system.get_next_drop_time(player_id)
             
             if not next_drop:
                 await ctx.send("✅ You're ready for your next loot drop! Use `!loot` to try your luck!")
@@ -174,7 +181,7 @@ class LootCommands(commands.Cog):
             await ctx.send(embed=embed)
             
         except Exception as e:
-            self.logger.error(f"Error in next_loot command: {e}", exc_info=True)
+            logger.error(f"Error in next_loot command: {e}", exc_info=True)
             await ctx.send("❌ An unexpected error occurred. Please try again later.")
 
     # --- NEW: Loot History Command --- #
@@ -196,7 +203,7 @@ class LootCommands(commands.Cog):
         player_id = str(target_user.id)
 
         if not self.loot_db:
-            self.logger.warning(f"Loot history command used but DB not available.")
+            logger.warning(f"Loot history command used but DB not available.")
             await ctx.send("❌ Loot history tracking is currently unavailable.")
             return
 
@@ -240,7 +247,7 @@ class LootCommands(commands.Cog):
             await ctx.send(embed=embed)
 
         except Exception as e:
-            self.logger.error(f"Error in loothistory command for user {player_id}: {e}", exc_info=True)
+            logger.error(f"Error in loothistory command for user {player_id}: {e}", exc_info=True)
             await ctx.send("❌ An error occurred while retrieving loot history.")
     # --- END NEW --- #
 
@@ -248,7 +255,7 @@ class LootCommands(commands.Cog):
         """Returns the loot system for use by other cogs."""
         return self.loot_system
 
-async def setup(bot):
+async def setup(bot: 'HCShinobiBot'):
     """Set up the loot commands cog."""
     if not hasattr(bot, 'services') or not hasattr(bot.services, 'config'):
         logger.error("Service container or config not found on bot object during LootCommands setup!")
@@ -259,4 +266,5 @@ async def setup(bot):
         logger.error("data_dir not found in bot config during LootCommands setup!")
         return
         
-    await bot.add_cog(LootCommands(bot, bot.loot_system, bot.character_system, data_dir)) 
+    await bot.add_cog(LootCommands(bot, bot.services.loot_system, bot.services.character_system, data_dir)) 
+    logger.info("LootCommands Cog loaded successfully.") 

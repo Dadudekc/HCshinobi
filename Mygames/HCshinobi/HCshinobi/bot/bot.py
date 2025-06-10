@@ -20,19 +20,37 @@ import aiofiles
 
 # --- Core Service Imports ---
 try:
-    from ..core.clan_data import ClanData
-    from ..core.token_system import TokenSystem, TokenError
-    from ..core.personality_modifiers import PersonalityModifiers
-    from ..core.npc_manager import NPCManager
-    from ..core.clan_assignment_engine import ClanAssignmentEngine
-    from ..core.character_manager import CharacterManager
-    from ..core.battle_manager import BattleManager, BattleManagerError
-    from ..core.engine import Engine as GameEngine
-    from ..core.character_system import CharacterSystem
-    from ..core.battle_system import BattleSystem
+    from HCshinobi.core.clan_data import ClanData
+    from HCshinobi.core.token_system import TokenSystem, TokenError
+    from HCshinobi.core.personality_modifiers import PersonalityModifiers
+    from HCshinobi.core.npc_manager import NPCManager
+    from HCshinobi.core.clan_assignment_engine import ClanAssignmentEngine
+    from HCshinobi.core.character_manager import CharacterManager
+    from HCshinobi.core.battle_manager import BattleManager, BattleManagerError
+    from HCshinobi.core.engine import Engine as GameEngine
+    from HCshinobi.core.character_system import CharacterSystem
+    from HCshinobi.core.battle_system import BattleSystem
+    # Assuming other core imports are also needed absolutely if they were relative
+    from HCshinobi.core.clan_system import ClanSystem
+    from HCshinobi.core.currency_system import CurrencySystem
+    from HCshinobi.core.training_system import TrainingSystem
+    from HCshinobi.core.quest_system import QuestSystem
+    from HCshinobi.core.mission_system import MissionSystem
+    from HCshinobi.core.database import Database
+    from HCshinobi.core.item_manager import ItemManager
+    from HCshinobi.core.constants import JUTSU_SHOP_CHANNEL_ID # Assuming constants was relative too
+    from HCshinobi.core.clan_missions import ClanMissions
+    from HCshinobi.core.loot_system import LootSystem
+    from HCshinobi.core.room_system import RoomSystem
+    from HCshinobi.core.jutsu_shop_system import JutsuShopSystem
+    from HCshinobi.core.progression_engine import ShinobiProgressionEngine
+    from HCshinobi.core.equipment_shop_system import EquipmentShopSystem
+
 except ImportError as e:
+    # Re-raise the exception instead of calling exit()
     print(f"FATAL: Error importing core services: {e}. Check structure and dependencies.")
-    exit(f"Core service import failed: {e}")
+    # exit(f"Core service import failed: {e}") # Remove the exit call
+    raise ImportError(f"Core service import failed: {e}") from e # Re-raise
 
 # --- Utility Imports ---
 try:
@@ -61,18 +79,22 @@ from .config import BotConfig, load_config
 from .services import ServiceContainer
 # from .events import BotEvents # Events seem unused, commented out
 # from .setup import BotSetup # Setup seems unused, commented out
-from ..commands.character_commands import CharacterCommands
-from ..commands.battle_commands import BattleCommands
-from ..commands.clan_commands import ClanCommands
-from ..commands.mission_commands import MissionCommands
-from ..commands.currency_commands import CurrencyCommands
-from ..commands.training_commands import TrainingCommands
+# Remove unused/incorrect imports referencing the old 'commands' directory
+# from ..commands.character_commands import CharacterCommands
+# from ..commands.battle_commands import BattleCommands
+# from ..commands.clan_commands import ClanCommands
+# from ..commands.mission_commands import MissionCommands
+# from ..commands.currency_commands import CurrencyCommands
+# from ..commands.training_commands import TrainingCommands
+# from ..commands.quest_commands import QuestCommands
+# from ..commands.loot_commands import LootCommands
+from .cogs.room import RoomCommands # Example of correct cog import (if needed)
+from .cogs.announcements import AnnouncementCommands # Example of correct cog import (if needed)
+from .cogs.shop import ShopCommands # Example of correct cog import (if needed)
+from .services import ServiceContainer
+from ..core.constants import DATA_DIR
 from ..commands.quest_commands import QuestCommands
 from ..commands.loot_commands import LootCommands
-from ..commands.room_commands import RoomCommands
-from ..commands.announcement_commands import AnnouncementCommands
-from ..commands.devlog_commands import DevLogCommands
-from ..commands.shop_commands import ShopCommands
 
 class HCBot(commands.Bot):
     """Main bot class."""
@@ -107,160 +129,80 @@ class HCBot(commands.Bot):
     
     async def setup_hook(self) -> None:
         """Overrides commands.Bot.setup_hook. Called before on_ready."""
-        self.logger.info("Running setup_hook...")
+        # --- Initialize Services FIRST --- 
+        self.logger.info("Initializing core services...")
         try:
-            # 1. Initialize services first (this now loads master list)
             self.services = ServiceContainer(self.config)
-            await self.services.initialize()
-            self._initialized_services = True # Mark services as initialized
-            self.logger.info("Service container initialized successfully.")
-
-            # --- Perform ONE-TIME Jutsu Data Migration --- #
-            migration_flag_file = os.path.join(DATA_DIR, ".jutsu_migration_done")
-            
-            if not os.path.exists(migration_flag_file):
-                if self.services.master_jutsu_list: # Check if list loaded in services
-                    master_jutsu_names = {jutsu.get('name') for jutsu in self.services.master_jutsu_list if jutsu.get('name')}
-                    if master_jutsu_names:
-                        modified_count = await self.services.character_system.migrate_jutsu_data(master_jutsu_names)
-                        if modified_count >= 0: 
-                            try:
-                                # Use aiofiles for async flag creation
-                                async with aiofiles.open(migration_flag_file, 'w') as f:
-                                     await f.write(datetime.utcnow().isoformat())
-                                self.logger.info("Created jutsu migration flag file.")
-                            except Exception as e:
-                                self.logger.error(f"Failed to create jutsu migration flag file: {e}")
-                        else:
-                             self.logger.error("Jutsu migration failed. Flag file not created.")
-                    else:
-                         self.logger.error("Could not extract names from master jutsu list. Migration skipped.")
-                else:
-                     self.logger.error("Master jutsu list is empty or failed to load. Migration skipped.")
-            else:
-                 self.logger.info("Jutsu migration flag file found. Skipping migration.")
-            # --- End Migration Logic --- #
-            
-            # --- Refresh Jutsu Shop (No Posting Here) --- #
-            if self.services.jutsu_shop_system:
-                refreshed = await self.services.jutsu_shop_system.refresh_shop_if_needed()
-                if refreshed:
-                     self.logger.info("Jutsu shop was refreshed during setup_hook.")
-                # REMOVED post_shop_inventory call from here
-            else:
-                 self.logger.error("JutsuShopSystem not initialized. Cannot refresh shop.")
-            # --- End Jutsu Shop Refresh Logic --- #
-
-            # 2. Set up core systems references (optional)
-            # Access systems via self.services.<system_name> property is preferred
-            # Example (if needed, but generally avoid duplicating state):
-            # self.character_system = self.services.character_system 
-            # self._clan_data = self.services.clan_data
-            
-            # 3. Register command cogs 
-            # Ensure service references are valid before creating cogs
-            cogs_to_load = [
-                CharacterCommands(self, self.services.character_system, self.services.clan_data, self.services.progression_engine),
-                # Corrected initialization: Only pass bot instance
-                # CurrencyCommands(self), # REMOVED: Load as extension
-                # Corrected initialization: Only pass bot instance
-                # ShopCommands(self), # REMOVED: Load as extension
-                # BattleCommands(self, self.services.battle_system, self.services.character_system, self.services.battle_manager), # REMOVED: Load as extension
-                ClanCommands(self, self.services.clan_system, self.services.character_system),
-                MissionCommands(self, self.services.mission_system, self.services.character_system),
-                TrainingCommands(self, self.services.training_system, self.services.character_system),
-                QuestCommands(self, self.services.quest_system, self.services.character_system),
-                LootCommands(self, self.services.loot_system, self.services.character_system, DATA_DIR),
-                RoomCommands(self, self.services.room_system, self.services.character_system),
-                AnnouncementCommands(self), # Assumes it only needs bot instance
-                DevLogCommands(self), # Assumes it only needs bot instance
-            ]
-            
-            # Add diagnostic command (optional)
-            # self.tree.add_command(debug_commands) 
-            
-            loaded_cog_count = 0
-            for cog_instance in cogs_to_load:
-                try:
-                    await self.add_cog(cog_instance)
-                    self.logger.info(f"Successfully added cog: {cog_instance.__class__.__name__}")
-                    loaded_cog_count += 1
-                except Exception as e:
-                    self.logger.error(f"Failed to load cog {cog_instance.__class__.__name__}: {e}", exc_info=True)
-                    # Continue loading other cogs even if one fails?
-            
-            self.logger.info(f"Loaded {loaded_cog_count}/{len(cogs_to_load)} cogs directly.") # Updated log message
-            
-            # --- Load Core System Cogs FIRST --- #
-            core_extensions = [
-                 "HCshinobi.core.currency_system" # Load Currency Cog first
-                 # Add other core system cogs here if they exist (e.g., CharacterSystemCog?)
-            ]
-            core_load_success = 0
-            for extension in core_extensions:
-                 try:
-                      await self.load_extension(extension)
-                      self.logger.info(f"Successfully loaded core extension: {extension}")
-                      core_load_success += 1
-                 except Exception as e:
-                      self.logger.error(f"Failed to load core extension {extension}: {e}", exc_info=True)
-                      # Consider stopping if a core cog fails
-            self.logger.info(f"Loaded {core_load_success}/{len(core_extensions)} core extensions.")
-            # --- End Core Cog Loading ---
-            
-            # --- Load Command Cogs via load_extension --- # 
-            # These can now depend on core cogs loaded above
-            extensions_to_load = [
-                 "HCshinobi.commands.currency_commands",
-                 "HCshinobi.commands.shop_commands",
-                 "HCshinobi.commands.battle_commands" 
-                 # Add other cogs intended to be loaded via extension here
-            ]
-            
-            extension_load_success = 0
-            for extension in extensions_to_load:
-                 try:
-                      await self.load_extension(extension)
-                      self.logger.info(f"Successfully loaded extension: {extension}")
-                      extension_load_success += 1
-                 except commands.ExtensionNotFound:
-                      self.logger.error(f"Extension not found: {extension}")
-                 except commands.ExtensionAlreadyLoaded:
-                      self.logger.warning(f"Extension already loaded: {extension}")
-                      extension_load_success += 1 # Count as success if already loaded
-                 except commands.NoEntryPointError:
-                      self.logger.error(f"Extension {extension} has no setup function.")
-                 except commands.ExtensionFailed as e:
-                      self.logger.error(f"Extension {extension} failed to load: {e}", exc_info=True)
-                 except Exception as e:
-                      self.logger.error(f"Unexpected error loading extension {extension}: {e}", exc_info=True)
-            
-            self.logger.info(f"Loaded {extension_load_success}/{len(extensions_to_load)} extensions.")
-            # --- End Extension Loading --- #
-
-            # 4. Sync application commands 
-            if self.guild_id:
-                guild_object = discord.Object(id=self.guild_id)
-                self.tree.copy_global_to(guild=guild_object)
-                synced_commands = await self.tree.sync(guild=guild_object)
-                self.logger.info(f"Synced {len(synced_commands)} application commands to guild {self.guild_id}.")
-            else:
-                # Sync globally if no specific guild ID is set
-                synced_commands = await self.tree.sync()
-                self.logger.info(f"Synced {len(synced_commands)} application commands globally.")
-
-            # --- ADD Logging before exit --- #
-            if self.services and hasattr(self.services, 'jutsu_shop_system'):
-                shop_sys_status = type(self.services.jutsu_shop_system) if self.services.jutsu_shop_system else "None"
-                self.logger.info(f"setup_hook end: services={type(self.services)}, jutsu_shop_system={shop_sys_status}")
-            else:
-                 self.logger.warning(f"setup_hook end: services={type(self.services)}, jutsu_shop_system attribute MISSING or services None.")
-            # --- End Logging --- #
-            
+            await self.services.initialize(self)
+            self._clan_data = self.services.clan_data # Assign loaded clan data
+            self._initialized_services = True
+            self.logger.info("Core services initialized successfully.")
         except Exception as e:
-            self.logger.critical(f"CRITICAL ERROR during setup_hook: {e}", exc_info=True)
-            # Optionally prevent the bot from fully starting if setup fails critically
-            # await self.close() 
+            self.logger.critical(f"Fatal error initializing services: {e}", exc_info=True)
+            # Decide whether to proceed or shutdown if services are critical
+            await self.close() # Close bot if services fail to initialize
+            return
+            
+        # --- Load Cogs --- 
+        self.logger.info("Loading cogs...")
+        # Load cogs from the cogs directory
+        cogs_to_load = [
+            # Removed: CharacterCommands(self, self.services.character_system, self.services.progression_engine),
+            # ClanCommands(self, self.services.clan_system, self.services.character_system), # Removed mixed command cog
+            # MissionCommands(self, self.services.mission_system, self.services.character_system), # Removed prefix command cog
+            # TrainingCommands(self, self.services.training_system), # Removed prefix command cog
+            QuestCommands(self, self.services.quest_system),
+            LootCommands(self, self.services.loot_system, self.services.character_system, DATA_DIR),
+            RoomCommands(self),
+            AnnouncementCommands(self),
+        ]
+        
+        loaded_cog_count = 0
+        for cog_instance in cogs_to_load:
+            try:
+                await self.add_cog(cog_instance)
+                self.logger.info(f"Successfully added cog: {cog_instance.__class__.__name__}")
+                loaded_cog_count += 1
+            except Exception as e:
+                self.logger.error(f"Failed to load cog {cog_instance.__class__.__name__}: {e}", exc_info=True)
+        
+        self.logger.info(f"Loaded {loaded_cog_count}/{len(cogs_to_load)} cogs.")
+        
+        # Load core system cogs and extensions
+        extensions_to_load = [
+            "HCshinobi.core.currency_system",
+            "HCshinobi.bot.cogs.devlog",
+            "HCshinobi.bot.cogs.missions",
+            "HCshinobi.bot.cogs.battle_system",
+            "HCshinobi.bot.cogs.training",
+            "HCshinobi.bot.cogs.clans",
+            "HCshinobi.bot.cogs.currency",
+            "HCshinobi.bot.cogs.shop",
+            "HCshinobi.bot.cogs.npcs",
+            "HCshinobi.bot.cogs.tokens",
+            "HCshinobi.bot.cogs.help", # Added help command cog
+            "HCshinobi.bot.cogs.character_commands" # Added character commands cog
+        ]
+        extension_load_success = 0
+        for extension in extensions_to_load:
+            try:
+                await self.load_extension(extension)
+                self.logger.info(f"Successfully loaded extension: {extension}")
+                extension_load_success += 1
+            except Exception as e:
+                self.logger.error(f"Failed to load extension {extension}: {e}", exc_info=True)
+        
+        self.logger.info(f"Loaded {extension_load_success}/{len(extensions_to_load)} extensions.")
+        
+        # Sync application commands
+        if self.guild_id:
+            guild_object = discord.Object(id=self.guild_id)
+            self.tree.copy_global_to(guild=guild_object)
+            synced_commands = await self.tree.sync(guild=guild_object)
+            self.logger.info(f"Synced {len(synced_commands)} application commands to guild {self.guild_id}.")
+        else:
+            synced_commands = await self.tree.sync()
+            self.logger.info(f"Synced {len(synced_commands)} application commands globally.")
 
     async def on_ready(self):
         """Called when the bot is ready."""
@@ -273,16 +215,8 @@ class HCBot(commands.Bot):
         self.logger.info(f"Logged in as {self.user} (ID: {self.user.id})")
         self.logger.info("------")
         
-        # Announce status unless silent start
-        if not self.silent_start:
-            try:
-                self.logger.info("Attempting to announce online status...")
-                await self._announce_status("online")
-            except Exception as e:
-                 self.logger.error(f"Error announcing online status in on_ready: {e}", exc_info=True)
-        else:
-            self.logger.info("Silent start: Skipping online status announcement.")
-             
+        # (online-status announcements removed per user request)
+
         # --- ADD Logging before check --- #
         if self.services and hasattr(self.services, 'jutsu_shop_system'):
             shop_sys_status = type(self.services.jutsu_shop_system) if self.services.jutsu_shop_system else "None"
@@ -323,7 +257,7 @@ class HCBot(commands.Bot):
     async def on_resumed(self):
         """Called when the bot resumes its connection to Discord."""
         self.logger.info("Bot resumed connection to Discord")
-        await self._announce_status("online")
+        # (online-status announcement on resume removed per user request)
 
     async def _announce_status(self, status: str):
         """Announce bot status changes to the designated channel.
@@ -530,15 +464,19 @@ class HCBot(commands.Bot):
             
             while retry_count < max_retries:
                 try:
+                    # Ensure session is closed before exiting
                     await super().start(token, reconnect=reconnect)
                     
+                    # If we reach here, the connection was successful
                     # Set connection timeouts after client is initialized
                     if hasattr(self, 'http') and hasattr(self.http, 'connector'):
-                        self.http.connector.set_default_timeout(30)  # 30 second timeout for HTTP requests
+                        pass # Placeholder if removing the line causes syntax issues
                     if hasattr(self, 'ws'):
-                        self.ws.max_heartbeat_timeout = 60  # 60 second timeout for heartbeat
+                        # This attribute might also not exist or be named differently
+                        # self.ws.max_heartbeat_timeout = 60
+                        pass
                     
-                    break
+                    break # Exit retry loop on success
                 except discord.ConnectionClosed as e:
                     last_error = e
                     retry_count += 1

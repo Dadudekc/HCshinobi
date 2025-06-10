@@ -44,7 +44,7 @@ class LootSystem:
         self.last_drop_time = {}  # Store last drop time by player ID
         self.logger = logging.getLogger(__name__)
         
-    def can_drop_loot(self, player_id: str) -> Tuple[bool, Optional[str]]:
+    async def can_drop_loot(self, player_id: str) -> Tuple[bool, Optional[str]]:
         """Check if a player can receive a loot drop.
         
         Args:
@@ -53,10 +53,10 @@ class LootSystem:
         Returns:
             Tuple of (can_drop, message)
         """
-        # Get player's character
-        character = self.character_system.get_character(player_id)
+        # Check if player has a character
+        character = await self.character_system.get_character(player_id)
         if not character:
-            return False, "❌ You need a character to receive loot drops! Use /create to create one."
+            return False, "❌ You need a character to receive loot drops!"
             
         # Check cooldown
         last_drop = self.last_drop_time.get(player_id)
@@ -72,7 +72,7 @@ class LootSystem:
                 
         return True, None
         
-    def generate_loot_drop(self, player_id: str) -> Tuple[bool, Optional[Dict], Optional[str]]:
+    async def generate_loot_drop(self, player_id: str) -> Tuple[bool, Optional[Dict], Optional[str]]:
         """Generate a loot drop for a player.
         
         Args:
@@ -82,12 +82,12 @@ class LootSystem:
             Tuple of (success, loot_data, message)
         """
         # Check if player can receive loot
-        can_drop, message = self.can_drop_loot(player_id)
+        can_drop, message = await self.can_drop_loot(player_id)
         if not can_drop:
             return False, None, message
             
         # Get player's character
-        character = self.character_system.get_character(player_id)
+        character = await self.character_system.get_character(player_id)
         if not character:
             return False, None, "❌ Character not found!"
             
@@ -150,7 +150,7 @@ class LootSystem:
         
         return True, loot_data, None
         
-    def get_next_drop_time(self, player_id: str) -> Optional[str]:
+    async def get_next_drop_time(self, player_id: str) -> Optional[str]:
         """Get time until next possible loot drop.
         
         Args:
@@ -163,7 +163,7 @@ class LootSystem:
         if not last_drop:
             return None
             
-        character = self.character_system.get_character(player_id)
+        character = await self.character_system.get_character(player_id)
         if not character:
             return None
             

@@ -55,7 +55,7 @@ EQUIPMENT_SHOP_FILE = "equipment_shop.json"  # Resides in SHOPS_SUBDIR
 EQUIPMENT_SHOP_STATE_FILE = "equipment_shop_state.json"  # Resides in SHOPS_SUBDIR
 
 # --- Shop Gameplay Constants --- 
-DEFAULT_SELL_MODIFIER = 0.5 # Items sell for 50% of base price
+DEFAULT_SELL_MODIFIER = 0.5 # Sell price is 50% of base price
 
 # --- Progression Filenames --- 
 RANKS_FILE = "ranks.json"  # Resides in PROGRESSION_SUBDIR
@@ -138,6 +138,10 @@ MAX_JUTSU_LEVEL = 5
 MAX_JUTSU_GAUGE = 100
 MASTERY_GAIN_PER_USE = 1  # Example value, adjust for balance
 
+# --- Training System --- #
+TRAINING_SESSIONS_FILE = "training_sessions.json" # Resides in DATA_DIR root?
+TRAINING_COOLDOWNS_FILE = "training_cooldowns.json" # Resides in DATA_DIR root?
+
 # --- Jutsu Shop --- 
 JUTSU_SHOP_REFRESH_HOURS = 24  # How often the shop rotates (in hours)
 JUTSU_SHOP_SIZE = 20  # How many jutsu are available at once
@@ -176,3 +180,46 @@ CLAN_FORMAT_TRANSITION_VERSION = "1.0"  # Current version of clan format transit
 CLAN_FORMAT_TRANSITION_MESSAGE = ("The clan system is transitioning from a single clans.json file to "
                                 "multiple village-specific files. The legacy format will eventually "
                                 "be removed entirely. Please migrate any custom clans to the new format.")
+
+# --- Elements --- #
+ELEMENTS = ["Fire", "Water", "Wind", "Earth", "Lightning"]
+
+# Elemental interaction chart: AttackerElement -> DefenderElement -> Multiplier
+ELEMENTAL_CHART = {
+    "Fire": {
+        "Wind": 1.5, # Strong vs Wind
+        "Water": 0.75, # Weak vs Water
+        "default": 1.0
+    },
+    "Water": {
+        "Fire": 1.5, # Strong vs Fire
+        "Earth": 0.75, # Weak vs Earth
+        "default": 1.0
+    },
+    "Wind": {
+        "Lightning": 1.5, # Strong vs Lightning
+        "Fire": 0.75, # Weak vs Fire
+        "default": 1.0
+    },
+    "Earth": {
+        "Water": 1.5, # Strong vs Water
+        "Lightning": 0.75, # Weak vs Lightning
+        "default": 1.0
+    },
+    "Lightning": {
+        "Earth": 1.5, # Strong vs Earth
+        "Wind": 0.75, # Weak vs Wind
+        "default": 1.0
+    },
+    "default": {
+        "default": 1.0 # Neutral interaction if attacker element not listed
+    }
+}
+
+# --- Ollama Integration --- #
+OLLAMA_API_URL = "http://localhost:11434/api/generate" # Default local endpoint
+OLLAMA_MODEL = "mistral:latest" # Changed to available model
+OLLAMA_REQUEST_TIMEOUT = 60 # Seconds
+
+# --- Other Game Settings --- #
+MAX_ACTIVE_MISSIONS = 1

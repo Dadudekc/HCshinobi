@@ -171,7 +171,7 @@ class MissionSystem:
 
     async def assign_mission(self, character: Character, mission_id: str) -> Tuple[bool, str]:
         """Assigns a mission to a character if valid and not already active."""
-        user_id_str = str(character.user_id)
+        user_id_str = str(character.id)
 
         if user_id_str in self.active_missions:
             active_mission_id = self.active_missions[user_id_str].get("mission_id", "Unknown")
@@ -185,12 +185,32 @@ class MissionSystem:
         mission_details = self.mission_definitions[mission_id]
         mission_name = mission_details.get("name", mission_id)
 
-        # Optional: Add rank checks or other prerequisites here
-        required_rank = mission_details.get("rank", "D") # Default to D if missing
-        # Need RANK_ORDER imported if doing rank checks
-        # if RANK_ORDER.index(character.rank) < RANK_ORDER.index(required_rank):
-        #     return False, f"You are not high enough rank for '{mission_name}'. Requires {required_rank} rank."
-
+        # Level Check
+        required_level = mission_details.get("requirements", {}).get("level", 0)
+        if character.level < required_level:
+            return False, f"Mission '{mission_name}' requires level {required_level}, you are level {character.level}."
+        
+        # Rank Check
+        required_rank = mission_details.get("rank")
+        if required_rank:
+            try:
+                if RANK_ORDER.index(character.rank) < RANK_ORDER.index(required_rank):
+                    return False, f"Mission '{mission_name}' requires rank {required_rank}, you are rank {character.rank}."
+            except ValueError:
+                # Handle cases where character rank or mission rank isn't in RANK_ORDER
+                logger.warning(f"Could not perform rank check for mission {mission_id} or character {user_id_str}. Ranks: Char='{character.rank}', Mission='{required_rank}'")
+                # Decide if this should prevent assignment or just log
+                # return False, f"Invalid rank specified for mission or character."
+                
+        # Jutsu Check
+        required_jutsu = mission_details.get("requirements", {}).get("jutsu", [])
+        if required_jutsu:
+            if not hasattr(character, 'jutsu') or not character.jutsu:
+                 return False, f"Mission '{mission_name}' requires jutsu: {', '.join(required_jutsu)}. You have none."
+            missing_jutsu = [j for j in required_jutsu if j not in character.jutsu]
+            if missing_jutsu:
+                return False, f"Mission '{mission_name}' requires jutsu: {', '.join(required_jutsu)}. You are missing: {', '.join(missing_jutsu)}."
+        
         self.active_missions[user_id_str] = {
             "mission_id": mission_id,
             "start_time": datetime.now(timezone.utc).isoformat()
@@ -201,110 +221,113 @@ class MissionSystem:
 
     async def complete_mission(self, character: Character) -> Optional[Dict[str, Any]]:
         """Completes the active mission, grants rewards, updates state, checks progression."""
-        user_id_str = str(character.user_id)
+        user_id_str = str(character.id)
 
         if user_id_str not in self.active_missions:
-            logger.warning(f"User {user_id_str} tried to complete a mission but has none active.")
-            return None # Indicate no active mission
-
-        active_mission_info = self.active_missions.pop(user_id_str) # Remove from active
-        mission_id = active_mission_info.get("mission_id")
-
-        if not mission_id or mission_id not in self.mission_definitions:
-            logger.error(f"Active mission {mission_id} for user {user_id_str} has invalid ID or not found in definitions! Restoring active mission state.")
-            self.active_missions[user_id_str] = active_mission_info # Put it back
-            # Don't save here, log error prominently and investigate
-            return {"error": f"Internal error processing mission '{mission_id}'. Please report this."} # Indicate failure
-
-        mission_def = self.mission_definitions[mission_id]
-        mission_name = mission_def.get("name", mission_id)
-
-        # Record completion
-        if user_id_str not in self.completed_missions:
-            self.completed_missions[user_id_str] = []
-        if mission_id not in self.completed_missions[user_id_str]: # Avoid duplicates if somehow possible
-             self.completed_missions[user_id_str].append(mission_id)
-        # Update character stat (assuming character object is saved elsewhere)
-        character.missions_completed = len(self.completed_missions.get(user_id_str, []))
-
-        # Grant Rewards & Progression
-        rewards = mission_def.get("reward", {})
-        reward_msg_parts = []
-        progression_notes = []
-
-        # Ryo Reward (Using CurrencySystem - needs adjustment if CurrencySystem removed)
-        ryo_reward = rewards.get("ryo")
-        if isinstance(ryo_reward, int) and ryo_reward > 0:
-             # Assuming direct character manipulation is okay if CurrencySystem removed/simplified
-            character.ryo += ryo_reward
-            reward_msg_parts.append(f"{ryo_reward} Ryo")
-            # await self.currency_system.add_ryo(character.user_id, ryo_reward, "Mission Reward") # If using CurrencySystem
-        elif ryo_reward is not None:
-            logger.warning(f"Invalid Ryo reward format for mission {mission_id}: {ryo_reward}")
-
-        # Experience Reward & Progression Engine Calls
-        exp_reward = rewards.get("exp")
-        if isinstance(exp_reward, int) and exp_reward > 0:
-            granted_exp, level_up, rank_up, new_rank = await self.progression_engine.grant_exp(character, exp_reward)
-            reward_msg_parts.append(f"{granted_exp} EXP")
-            if level_up:
-                progression_notes.append(f"**Level Up!** You reached Level {character.level}!")
-            if rank_up:
-                progression_notes.append(f"**Rank Up!** You achieved the rank of {new_rank}!")
-        elif exp_reward is not None:
-            logger.warning(f"Invalid EXP reward format for mission {mission_id}: {exp_reward}")
-
-        # Achievement Check
-        achievement_key = mission_def.get("achievement_key")
-        if achievement_key:
-            awarded, achievement_details = await self.progression_engine.award_achievement(character, achievement_key)
-            if awarded and achievement_details: # Check details exist
-                progression_notes.append(f"**Achievement Unlocked:** {achievement_details.get('name','?')} - {achievement_details.get('description','?')}")
-
-        # Title Check (after potential rank/level up)
-        newly_assigned_titles = await self.progression_engine.check_and_assign_titles(character)
-        if newly_assigned_titles:
-            for title_key, title_details in newly_assigned_titles.items():
-                 if title_details: # Check details exist
-                    progression_notes.append(f"**Title Earned:** {title_details.get('name','?')}")
-
-        # Save changes (Character state is saved elsewhere, save mission lists)
-        await self._save_active_missions() # Since we popped
-        await self._save_completed_missions() # Since we potentially added
-
-        logger.info(f"User {user_id_str} completed mission '{mission_id}' ({mission_name}). Rewards: {reward_msg_parts}. Progression: {progression_notes}")
-
-        # Return detailed results for feedback
-        return {
-            "mission_id": mission_id,
-            "mission_name": mission_name,
-            "rewards_granted": reward_msg_parts,
-            "progression_notes": progression_notes,
-        }
-
-    def get_active_mission(self, user_id: int) -> Optional[Dict[str, Any]]:
-        """Gets the definition details for the user's active mission."""
-        user_id_str = str(user_id)
-        active_info = self.active_missions.get(user_id_str)
-
-        if not active_info:
+            logger.warning(f"User {user_id_str} tried to complete a mission, but none is active.")
             return None
 
+        active_info = self.active_missions[user_id_str]
+        mission_id = active_info["mission_id"]
+        start_time = datetime.fromisoformat(active_info["start_time"])
+
+        if mission_id not in self.mission_definitions:
+            logger.error(f"Active mission {mission_id} for user {user_id_str} not found in definitions! Removing active mission.")
+            del self.active_missions[user_id_str]
+            await self._save_active_missions()
+            return None
+
+        mission_details = self.mission_definitions[mission_id]
+        mission_name = mission_details.get("name", mission_id)
+
+        # Check time limit (if applicable)
+        duration_str = mission_details.get("duration") # Assuming duration is stored in defs
+        if duration_str:
+            try:
+                # Assuming duration is stored as string like "1h", "30m"
+                # This needs a robust parsing function
+                # duration = parse_duration(duration_str)
+                duration = timedelta(hours=1) # Placeholder - needs proper parsing or storage format
+                if datetime.now(timezone.utc) > start_time + duration:
+                    logger.info(f"Mission '{mission_id}' ({mission_name}) expired for user {user_id_str}.")
+                    del self.active_missions[user_id_str]
+                    await self._save_active_missions()
+                    return None # Indicate failure due to expiration
+            except Exception as e:
+                 logger.error(f"Error checking time limit for mission {mission_id}: {e}")
+                 # Decide how to handle parse errors - fail safe?
+                 # return None
+
+        # Grant rewards
+        rewards = mission_details.get("reward", {})
+        granted_rewards = {}
+        if "exp" in rewards:
+            exp_reward = rewards["exp"]
+            await self.progression_engine.grant_experience(user_id_str, exp_reward)
+            granted_rewards["exp"] = exp_reward
+            logger.info(f"Granted {exp_reward} EXP to {user_id_str} for mission {mission_id}")
+        if "ryo" in rewards:
+            ryo_reward = rewards["ryo"]
+            await self.currency_system.add_ryo(user_id_str, ryo_reward)
+            granted_rewards["ryo"] = ryo_reward
+            logger.info(f"Granted {ryo_reward} Ryo to {user_id_str} for mission {mission_id}")
+
+        # Grant item rewards
+        item_rewards = rewards.get("items", [])
+        granted_items = []
+        if item_rewards:
+            # Need the character object to modify inventory
+            character = await self.character_system.get_character(user_id_str)
+            if character:
+                if not hasattr(character, 'inventory') or character.inventory is None:
+                    character.inventory = [] # Initialize inventory if missing
+                
+                for item_id in item_rewards:
+                    if isinstance(item_id, str):
+                        character.inventory.append(item_id.lower()) # Add item to inventory list
+                        granted_items.append(item_id)
+                        logger.info(f"Granted item '{item_id}' to {user_id_str} for mission {mission_id}")
+                    else:
+                        logger.warning(f"Invalid item_id format in mission reward for {mission_id}: {item_id}")
+                
+                # Save the character with the updated inventory
+                await self.character_system.save_character(character)
+                granted_rewards["items"] = granted_items # Add granted items to the rewards dict
+            else:
+                logger.error(f"Could not grant items for mission {mission_id}: Character {user_id_str} not found.")
+
+        # Check for achievements
+        achievement_key = mission_details.get("achievement_key")
+        if achievement_key:
+            await self.progression_engine.check_achievement(user_id_str, achievement_key)
+
+        # Update state: remove from active, add to completed
+        del self.active_missions[user_id_str]
+        if user_id_str not in self.completed_missions:
+            self.completed_missions[user_id_str] = []
+        self.completed_missions[user_id_str].append(mission_id)
+
+        await self._save_active_missions()
+        await self._save_completed_missions()
+
+        logger.info(f"User {user_id_str} completed mission '{mission_id}' ({mission_name}). Rewards: {granted_rewards}")
+        return granted_rewards
+
+    def get_active_mission(self, user_id: int) -> Optional[Dict[str, Any]]:
+        """Returns the active mission details for a user, or None if no mission is active."""
+        user_id_str = str(user_id) # Convert int to str for lookup
+        active_info = self.active_missions.get(user_id_str)
+        if not active_info:
+            return None
+        
         mission_id = active_info.get("mission_id")
-        mission_def = self.mission_definitions.get(mission_id)
-
-        if not mission_def:
-             logger.error(f"Active mission {mission_id} for user {user_id_str} has no definition found in memory!")
-             # Consider clearing the inconsistent active mission state?
-             # self.active_missions.pop(user_id_str, None)
-             # asyncio.create_task(self._save_active_missions()) # Fire and forget save
-             return None # Indicate error
-
-        # Return the definition, maybe add start time if needed by caller
-        full_mission_details = mission_def.copy()
-        full_mission_details["start_time_iso"] = active_info.get("start_time")
-        # Add other active state parts if they exist in the future
-        return full_mission_details
+        if not mission_id or mission_id not in self.mission_definitions:
+            return None # Or log error if definition is missing
+        
+        mission_details = self.mission_definitions[mission_id].copy() # Return a copy
+        mission_details["start_time"] = active_info["start_time"]
+        # Add progress if tracked: mission_details["progress"] = active_info.get("progress", {})
+        return mission_details
 
     def get_completed_missions(self, user_id: int) -> List[str]:
         """Gets the list of completed mission IDs for a user."""
@@ -313,8 +336,8 @@ class MissionSystem:
     def get_available_missions(self, character: Character) -> List[Dict[str, Any]]:
         """Returns a list of mission definitions available to the character."""
         available = []
-        user_id_str = str(character.user_id)
-        completed_ids = set(self.get_completed_missions(character.user_id))
+        user_id_str = str(character.id)
+        completed_ids = set(self.get_completed_missions(character.id))
         has_active_mission = user_id_str in self.active_missions
 
         # Cannot take new missions if one is active (current design)

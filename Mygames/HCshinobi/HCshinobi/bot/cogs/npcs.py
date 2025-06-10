@@ -90,9 +90,22 @@ class NPCCommands(commands.Cog):
         - Optionally, OpenAIClient for AI-generated death stories.
     """
     def __init__(self, bot: "HCShinobiBot"):
-        self.bot = bot
-        self.npc_manager: NPCManager = getattr(bot, 'npc_manager', NPCManager())
-        self.clan_data: ClanData = getattr(bot, 'clan_data', ClanData())
+        """Initialize the NPCCommands cog."""
+        self.bot: HCShinobiBot = bot
+        # Get services using direct attribute access
+        self.npc_manager: NPCManager = getattr(bot.services, 'npc_manager', None)
+        self.clan_data: ClanData = getattr(bot.services, 'clan_data', None)
+        self.character_manager: CharacterManager = getattr(bot.services, 'character_manager', None)
+
+        if self.npc_manager is None:
+            logger.error("NPCManager service not found via bot.services.npc_manager.")
+        if self.clan_data is None:
+            logger.error("ClanData service not found during NPCCommands initialization.")
+            # Potentially raise an error or handle the missing service appropriately
+        if self.character_manager is None:
+            logger.error("CharacterManager service not found during NPCCommands initialization.")
+            # Potentially raise an error or handle the missing service appropriately
+
         self.openai_client: Optional["OpenAIClient"] = getattr(bot, 'openai_client', None)
         self.prompt_generator = NPCPromptGenerator(self.openai_client) if self.openai_client else None
 

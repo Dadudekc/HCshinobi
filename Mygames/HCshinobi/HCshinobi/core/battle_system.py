@@ -16,27 +16,30 @@ from .progression_engine import ShinobiProgressionEngine
 from .constants import BATTLES_SUBDIR, ACTIVE_BATTLES_FILENAME, BATTLE_HISTORY_FILENAME
 from ..utils.file_io import load_json, save_json
 
-# Imports from battle_effects
-from .battle_effects import (
+# Import from new battle module
+from .battle import (
+    BattleState,
+    deserialize_battle_state,
     StatusEffect,
     tick_status_durations,
     apply_status_effects,
     can_player_act,
-    add_status_effect
-)
-
-# Imports from battle_actions
-from .battle_actions import (
+    add_status_effect,
     resolve_basic_attack,
     resolve_jutsu_action,
     resolve_flee_action,
     resolve_defend_action,
-    resolve_attack,
-    get_effective_stat
+    get_effective_stat,
+    initialize_battle
 )
 
-# Data class or enum from battle_types
-from .battle_types import BattleState
+# Import resolve_attack directly from its source using the correct relative path
+from .battle_actions import resolve_attack
+
+from .battle.persistence import BattlePersistence
+from .battle.lifecycle import BattleLifecycle
+from .battle.turn import process_turn
+from .battle.types import BattleLogCallback
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +51,7 @@ class BattleSystem:
         self,
         character_system: CharacterSystem,
         data_dir: Optional[str] = None,
-        progression_engine: Optional[Any] = None,
+        progression_engine: Optional[ShinobiProgressionEngine] = None,
         master_jutsu_data: Optional[Dict[str, Dict]] = None
     ):
         """
@@ -60,107 +63,131 @@ class BattleSystem:
             progression_engine: Instance of the progression engine (optional)
             master_jutsu_data: Dictionary containing all loaded jutsu definitions (optional)
         """
-        # Set up logger first to ensure it's available everywhere
-        self.logger = logging.getLogger(__name__)
-        
-        # Set up data directories with default if not specified
-        self.base_data_dir = data_dir or "data"
-        self.battles_data_dir = os.path.join(self.base_data_dir, BATTLES_SUBDIR)
-        os.makedirs(self.battles_data_dir, exist_ok=True)
-
-        self.active_battles_file = os.path.join(self.battles_data_dir, ACTIVE_BATTLES_FILENAME)
-        self.battle_history_file = os.path.join(self.battles_data_dir, BATTLE_HISTORY_FILENAME)
-
-        self.character_system = character_system
-        self.progression_engine = progression_engine
-        self.master_jutsu_data = master_jutsu_data or {}
-
-        self.active_battles: Dict[str, BattleState] = {}
-        self.battle_history: Dict[str, List[str]] = {}
-        self.battle_tasks: Dict[str, asyncio.Task] = {}
-        self._load_lock = asyncio.Lock()
-        
-        # Store reference to bot (will be set in ready_hook)
-        self.bot = None
-
-        self.logger.info(f"BattleSystem initialized. Data dir: {self.battles_data_dir}")
-
-    async def _deserialize_battle_state(self, data: Dict) -> Optional[BattleState]:
-        """
-        Deserialize a dictionary back into a BattleState object.
-        """
-        try:
-            # --- Reconstruct Character Objects --- #
-            attacker_data = data.get('attacker')
-            defender_data = data.get('defender')
-            
-            if not attacker_data or not defender_data:
-                self.logger.error("_deserialize_battle_state: Missing attacker or defender data.")
-                return None
-
-            # Use Character.from_dict to reconstruct
-            attacker = Character.from_dict(attacker_data)
-            defender = Character.from_dict(defender_data)
-            
-            if not attacker or not defender:
-                self.logger.error("_deserialize_battle_state: Failed to reconstruct Character objects.")
-                return None
-            # --- End Character Reconstruction --- #
-                 
-            # Handle last_action timestamp conversion
-            last_action_str = data.get('last_action')
-            last_action_dt = None
-            if last_action_str:
-                try:
-                    last_action_dt = datetime.fromisoformat(last_action_str).replace(tzinfo=timezone.utc)
-                except (ValueError, TypeError):
-                    self.logger.warning(f"_deserialize_battle_state: Could not parse last_action timestamp '{last_action_str}'.")
-                    
-            # Handle start_time timestamp conversion
-            start_time_str = data.get('start_time')
-            start_time_dt = datetime.now(timezone.utc) # Default to now if missing/invalid
-            if start_time_str:
-                try:
-                    start_time_dt = datetime.fromisoformat(start_time_str).replace(tzinfo=timezone.utc)
-                except (ValueError, TypeError):
-                    self.logger.warning(f"_deserialize_battle_state: Could not parse start_time timestamp '{start_time_str}'. Using current time.")
-                    
-            # --- Create BattleState --- #
-            state = BattleState(
-                attacker=attacker,
-                defender=defender,
-                attacker_hp=data.get('attacker_hp', attacker.hp), # Use character HP if missing
-                defender_hp=data.get('defender_hp', defender.hp),
-                attacker_chakra=data.get('attacker_chakra', attacker.chakra), # Use character chakra if missing
-                defender_chakra=data.get('defender_chakra', defender.chakra), # Use character chakra if missing
-                current_turn_player_id=data.get('current_turn_player_id'),
-                turn_number=data.get('turn_number', 1),
-                battle_log=data.get('battle_log', []), # Default to empty list
-                attacker_effects=data.get('attacker_effects', []), # Default to empty list
-                defender_effects=data.get('defender_effects', []), # Default to empty list
-                winner_id=data.get('winner_id'),
-                is_active=data.get('is_active', False), # Assume inactive if missing
-                start_time=start_time_dt, 
-                last_action=last_action_dt, 
-                end_reason=data.get('end_reason')
-            )
-            return state
-            # --- End Create BattleState --- #
-            
-        except Exception as e:
-            self.logger.error(f"Error deserializing battle state: {e}", exc_info=True)
-            return None
+        self.persistence = BattlePersistence(data_dir)
+        self.lifecycle = BattleLifecycle(
+            character_system=character_system,
+            persistence=self.persistence,
+            progression_engine=progression_engine,
+            master_jutsu_data=master_jutsu_data
+        )
+        # Store services reference
+        self.services: Optional[ServiceContainer] = None
 
     async def process_turn(
         self,
         battle_id: str,
         player_id: str,
         action: Dict[str, Any]
-    ) -> Tuple[Optional[BattleState], str]:
+    ) -> Tuple[Optional['BattleState'], str]:
+        """
+        Process a single turn in an ongoing battle.
+
+        Args:
+            battle_id: ID of the battle
+            player_id: ID of the player taking the turn
+            action: Action to perform
+
+        Returns:
+            Tuple of (updated battle state, result message)
+        """
+        # Check for services first
+        if not self.services:
+            logger.critical(f"BattleSystem.process_turn called before services were initialized!")
+            return None, "Error: Battle system services not ready."
+
+        battle = self.persistence.active_battles.get(battle_id)
+        if not battle:
+            return None, "Battle not found."
+
+        # Process the turn
+        updated_battle, message = await process_turn(
+            battle,
+            player_id,
+            action,
+            self.lifecycle._add_to_battle_log
+        )
+
+        # Handle battle end if needed
+        if updated_battle and not updated_battle.is_active:
+            await self.lifecycle.handle_battle_end(updated_battle, battle_id)
+
+        return updated_battle, message
+
+    async def ready_hook(self, bot: Any) -> None:
+        """
+        Hook called when the bot is ready.
+
+        Args:
+            bot: Discord bot instance
+        """
+        from HCshinobi.bot.services import ServiceContainer
+
+        # Store services from bot
+        if hasattr(bot, 'services') and isinstance(bot.services, ServiceContainer):
+            self.services = bot.services
+        else:
+            logger.error("BattleSystem ready_hook: Could not get ServiceContainer from bot object!")
+            # Handle error: perhaps raise an exception or log critical failure
+
+        # Load saved state
+        await self.persistence.load_active_battles()
+        await self.persistence.load_battle_history()
+
+        # Initialize lifecycle
+        await self.lifecycle.ready_hook(bot)
+
+    async def shutdown(self) -> None:
+        """Clean up when shutting down."""
+        await self.lifecycle.shutdown()
+
+    def _add_to_battle_log(self, battle: BattleState, message: str) -> None:
+        """Add a message to the battle log."""
+        battle.battle_log.append(f"{datetime.now(timezone.utc).isoformat()} - {message}")
+        self.logger.info(f"Battle {battle.id}: {message}")
+
+    async def _handle_battle_end(self, battle: BattleState, battle_id: str) -> None:
+        """Handle cleanup when a battle ends."""
+        # Save battle to history
+        if battle_id not in self.battle_history:
+            self.battle_history[battle_id] = []
+        self.battle_history[battle_id].extend(battle.battle_log)
+
+        # Remove from active battles
+        if battle_id in self.active_battles:
+            del self.active_battles[battle_id]
+
+        # Cancel any ongoing battle task
+        if battle_id in self.battle_tasks:
+            self.battle_tasks[battle_id].cancel()
+            del self.battle_tasks[battle_id]
+
+        # Save changes
+        await self.save_active_battles()
+        await self._save_battle_history()
+
+    async def _save_battle_history(self) -> None:
+        """Save battle history to disk."""
+        try:
+            await save_json(self.battle_history_file, self.battle_history)
+            self.logger.info(f"Saved battle history with {len(self.battle_history)} battles")
+        except Exception as e:
+            self.logger.error(f"Error saving battle history: {e}", exc_info=True)
+
+    async def process_turn(
+        self,
+        battle_id: str,
+        player_id: str,
+        action: Dict[str, Any]
+    ) -> Tuple[Optional['BattleState'], str]:
         """
         Processes a single turn in an ongoing battle, including effects and actions.
         """
-        battle = self.active_battles.get(battle_id)
+        # Check for services first
+        if not self.services:
+            logger.critical(f"BattleSystem.process_action called before services were initialized!")
+            return None, "Error: Battle system services not ready."
+            
+        battle = self.persistence.active_battles.get(battle_id)
         if not battle or not battle.is_active:
             logger.warning(f"process_turn called for inactive/non-existent battle: {battle_id}")
             return None, "Battle not found or is inactive."
@@ -576,199 +603,6 @@ class BattleSystem:
         except Exception as e:
             logger.error(f"Failed to save active battles: {e}", exc_info=True)
 
-    async def ready_hook(self):
-        """Called when the bot is ready to set up systems that depend on it."""
-        self.logger.info("Battle system ready hook called")
-        
-        # Load battle states
-        await self.load_battle_state()
-        self.logger.info(f"Loaded {len(self.active_battles)} active battles")
-        
-        # Validate battle states and clean up any problematic ones
-        invalid_count = await self.validate_battle_states()
-        if invalid_count > 0:
-            self.logger.warning(f"Removed {invalid_count} invalid battles during validation on startup")
-        
-        # Load battle history
-        await self._load_battle_history()
-        total_history = sum(len(battles) for battles in self.battle_history.values())
-        self.logger.info(f"Loaded {total_history} battle history records")
-
-    def _add_to_battle_log(self, battle: BattleState, message: str):
-        """Adds a message to the battle log."""
-        timestamp = datetime.now(timezone.utc).strftime("%H:%M:%S")
-        # Limit log size
-        if len(battle.battle_log) > 50:
-            battle.battle_log = battle.battle_log[-50:]
-        battle.battle_log.append(f"[{timestamp}] {message}")
-
-    async def start_battle(self, attacker_id: str, defender_id: str) -> Optional[BattleState]:
-        """
-        Start a new battle.
-        """
-        attacker = await self.character_system.get_character(attacker_id)
-        defender = await self.character_system.get_character(defender_id)
-
-        if not attacker or not defender:
-            logger.warning(
-                f"Attempted to start battle, but character not found. "
-                f"Att: {attacker_id}, Def: {defender_id}"
-            )
-            return None
-        if attacker_id == defender_id:
-            logger.warning(f"Attempted to start battle with self: {attacker_id}")
-            return None
-
-        p_ids = sorted([attacker_id, defender_id])
-        battle_id = f"{p_ids[0]}_{p_ids[1]}"
-
-        if battle_id in self.active_battles and self.active_battles[battle_id].is_active:
-            logger.warning(f"Battle {battle_id} already active. Returning existing state.")
-            return self.active_battles[battle_id]
-
-        # Check if either player is already in another active battle
-        for existing_id, state in self.active_battles.items():
-            if state.is_active and (
-                state.attacker.id == attacker_id
-                or state.defender.id == attacker_id
-                or state.attacker.id == defender_id
-                or state.defender.id == defender_id
-            ):
-                logger.warning(
-                    f"Cannot start battle {battle_id}: Player {attacker_id if (state.attacker.id == attacker_id or state.defender.id == attacker_id) else defender_id} "
-                    f"is already in battle {existing_id}."
-                )
-                return None
-
-        battle = BattleState(
-            attacker=attacker,
-            defender=defender,
-            attacker_hp=attacker.hp,
-            defender_hp=defender.hp,
-            attacker_chakra=attacker.chakra,  # Initialize attacker chakra
-            defender_chakra=defender.chakra,  # Initialize defender chakra
-            current_turn_player_id=attacker_id,
-            turn_number=1
-        )
-        self._add_to_battle_log(battle, f"Battle started: {attacker.name} vs {defender.name}.")
-
-        # Check if the battle ended immediately
-        if await self.check_battle_end(battle):
-            logger.info(f"Battle {battle_id} ended immediately due to start-of-battle effects.")
-            self.active_battles[battle_id] = battle
-            await self.save_battle_state()
-            return battle
-
-        # For demonstration, assume first player can act
-        self._add_to_battle_log(battle, f"Turn {battle.turn_number} begins. It's {attacker.name}'s turn.")
-
-        self.active_battles[battle_id] = battle
-        logger.info(f"[BattleSystem] Battle {battle_id} created and added to active_battles dict. State: {battle}")
-        await self.save_battle_state()
-        logger.info(f"Battle started successfully: {battle_id}. Current Turn: {battle.current_turn_player_id}")
-        return battle
-
-    async def check_battle_end(self, battle: BattleState) -> bool:
-        """
-        Check if battle has ended and update state if it has.
-        Returns True if battle ended, False otherwise.
-        """
-        if not battle.is_active:
-            return True
-
-        winner_id = None
-        if battle.attacker_hp <= 0:
-            winner_id = battle.defender.id
-        elif battle.defender_hp <= 0:
-            winner_id = battle.attacker.id
-
-        if winner_id:
-            winner = battle.attacker if winner_id == battle.attacker.id else battle.defender
-            loser = battle.defender if winner_id == battle.attacker.id else battle.attacker
-            self._add_to_battle_log(battle, f"Battle Ended! Winner: {winner.name}")
-            battle.is_active = False
-            battle.winner_id = winner_id
-            await self.save_battle_state()
-            return True
-
-        return False
-
-    async def end_battle(
-        self,
-        battle_id: str,
-        winner_id: Optional[str] = None,
-        reason: str = "Battle Concluded"
-    ) -> Tuple[bool, str]:
-        """Ends an active battle, updates character stats, and cleans up."""
-        if battle_id not in self.active_battles:
-            logger.warning(f"Attempted to end non-existent battle: {battle_id}")
-            return False, "Battle not found."
-
-        battle_state = self.active_battles[battle_id]
-        if not battle_state.is_active:
-            logger.warning(f"Attempted to end already inactive battle: {battle_id}")
-            return False, "Battle already ended."
-
-        # Mark battle as inactive and set winner/reason
-        battle_state.is_active = False
-        battle_state.winner_id = winner_id
-        battle_state.end_reason = reason
-        battle_state.battle_log.append(f"🏁 {reason}")
-        if winner_id:
-            winner = battle_state.attacker if str(battle_state.attacker.id) == winner_id else battle_state.defender
-            battle_state.battle_log.append(f"🏆 Winner: {winner.name}")
-
-        self.logger.info(f"Ending battle {battle_id}. Reason: {reason}. Winner ID: {winner_id}")
-
-        # --- Store Battle Log --- #
-        if battle_state.battle_log: # Ensure there is a log to store
-            self.battle_history[battle_id] = battle_state.battle_log[:]
-            # Limit history size if needed
-            max_history = 100 # Example limit
-            if len(self.battle_history) > max_history:
-                # Simple FIFO removal
-                oldest_battle_id = next(iter(self.battle_history))
-                del self.battle_history[oldest_battle_id]
-                self.logger.info(f"Removed oldest battle log ({oldest_battle_id}) to maintain history size.")
-        await self._save_battle_history() # Save history after modification
-        # ------------------------ #
-
-        # Update character wins/losses
-        if winner_id:
-            loser_id = str(battle_state.defender.id) if str(battle_state.attacker.id) == winner_id else str(battle_state.attacker.id)
-            await self._handle_battle_end(battle_state, battle_id)
-        else:
-             # Handle draws or other outcomes if necessary
-             pass
-
-        # Remove from active battles *after* processing
-        # Keep state temporarily if needed? For now, remove immediately.
-        # Consider potential race condition if another request tries to access the ended battle
-        # For simplicity, we remove it here. A short delay or different state might be safer.
-        if battle_id in self.active_battles: # Check again in case of concurrent modification
-            del self.active_battles[battle_id]
-
-        return True, f"{reason}"
-
-    def get_battle_state(self, battle_id: str) -> Optional[BattleState]:
-        """Get the current state of a battle."""
-        state = self.active_battles.get(battle_id)
-        logger.debug(f"[BattleSystem] get_battle_state called for ID {battle_id}. State found: {state is not None}")
-        if state is None:
-             logger.warning(f"[BattleSystem] get_battle_state failed to find state for ID {battle_id}. Current active battles: {list(self.active_battles.keys())}")
-        return state
-
-    def get_battle_id_for_player(self, player_id: str) -> Optional[str]:
-        """Find the battle ID for an active battle involving the specified player."""
-        for battle_id, state in self.active_battles.items():
-            if state.is_active and (str(state.attacker.id) == player_id or str(state.defender.id) == player_id):
-                return battle_id
-        return None
-        
-    def is_user_in_battle(self, user_id: str) -> bool:
-        """Check if a user ID is involved in any active battle."""
-        return self.get_battle_id_for_player(user_id) is not None
-
     async def battle_timeout_check(self) -> None:
         """
         Background task to check for battle timeouts.
@@ -824,13 +658,18 @@ class BattleSystem:
         actor_id: str,
         action_type: str,
         **kwargs
-    ) -> Tuple[Optional[BattleState], str]:
+    ) -> Tuple[Optional['BattleState'], str]:
         """
         Processes a player's action (attack, jutsu, etc.).
         
         Returns the updated BattleState and a message summarizing the action/outcome.
         """
-        battle = self.active_battles.get(battle_id)
+        # Check for services first
+        if not self.services:
+            logger.critical(f"BattleSystem.process_action called before services were initialized!")
+            return None, "Error: Battle system services not ready."
+            
+        battle = self.persistence.active_battles.get(battle_id)
         if not battle or not battle.is_active:
             warning_msg = f"Process action failed: Battle {battle_id} not found or inactive."
             logger.warning(warning_msg)
@@ -1100,3 +939,38 @@ class BattleSystem:
                     self.logger.error(f"Failed to notify player {player_id} about battle timeout: {e}")
         except Exception as e:
             self.logger.error(f"Error in notify_players_battle_timeout: {e}", exc_info=True)
+
+    async def create_battle(
+        self,
+        attacker: Character,
+        defender: Character,
+        is_duel: bool = False # Parameter unused for now, but kept for potential future use
+    ) -> str:
+        """
+        Initializes and starts a new battle between two characters.
+
+        Args:
+            attacker: The attacking character.
+            defender: The defending character.
+            is_duel: Whether the battle is a duel (currently unused).
+
+        Returns:
+            The ID of the newly created battle.
+
+        Raises:
+            Exception: If battle initialization fails.
+        """
+        logger.info(f"Attempting to create battle between {attacker.name} ({attacker.id}) and {defender.name} ({defender.id})")
+        try:
+            battle_id, battle_state = await initialize_battle(
+                attacker=attacker,
+                defender=defender,
+                persistence=self.persistence,
+                add_to_battle_log=self._add_to_battle_log
+            )
+            logger.info(f"Battle {battle_id} initialized successfully.")
+            # The battle state should already be added to persistence by initialize_battle
+            return battle_id
+        except Exception as e:
+            logger.exception(f"Failed to initialize battle between {attacker.id} and {defender.id}")
+            raise Exception(f"Could not start battle: {e}") from e

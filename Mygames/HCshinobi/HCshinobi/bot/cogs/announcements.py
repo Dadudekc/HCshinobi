@@ -7,8 +7,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 import logging
-from typing import Optional
-from ..bot import HCBot
+from typing import Optional, TYPE_CHECKING
 import os
 import sys
 import time
@@ -25,6 +24,9 @@ from ..core.notifications.templates import (
 from ...core.views import ConfirmView
 from ...utils.config import load_config
 from ...utils.embeds import create_error_embed, create_success_embed
+
+if TYPE_CHECKING:
+    from ..bot import HCBot
 
 logger = logging.getLogger(__name__)
 
@@ -57,9 +59,11 @@ class AnnouncementCommands(commands.Cog):
         self.maintenance_mode = maintenance_mode
         logger.info("AnnouncementCommands Cog initialized.")
         logger.info(f"Announcement channel ID set to: {self.announcement_channel_id}")
+        # Set initial announcement state based on maintenance mode
+        self.announcements_enabled = not self.maintenance_mode 
         if self.maintenance_mode:
             logger.info("Maintenance mode is active - announcements will be disabled")
-            self.no_announcement = True
+            # self.no_announcement = True # Remove this redundant flag
 
     def _is_duplicate_announcement(self, message: str) -> bool:
         """Check if an announcement is a duplicate of a recent one."""
@@ -126,7 +130,7 @@ class AnnouncementCommands(commands.Cog):
         )
         embed.add_field(
             name="Announcements",
-            value="❌ Disabled" if self.no_announcement else "✅ Enabled",
+            value="✅ Enabled" if self.announcements_enabled else "❌ Disabled",
             inline=False
         )
         if self.maintenance_mode:
@@ -168,8 +172,9 @@ class AnnouncementCommands(commands.Cog):
             await interaction.followup.send("❌ Cannot send announcements while in maintenance mode.", ephemeral=True)
             return
             
-        if self.no_announcement:
-            await interaction.followup.send("❌ Announcements are currently disabled.", ephemeral=True)
+        # Use the unified announcements_enabled flag
+        if not self.announcements_enabled:
+            await interaction.followup.send("❌ Announcements are currently disabled via /toggle_announcements.", ephemeral=True)
             return
 
         # Create announcement message
@@ -232,8 +237,9 @@ class AnnouncementCommands(commands.Cog):
             await interaction.followup.send("❌ Cannot send announcements while in maintenance mode.", ephemeral=True)
             return
             
-        if self.no_announcement:
-            await interaction.followup.send("❌ Announcements are currently disabled.", ephemeral=True)
+        # Use the unified announcements_enabled flag
+        if not self.announcements_enabled:
+            await interaction.followup.send("❌ Announcements are currently disabled via /toggle_announcements.", ephemeral=True)
             return
 
         try:
@@ -282,8 +288,9 @@ class AnnouncementCommands(commands.Cog):
             await interaction.followup.send("❌ Cannot send announcements while in maintenance mode.", ephemeral=True)
             return
             
-        if self.no_announcement:
-            await interaction.followup.send("❌ Announcements are currently disabled.", ephemeral=True)
+        # Use the unified announcements_enabled flag
+        if not self.announcements_enabled:
+            await interaction.followup.send("❌ Announcements are currently disabled via /toggle_announcements.", ephemeral=True)
             return
 
         try:
@@ -464,8 +471,9 @@ class AnnouncementCommands(commands.Cog):
             await interaction.followup.send("❌ Cannot send announcements while in maintenance mode.", ephemeral=True)
             return
             
-        if self.no_announcement:
-            await interaction.followup.send("❌ Announcements are currently disabled.", ephemeral=True)
+        # Use the unified announcements_enabled flag
+        if not self.announcements_enabled:
+            await interaction.followup.send("❌ Announcements are currently disabled via /toggle_announcements.", ephemeral=True)
             return
 
         # Optional: Prevent duplicate generic announcements if needed
@@ -526,8 +534,9 @@ class AnnouncementCommands(commands.Cog):
             await interaction.followup.send("❌ Cannot send announcements while in maintenance mode.", ephemeral=True)
             return
             
-        if self.no_announcement:
-            await interaction.followup.send("❌ Announcements are currently disabled.", ephemeral=True)
+        # Use the unified announcements_enabled flag
+        if not self.announcements_enabled:
+            await interaction.followup.send("❌ Announcements are currently disabled via /toggle_announcements.", ephemeral=True)
             return
 
         try:
@@ -572,8 +581,9 @@ class AnnouncementCommands(commands.Cog):
             await interaction.followup.send("❌ Cannot send announcements while in maintenance mode.", ephemeral=True)
             return
             
-        if self.no_announcement:
-            await interaction.followup.send("❌ Announcements are currently disabled.", ephemeral=True)
+        # Use the unified announcements_enabled flag
+        if not self.announcements_enabled:
+            await interaction.followup.send("❌ Announcements are currently disabled via /toggle_announcements.", ephemeral=True)
             return
 
         try:
@@ -623,8 +633,9 @@ class AnnouncementCommands(commands.Cog):
             await interaction.followup.send("❌ Cannot send announcements while in maintenance mode.", ephemeral=True)
             return
             
-        if self.no_announcement:
-            await interaction.followup.send("❌ Announcements are currently disabled.", ephemeral=True)
+        # Use the unified announcements_enabled flag
+        if not self.announcements_enabled:
+            await interaction.followup.send("❌ Announcements are currently disabled via /toggle_announcements.", ephemeral=True)
             return
 
         try:
@@ -714,7 +725,7 @@ class AnnouncementCommands(commands.Cog):
             await interaction.followup.send("❌ Failed to retrieve lore information. Check the logs for details.", ephemeral=True)
 
     @app_commands.command(
-        name="update",
+        name="send_update",
         description="Send an update announcement"
     )
     @app_commands.describe(
@@ -824,7 +835,85 @@ class AnnouncementCommands(commands.Cog):
                 embed=error_embed
             )
 
-async def setup(bot: HCBot):
+# Define the 'update' command group separately
+@app_commands.guild_only() # Or remove if intended to be global
+class SystemUpdateCommands(commands.GroupCog, group_name="system_update"):
+    """Commands related to system update announcements."""
+    
+    def __init__(self, bot: commands.Bot, announcements_cog: AnnouncementCommands):
+        self.bot = bot
+        self.announcements_cog = announcements_cog
+        self.logger = logging.getLogger(__name__)
+
+    @app_commands.command(
+        name="now", # Renamed from 'update' to 'now' to avoid conflict with group name
+        description="[Admin] Announce an impending system update."
+    )
+    @app_commands.describe(
+        version="The version number of the update",
+        release_date="When the update will be released",
+        changes="Key changes in this update",
+        downtime="Expected downtime (if any)",
+        additional_info="Any additional information"
+    )
+    @app_commands.checks.has_permissions(administrator=True)
+    async def update(
+        self,
+        interaction: discord.Interaction,
+        version: str,
+        release_date: str,
+        changes: str,
+        downtime: Optional[str] = None,
+        additional_info: Optional[str] = None
+    ) -> None:
+        """Announce an impending system update."""
+        logger.info(f"update command triggered by {interaction.user.name} (ID: {interaction.user.id})")
+        await interaction.response.defer(ephemeral=True)
+        
+        if self.announcements_cog.maintenance_mode:
+            await interaction.followup.send("❌ Cannot send announcements while in maintenance mode.", ephemeral=True)
+            return
+            
+        # Use the unified announcements_enabled flag
+        if not self.announcements_cog.announcements_enabled:
+            await interaction.followup.send("❌ Announcements are currently disabled via /toggle_announcements.", ephemeral=True)
+            return
+
+        # Create announcement message
+        message = f"System Update v{version} - Release Date: {release_date}\nChanges: {changes}"
+        if downtime:
+            message += f"\nDowntime: {downtime}"
+        if additional_info:
+            message += f"\nAdditional Info: {additional_info}"
+
+        # Check for duplicate announcements
+        if self.announcements_cog._is_duplicate_announcement(message):
+            await interaction.followup.send(
+                "This update announcement is too similar to a recent one. Please wait a few minutes before posting a similar announcement.",
+                ephemeral=True
+            )
+            return
+
+        try:
+            # Create system update embed
+            embed = system_update(
+                title=f"System Update v{version}",
+                version=version,
+                changes=changes,
+                downtime=downtime
+            )
+            
+            # Send notification
+            await self.announcements_cog.dispatcher.dispatch(embed, ping_everyone=True)
+            
+            logger.info("Update announcement sent successfully")
+            await interaction.followup.send("✅ Update announcement sent successfully!", ephemeral=True)
+            
+        except Exception as e:
+            logger.error(f"Error sending update announcement: {e}", exc_info=True)
+            await interaction.followup.send("❌ Failed to send the announcement. Check the logs for details.", ephemeral=True)
+
+async def setup(bot: "HCBot"):
     """Adds the AnnouncementCommands cog to the bot."""
     try:
         await bot.add_cog(AnnouncementCommands(bot))

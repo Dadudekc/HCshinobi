@@ -81,6 +81,7 @@ class BotConfig:
     online_channel_id: int
     data_dir: str
     application_id: int
+    database_url: str
     
     # Optional fields with defaults
     announcement_channel_id: Optional[int] = None
@@ -95,6 +96,9 @@ class BotConfig:
     openai_target_url: Optional[str] = None
     openai_headless: bool = False
     version: str = "1.0.0"
+    # Add new optional channel IDs
+    bug_report_channel_id: Optional[int] = None
+    suggestion_channel_id: Optional[int] = None
 
     def __post_init__(self):
         """Validate configuration after initialization."""
@@ -117,8 +121,22 @@ class BotConfig:
             raise ValueError("jutsu_shop_channel_id must be positive")
         if self.equipment_shop_channel_id is not None and self.equipment_shop_channel_id <= 0:
             raise ValueError("equipment_shop_channel_id must be positive")
+        # Validate new channel IDs if provided
+        if self.bug_report_channel_id is not None and self.bug_report_channel_id <= 0:
+            raise ValueError("bug_report_channel_id must be positive")
+        if self.suggestion_channel_id is not None and self.suggestion_channel_id <= 0:
+            raise ValueError("suggestion_channel_id must be positive")
 
         # Validate URLs, only if they are provided
+        db_parsed = urlparse(self.database_url)
+        if db_parsed.scheme == 'sqlite':
+            # For SQLite, netloc might be empty, so we just check the scheme
+            if not db_parsed.scheme:
+                 raise ValueError(f"Invalid database URL scheme: {self.database_url}")
+        elif not self._is_valid_url(self.database_url):
+             # For other schemes, use the standard validation
+             raise ValueError(f"Invalid database URL: {self.database_url}")
+             
         if self.webhook_url and not self._is_valid_url(self.webhook_url):
             raise ValueError(f"Invalid webhook URL: {self.webhook_url}")
         if self.ollama_base_url and not self._is_valid_url(self.ollama_base_url):
@@ -152,7 +170,8 @@ class BotConfig:
             "battle_channel_id": os.getenv("DISCORD_BATTLE_CHANNEL_ID"),
             "online_channel_id": os.getenv("DISCORD_ONLINE_CHANNEL_ID"),
             "data_dir": os.getenv("DATA_DIR"),
-            "application_id": os.getenv("APPLICATION_ID")
+            "application_id": os.getenv("APPLICATION_ID"),
+            "database_url": os.getenv("DATABASE_URL")
         }
 
         # Check for missing required fields
@@ -173,6 +192,11 @@ class BotConfig:
             jutsu_shop_channel_id = int(raw_jutsu_shop_id) if raw_jutsu_shop_id else None
             raw_equipment_shop_id = os.getenv("DISCORD_EQUIPMENT_SHOP_CHANNEL_ID")
             equipment_shop_channel_id = int(raw_equipment_shop_id) if raw_equipment_shop_id else None
+            # Load new channel IDs
+            raw_bug_report_id = os.getenv("DISCORD_BUG_REPORT_CHANNEL_ID")
+            bug_report_channel_id = int(raw_bug_report_id) if raw_bug_report_id else None
+            raw_suggestion_id = os.getenv("DISCORD_SUGGESTION_CHANNEL_ID")
+            suggestion_channel_id = int(raw_suggestion_id) if raw_suggestion_id else None
         except ValueError as e:
             raise ValueError(f"Invalid numeric value in configuration: {str(e)}")
 
@@ -181,6 +205,9 @@ class BotConfig:
             "announcement_channel_id": announcement_channel_id,
             "jutsu_shop_channel_id": jutsu_shop_channel_id,
             "equipment_shop_channel_id": equipment_shop_channel_id,
+            # Add new fields
+            "bug_report_channel_id": bug_report_channel_id,
+            "suggestion_channel_id": suggestion_channel_id,
             "command_prefix": os.getenv("DISCORD_COMMAND_PREFIX", "!"),
             "webhook_url": os.getenv("DISCORD_WEBHOOK_URL"),
             "log_level": os.getenv("LOG_LEVEL", "INFO"),
@@ -200,6 +227,7 @@ class BotConfig:
             online_channel_id=online_channel_id,
             data_dir=required_fields["data_dir"],
             application_id=application_id,
+            database_url=required_fields["database_url"],
             **optional_fields
         )
 

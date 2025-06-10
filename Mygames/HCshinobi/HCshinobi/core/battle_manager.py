@@ -16,35 +16,9 @@ from .character_manager import CharacterManager
 from ..utils.ollama_client import OllamaClient, OllamaError
 from .battle_system import BattleSystem
 from .character import Character
+from .battle.state import BattleState, BattleParticipant
 
 logger = logging.getLogger(__name__)
-
-@dataclass
-class BattleParticipant:
-    """Represents a participant (player or AI) in a battle."""
-    character_id: str  # Name/ID used to fetch data from CharacterManager
-    character_data: Dict[str, Any] = field(repr=False) # Full data loaded from JSON
-    current_hp: int
-    max_hp: int
-    current_chakra: int # Added current chakra
-    max_chakra: int # Added max chakra
-    status_effects: list[str] = field(default_factory=list)
-    # Add other relevant stats like energy, buffs, debuffs as needed
-
-@dataclass
-class BattleState:
-    """Holds the state of an ongoing battle instance."""
-    # Non-default fields first
-    interaction_context: Any # Store discord interaction or relevant context (e.g., channel id)
-    player: BattleParticipant
-    opponent: BattleParticipant # Could be AI or another player
-    
-    # Fields with default values
-    battle_id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    turn_number: int = 1
-    is_ai_turn: bool = False
-    last_action_description: str = "Battle started!"
-    message_id: Optional[int] = None # Store message ID for potential updates
 
 class BattleError(Enum):
     """Enumeration of possible battle-related errors."""
@@ -57,24 +31,18 @@ class BattleError(Enum):
     SYSTEM_ERROR = auto()
 
 class BattleManagerError(Exception):
-    """Custom exception for Battle Manager errors."""
+    """Base exception for battle manager errors."""
     pass
 
 class BattleManager:
-    """Handles the creation, state management, and progression of battles."""
-
+    """Manages active battles and handles battle-related operations."""
+    
     def __init__(self, character_manager: CharacterManager, ollama_client: Optional[OllamaClient], battle_system: BattleSystem):
-        """
-        Initializes the BattleManager.
-
-        Args:
-            character_manager: Instance of CharacterManager to load character data.
-            ollama_client: Instance of OllamaClient to interact with the AI model.
-            battle_system: Instance of BattleSystem to manage battle state.
-        """
+        """Initialize the battle manager."""
         self.character_manager = character_manager
         self.ollama_client = ollama_client
         self.battle_system = battle_system
+        self.active_battles: Dict[str, BattleState] = {}
         self.battle_history: Dict[str, List[Dict[str, Any]]] = {}
         logger.info("BattleManager initialized.")
 

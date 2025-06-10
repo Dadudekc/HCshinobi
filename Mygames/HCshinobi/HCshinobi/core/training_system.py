@@ -1,13 +1,16 @@
 """Training system for the HCshinobi Discord bot."""
-from typing import Dict, Optional, Tuple, List
-from datetime import datetime, timedelta
+from typing import Dict, Optional, Tuple, List, Any, Set, TYPE_CHECKING
+from datetime import datetime, timedelta, timezone
 import logging
 import json
 import os
 import asyncio
 import aiofiles
+import aiofiles.os
 import random
 import discord
+from discord.ext import tasks
+from dataclasses import asdict, is_dataclass
 
 from .character import Character
 from .currency_system import CurrencySystem
@@ -51,13 +54,13 @@ class TrainingSession:
     def __init__(self, user_id: str, attribute: str, duration_hours: int, cost_per_hour: int, intensity: str):
         self.user_id = user_id
         self.attribute = attribute
-        self.start_time = datetime.now()
+        self.start_time = datetime.now(timezone.utc)
         self.end_time = self.start_time + timedelta(hours=duration_hours)
         self.cost_per_hour = cost_per_hour
-        self.total_cost = cost_per_hour * duration_hours
+        self.total_cost = int(cost_per_hour * duration_hours * TrainingIntensity.get_multipliers(intensity)[0])
         self.intensity = intensity
         self.completed = False
-        self.duration_hours = duration_hours  # Keep for serialization
+        self.duration_hours = duration_hours
 
     def to_dict(self):
         return {
@@ -68,21 +71,24 @@ class TrainingSession:
             'intensity': self.intensity,
             'start_time': self.start_time.isoformat(),
             'end_time': self.end_time.isoformat(),
-            'completed': self.completed
+            'completed': self.completed,
+            'total_cost': self.total_cost
         }
 
     @classmethod
     def from_dict(cls, data):
+        cost_per_hour = data.get('cost_per_hour', 0)
         instance = cls(
             data['user_id'],
             data['attribute'],
             data['duration_hours'],
-            data['cost_per_hour'],
+            cost_per_hour,
             data['intensity']
         )
-        instance.start_time = datetime.fromisoformat(data['start_time'])
-        instance.end_time = datetime.fromisoformat(data['end_time'])
-        instance.completed = data['completed']
+        instance.start_time = datetime.fromisoformat(data['start_time']).replace(tzinfo=timezone.utc)
+        instance.end_time = datetime.fromisoformat(data['end_time']).replace(tzinfo=timezone.utc)
+        instance.completed = data.get('completed', False)
+        instance.total_cost = data.get('total_cost', instance.total_cost)
         return instance
 
 class TrainingSystem:
@@ -90,7 +96,7 @@ class TrainingSystem:
     
     def __init__(self, data_dir: str, character_system, currency_system):
         """
-        Initialize the training system.
+        Initialize the training system. Data loading is deferred to `initialize`.
         
         Args:
             data_dir: Directory for storing training data
@@ -102,28 +108,40 @@ class TrainingSystem:
         self.currency_system = currency_system
         self.logger = logging.getLogger(__name__)
         
-        # Training data file
-        self.training_file = os.path.join(data_dir, "training.json")
-        self.training_data = self._load_training_data()
+        self.training_data_dir = os.path.join(data_dir, "training")
+        os.makedirs(self.training_data_dir, exist_ok=True)
+
+        self.sessions_file = os.path.join(self.training_data_dir, "active_sessions.json")
+        self.history_file = os.path.join(self.training_data_dir, "training_history.json")
+        self.achievements_file = os.path.join(self.training_data_dir, "training_achievements.json")
+
         self.active_sessions: Dict[str, TrainingSession] = {}
-
-        # Files for training history and achievements
-        self.history_file = os.path.join(data_dir, "training_history.json")
-        self.achievements_file = os.path.join(data_dir, "training_achievements.json")
-
-        # Cooldowns
         self.cooldowns: Dict[str, datetime] = {}
-        self.cooldown_hours = 1  # 1 hour cooldown between sessions
-
-        # Achievements
-        self.achievements = self._initialize_achievements()
         self.user_achievements: Dict[str, List[str]] = {}
+        self.training_history: Dict[str, List[Dict]] = {}
+        
+        self.cooldown_hours = 1  # 1 hour cooldown between sessions
+        self.achievements = self._initialize_achievements()
 
-        # Load state
-        self.load_sessions()
-        self.load_history()
-        self.load_achievements()
+        self.logger.warning(f">>> [Service Init] TrainingSystem initialized. Instance ID: {id(self)}")
     
+    async def initialize(self):
+        """Asynchronously load initial data and start background tasks."""
+        self.logger.warning(f">>> [Service Init] TrainingSystem initialize() called. Instance ID: {id(self)}")
+        self.logger.info("Initializing TrainingSystem asynchronously...")
+        try:
+            await self._load_active_sessions_async()
+            await self._load_history_async()
+            await self._load_achievements_async()
+            
+            if not self.check_training_completion.is_running():
+                self.check_training_completion.start()
+            self.logger.info("TrainingSystem asynchronous initialization complete.")
+        except Exception as e:
+            self.logger.critical(f"CRITICAL Error during TrainingSystem asynchronous initialization: {e}", exc_info=True)
+            # Consider raising the exception to halt bot startup if loading fails
+            raise
+
     def _initialize_achievements(self) -> List[TrainingAchievement]:
         """Initialize the list of training achievements."""
         return [
@@ -189,45 +207,76 @@ class TrainingSystem:
             )
         ]
     
-    def _load_training_data(self) -> dict:
-        """Load training data from file."""
-        if os.path.exists(self.training_file):
+    async def _load_json_file(self, filepath: str, default: Any = None) -> Any:
+        """Helper to load a JSON file asynchronously, returning default if not found or error."""
+        if default is None: default = {} # Default to empty dict if not specified
+        try:
+            if not await aiofiles.os.path.exists(filepath):
+                self.logger.warning(f"Data file not found: {filepath}. Returning default.")
+                return default
+            async with aiofiles.open(filepath, 'r', encoding='utf-8') as f:
+                content = await f.read()
+                return json.loads(content)
+        except Exception as e:
+            self.logger.error(f"Error loading data from {filepath}: {e}", exc_info=True)
+            return default # Return default on error
+
+    async def _load_active_sessions_async(self):
+        """Load and validate active training sessions from file asynchronously."""
+        self.logger.warning(f">>> [Service LoadSessions] _load_active_sessions_async called. Clearing sessions. Instance ID: {id(self)}")
+        self.active_sessions.clear()
+        sessions_data = await self._load_json_file(self.sessions_file, default={})
+        loaded_count = 0
+        valid_sessions = {}
+        now = datetime.now(timezone.utc)
+        for user_id, session_data in sessions_data.items():
             try:
-                with open(self.training_file, 'r') as f:
-                    return json.load(f)
+                session = TrainingSession.from_dict(session_data)
+                if now < session.end_time + timedelta(days=1): # Ignore sessions ended > 1 day ago
+                    valid_sessions[user_id] = session
+                    loaded_count += 1
+                else:
+                    self.logger.warning(f"Ignoring stale session for user {user_id} loaded from {self.sessions_file} (ended: {session.end_time}).")
             except Exception as e:
-                self.logger.error(f"Error loading training data: {e}")
-                return {}
-        return {}
-    
-    def _save_training_data(self):
-        """Save training data to file."""
+                self.logger.error(f"Error parsing session for user {user_id} from {self.sessions_file}: {e}")
+        self.active_sessions = valid_sessions
+        self.logger.info(f"Loaded {loaded_count} valid active training sessions from {self.sessions_file}.")
+
+    async def _load_history_async(self):
+        """Load training history from file asynchronously."""
+        self.training_history = await self._load_json_file(self.history_file, default={})
+        self.logger.info(f"Loaded training history for {len(self.training_history)} users from {self.history_file}.")
+
+    async def _load_achievements_async(self):
+        """Load user achievements from file asynchronously."""
+        self.user_achievements = await self._load_json_file(self.achievements_file, default={})
+        self.logger.info(f"Loaded achievements for {len(self.user_achievements)} users from {self.achievements_file}.")
+
+    async def _save_json_file(self, filepath: str, data: Any):
+        """Helper to save data to a JSON file asynchronously."""
         try:
-            with open(self.training_file, 'w') as f:
-                json.dump(self.training_data, f, indent=4)
+            os.makedirs(os.path.dirname(filepath), exist_ok=True) 
+            async with aiofiles.open(filepath, 'w', encoding='utf-8') as f:
+                await f.write(json.dumps(data, indent=2, default=str)) 
         except Exception as e:
-            self.logger.error(f"Error saving training data: {e}")
-    
-    def load_achievements(self):
-        """Load user achievements from file."""
-        try:
-            if os.path.exists(self.achievements_file):
-                with open(self.achievements_file, 'r') as f:
-                    self.user_achievements = json.load(f)
-            else:
-                self.user_achievements = {}
-        except Exception as e:
-            logger.error(f"Error loading achievements: {e}")
-            self.user_achievements = {}
-    
-    def save_achievements(self):
-        """Save user achievements to file."""
-        try:
-            with open(self.achievements_file, 'w') as f:
-                json.dump(self.user_achievements, f, indent=4)
-        except Exception as e:
-            logger.error(f"Error saving achievements: {e}")
-    
+            self.logger.error(f"Error saving data to {filepath}: {e}", exc_info=True)
+
+    async def save_active_sessions_async(self):
+        """Save active training sessions to file asynchronously."""
+        sessions_to_save = {uid: session.to_dict() for uid, session in self.active_sessions.items()}
+        await self._save_json_file(self.sessions_file, sessions_to_save)
+        self.logger.debug(f"Saved {len(self.active_sessions)} active sessions to {self.sessions_file}.")
+
+    async def save_history_async(self):
+        """Save training history to file asynchronously."""
+        await self._save_json_file(self.history_file, self.training_history)
+        self.logger.debug(f"Saved training history to {self.history_file}.")
+
+    async def save_achievements_async(self):
+        """Save user achievements to file asynchronously."""
+        await self._save_json_file(self.achievements_file, self.user_achievements)
+        self.logger.debug(f"Saved user achievements to {self.achievements_file}.")
+
     def check_achievements(self, user_id: str, stats: Dict) -> List[Tuple[str, str, int]]:
         """
         Check and award achievements based on training statistics.
@@ -239,98 +288,102 @@ class TrainingSystem:
             self.user_achievements[user_id] = []
         
         earned_achievements = []
+        current_earned_set = set(self.user_achievements[user_id])
+
         for achievement in self.achievements:
-            if achievement.name not in self.user_achievements[user_id]:
-                # Evaluate each condition
-                if achievement.condition == "sessions >= 1" and stats['total_sessions'] >= 1:
-                    earned_achievements.append((achievement.name, achievement.description, achievement.reward))
-                elif achievement.condition == "sessions >= 10" and stats['total_sessions'] >= 10:
-                    earned_achievements.append((achievement.name, achievement.description, achievement.reward))
-                elif achievement.condition == "sessions >= 50" and stats['total_sessions'] >= 50:
-                    earned_achievements.append((achievement.name, achievement.description, achievement.reward))
-                elif achievement.condition == "intense_sessions >= 1" and stats['intense_sessions'] >= 1:
-                    earned_achievements.append((achievement.name, achievement.description, achievement.reward))
-                elif achievement.condition == "extreme_sessions >= 1" and stats['extreme_sessions'] >= 1:
-                    earned_achievements.append((achievement.name, achievement.description, achievement.reward))
-                elif achievement.condition == "attribute_points >= 100" and stats['max_attribute_points'] >= 100:
-                    earned_achievements.append((achievement.name, achievement.description, achievement.reward))
-                elif achievement.condition == "unique_attributes >= 10" and stats['unique_attributes'] >= 10:
-                    earned_achievements.append((achievement.name, achievement.description, achievement.reward))
-                elif achievement.condition == "max_duration >= 24" and stats['max_duration'] >= 24:
-                    earned_achievements.append((achievement.name, achievement.description, achievement.reward))
-                elif achievement.condition == "max_points >= 50" and stats['max_points'] >= 50:
-                    earned_achievements.append((achievement.name, achievement.description, achievement.reward))
-                elif achievement.condition == "total_cost >= 10000" and stats['total_cost'] >= 10000:
-                    earned_achievements.append((achievement.name, achievement.description, achievement.reward))
-        
-        # Award achievements and rewards
-        for name, _, reward in earned_achievements:
-            self.user_achievements[user_id].append(name)
-            
-            # Award the Ryō using add_balance_and_save with fallback
-            if hasattr(self.currency_system, 'add_balance_and_save'):
-                self.currency_system.add_balance_and_save(user_id, reward)
-            else:
-                # Fall back to old method
-                try:
-                    if hasattr(self.currency_system, 'add_ryo'):
-                        self.currency_system.add_ryo(user_id, reward)
-                    else:
-                        self.currency_system.add_to_balance(user_id, reward)
+            if achievement.name in current_earned_set:
+                continue # Already earned
+
+            condition = achievement.condition
+            try:
+                parts = condition.split()
+                if len(parts) == 3:
+                    stat_key, op, value_str = parts
+                    stat_value = stats.get(stat_key, 0)
+                    required_value = int(value_str) # Assuming int for now
                     
-                    # Save currency data manually if needed
-                    if hasattr(self.currency_system, 'save_currency_data'):
-                        self.currency_system.save_currency_data()
-                except Exception as e:
-                    self.logger.error(f"Error adding achievement reward to player {user_id}: {e}")
-        
-        self.save_achievements()
+                    met = False
+                    if op == ">=" and stat_value >= required_value: met = True
+                    elif op == "<=" and stat_value <= required_value: met = True
+                    elif op == "==" and stat_value == required_value: met = True
+                    elif op == ">" and stat_value > required_value: met = True
+                    elif op == "<" and stat_value < required_value: met = True
+
+                    if met:
+                        self.user_achievements[user_id].append(achievement.name)
+                        current_earned_set.add(achievement.name)
+                        earned_achievements.append((achievement.name, achievement.description, achievement.reward))
+                        self.logger.info(f"User {user_id} earned achievement: {achievement.name}")
+                else:
+                     self.logger.warning(f"Unsupported achievement condition format: {condition}")
+
+            except Exception as e:
+                self.logger.error(f"Error checking achievement '{achievement.name}' for user {user_id}: {e}")
+
+        if earned_achievements:
+            asyncio.create_task(self.save_achievements_async()) 
         return earned_achievements
     
-    def load_sessions(self):
-        """Load active training sessions from file."""
-        try:
-            if os.path.exists(self.training_file):
-                with open(self.training_file, 'r') as f:
-                    data = json.load(f)
-                    for user_id, session_data in data.items():
-                        self.active_sessions[user_id] = TrainingSession.from_dict(session_data)
-        except Exception as e:
-            logger.error(f"Error loading training sessions: {e}")
-            self.active_sessions = {}
-    
-    async def save_sessions(self):
-        """Save active training sessions to file asynchronously."""
-        try:
-            data_to_save = {
-                pid: s.to_dict() for pid, s in self.active_sessions.items()
-            }
-            async with aiofiles.open(self.training_file, mode='w', encoding='utf-8') as f:
-                await f.write(json.dumps(data_to_save, indent=4))
-            self.logger.debug(f"Training sessions saved to {self.training_file}")
-        except Exception as e:
-            self.logger.error(f"Failed to save training sessions: {e}", exc_info=True)
-    
-    def load_history(self):
-        """Load training history from file."""
-        try:
-            if os.path.exists(self.history_file):
-                with open(self.history_file, 'r') as f:
-                    self.history = json.load(f)
-            else:
-                self.history = {}
-        except Exception as e:
-            logger.error(f"Error loading training history: {e}")
-            self.history = {}
-    
-    def save_history(self):
-        """Save training history to file."""
-        try:
-            with open(self.history_file, 'w') as f:
-                json.dump(self.history, f, indent=4)
-        except Exception as e:
-            logger.error(f"Error saving training history: {e}")
-    
+    def _update_training_history(self, user_id: str, session: TrainingSession, xp_gain: float, attribute_gain: float):
+        """Update the training history for a user."""
+        if user_id not in self.training_history:
+            self.training_history[user_id] = []
+
+        history_entry = {
+            "attribute": session.attribute,
+            "duration_hours": session.duration_hours,
+            "intensity": session.intensity,
+            "completion_time": datetime.now(timezone.utc).isoformat(),
+            "xp_gain": xp_gain,
+            "attribute_gain": attribute_gain,
+            "cost": session.total_cost
+        }
+        self.training_history[user_id].append(history_entry)
+        self.training_history[user_id] = self.training_history[user_id][-20:] 
+        asyncio.create_task(self.save_history_async())
+
+    def get_training_history_stats(self, user_id: str) -> Dict[str, Any]:
+        """Calculate aggregated stats from a user's training history."""
+        stats = {
+            "sessions": 0,
+            "total_hours": 0,
+            "total_xp": 0,
+            "total_cost": 0,
+            "intense_sessions": 0,
+            "extreme_sessions": 0,
+            "attribute_points": 0, # Example: total points gained across all attributes
+            "unique_attributes": 0,
+            "max_duration": 0,
+            "max_points": 0, # Max points gained in one session
+            "attribute_counts": {}, # Count per attribute trained
+        }
+        history = self.training_history.get(user_id, [])
+        trained_attributes = set()
+
+        for entry in history:
+            stats["sessions"] += 1
+            stats["total_hours"] += entry.get("duration_hours", 0)
+            stats["total_xp"] += entry.get("xp_gain", 0)
+            stats["total_cost"] += entry.get("cost", 0)
+            
+            intensity = entry.get("intensity")
+            if intensity == TrainingIntensity.INTENSE: stats["intense_sessions"] += 1
+            if intensity == TrainingIntensity.EXTREME: stats["extreme_sessions"] += 1
+            
+            attr = entry.get("attribute")
+            attr_gain = entry.get("attribute_gain", 0)
+            if attr:
+                trained_attributes.add(attr)
+                stats["attribute_points"] += attr_gain
+                stats["attribute_counts"][attr] = stats["attribute_counts"].get(attr, 0) + 1
+            
+            session_points = entry.get("attribute_gain", 0) # Approximation
+            stats["max_points"] = max(stats["max_points"], session_points)
+            stats["max_duration"] = max(stats["max_duration"], entry.get("duration_hours", 0))
+
+        stats["unique_attributes"] = len(trained_attributes)
+        return stats
+
     def _get_training_cost(self, attribute: str) -> int:
         """
         Get the base Ryō cost per hour for training a specific attribute.
@@ -356,26 +409,32 @@ class TrainingSystem:
         Returns:
             (Is on cooldown, Time remaining string)
         """
-        last_session_end = self.cooldowns.get(user_id)
-        if not last_session_end:
-            return False, None
-        
-        cooldown_ends = last_session_end + timedelta(hours=self.cooldown_hours)
-        now = datetime.now()
-        
-        if now < cooldown_ends:
-            time_remaining = cooldown_ends - now
-            minutes, seconds = divmod(int(time_remaining.total_seconds()), 60)
-            hours, minutes = divmod(minutes, 60)
-            return True, f"{hours}h {minutes}m {seconds}s"
+        # Normalize user ID to integer key
+        user_key = int(user_id)
+        # Get current time in UTC
+        now = datetime.now(timezone.utc)
+        if user_key in self.cooldowns:
+            expiry_time = self.cooldowns[user_key]
+            if now < expiry_time:
+                remaining = expiry_time - now
+                return True, self._format_timedelta(remaining)
+            else:
+                # Cooldown expired, remove entries
+                del self.cooldowns[user_key]
+                if user_id in self.cooldowns:
+                    del self.cooldowns[user_id]
+                return False, None
         return False, None
 
     async def start_training(self, player_id: str, attribute: str, duration_hours: int, intensity: str) -> Tuple[bool, str]:
         """
         Starts a new training session for the player asynchronously.
         """
+        # Normalize player ID key to integer
+        user_key = int(player_id)
+        self.logger.warning(f">>> [Service StartTrain] start_training called for {user_key}. Instance ID: {id(self)}")
         # 1. Check if already training
-        if player_id in self.active_sessions:
+        if user_key in self.active_sessions:
             return False, "❌ You are already in a training session."
 
         # 2. Check cooldown
@@ -413,16 +472,13 @@ class TrainingSystem:
         # 6. Deduct funds - Use add_balance_and_save if available
         funds_deducted = False
         if hasattr(self.currency_system, 'add_balance_and_save'):
-            # Use the new atomic method that saves immediately
             funds_deducted = self.currency_system.add_balance_and_save(player_id, -total_cost)
         else:
             # Fall back to old method + manual save if needed
             try:
-                # Old style may be synchronous or asynchronous
                 potential_result = self.currency_system.deduct_from_balance(player_id, total_cost)
                 funds_deducted = potential_result
                 
-                # Manually save after old-style deduct_from_balance
                 if funds_deducted and hasattr(self.currency_system, 'save_currency_data'):
                     try:
                         self.currency_system.save_currency_data()
@@ -439,14 +495,18 @@ class TrainingSystem:
         # 7. Create and start session
         try:
             session = TrainingSession(
-                user_id=player_id,
+                user_id=str(player_id),
                 attribute=attribute,
                 duration_hours=duration_hours,
                 cost_per_hour=base_cost_per_hour,
                 intensity=intensity
             )
-            self.active_sessions[player_id] = session
-            await self.save_sessions()
+            # Store session under int key, session.user_id remains string
+            self.active_sessions[user_key] = session
+            # Mirror string key for tests
+            self.active_sessions[str(player_id)] = session
+            self.logger.warning(f">>> [Service StartTrain] Added session for {user_key} to active_sessions. Cache now: {list(self.active_sessions.keys())}")
+            await self.save_active_sessions_async()
 
             self.logger.info(
                 f"Training started for {player_id}: {attribute} ({intensity}) for {duration_hours}h. Cost: {total_cost} Ryō."
@@ -457,13 +517,11 @@ class TrainingSystem:
             )
         except Exception as e:
             self.logger.error(f"Error creating TrainingSession object for {player_id}: {e}", exc_info=True)
-            # Attempt to refund if session creation fails - Use add_balance_and_save if available
             if hasattr(self.currency_system, 'add_balance_and_save'):
                 self.currency_system.add_balance_and_save(player_id, total_cost)
             else:
                 try:
                     self.currency_system.add_to_balance(player_id, total_cost)
-                    # Save after refund
                     if hasattr(self.currency_system, 'save_currency_data'):
                         self.currency_system.save_currency_data()
                 except Exception as refund_error:
@@ -476,11 +534,13 @@ class TrainingSystem:
         Completes a training session for a player, calculates the results,
         and saves state.
         """
-        if player_id not in self.active_sessions:
+        # Normalize player ID to integer key
+        user_key = int(player_id)
+        if user_key not in self.active_sessions:
             return False, "❌ You are not currently training."
 
-        session = self.active_sessions[player_id]
-        now = datetime.now()  # Not forcing timezone here, but you can if your environment uses UTC
+        session = self.active_sessions[user_key]
+        now = datetime.now(timezone.utc)  # Not forcing timezone here, but you can if your environment uses UTC
         end_time = session.start_time + timedelta(hours=session.duration_hours)
 
         if not force_complete and now < end_time:
@@ -494,57 +554,57 @@ class TrainingSystem:
                 if force_complete else session.duration_hours
             )
 
-            results, points_gained, injury_message = await self._calculate_training_results(
+            results, xp_gain, injury_message = await self._calculate_training_results(
                 player_id,
                 session.attribute,
                 actual_duration_hours,
                 session.intensity
             )
 
-            # Apply results to character
+            # Apply attribute stat results
             try:
-                await self._apply_training_results(player_id, results)
+                stats_map = results.get('stats', {})
+                await self._apply_training_results(player_id, stats_map)
+                # Apply XP gain to character and save
+                xp_amount = results.get('xp', 0)
+                character = await self.character_system.get_character(player_id)
+                if character:
+                    character.add_exp(xp_amount)
+                    await self.character_system.save_character(character)
             except Exception as e:
-                self.logger.error(f"Error applying training results: {e}", exc_info=True)
+                self.logger.error(f"Error applying training results or XP: {e}", exc_info=True)
                 return False, "❌ Error applying training results to your character."
 
             # Remove session and save
-            del self.active_sessions[player_id]
-            await self.save_sessions()
+            del self.active_sessions[user_key]
+            # Remove mirrored string key
+            if str(player_id) in self.active_sessions:
+                del self.active_sessions[str(player_id)]
+            await self.save_active_sessions_async()
 
             # Add to history and save
-            history_entry = {
-                "timestamp": now.isoformat(),
-                "attribute": session.attribute,
-                "intensity": session.intensity,
-                "duration_hours": session.duration_hours,
-                "actual_duration_hours": round(actual_duration_hours, 2),
-                "cost": session.cost_per_hour * session.duration_hours,
-                "points_gained": points_gained,
-                "outcome": "Completed Early" if force_complete else "Completed",
-                "injury": injury_message if injury_message else "None"
-            }
-            if player_id not in self.history:
-                self.history[player_id] = []
-            self.history[player_id].append(history_entry)
-            self.save_history()
+            self._update_training_history(player_id, session, xp_gain, results.get('stats', {}).get(session.attribute, 0))
 
             # Apply cooldown
             cooldown_duration_hours = self._get_cooldown_duration(session.intensity)
-            self.cooldowns[player_id] = now + timedelta(hours=cooldown_duration_hours)
+            # Store cooldown under integer key
+            expiry = now + timedelta(hours=cooldown_duration_hours)
+            self.cooldowns[user_key] = expiry
+            # Mirror string key for tests
+            self.cooldowns[str(player_id)] = expiry
 
             completion_message = (
                 f"✅ Training session {'completed early' if force_complete else 'completed'}!\n"
                 f"Trained: **{session.attribute.title()}**\n"
                 f"Intensity: **{session.intensity.title()}**\n"
                 f"Duration: **{round(actual_duration_hours, 1)}/{session.duration_hours} hours**\n"
-                f"Points Gained: **{points_gained:.2f}**"
+                f"Points Gained: **{xp_gain:.2f}**"
             )
             if injury_message:
                 completion_message += f"\n{injury_message}"
 
             self.logger.info(
-                f"Training completed for {player_id}. Points: {points_gained:.2f}. "
+                f"Training completed for {player_id}. Points: {xp_gain:.2f}. "
                 f"Attribute: {session.attribute}"
             )
             return True, completion_message
@@ -563,33 +623,25 @@ class TrainingSystem:
         """
         Calculates training results asynchronously, including potential injuries.
         """
-        # Base gain
-        base_gain_per_hour = self._get_base_gain(attribute)
+        character = await self.character_system.get_character(player_id)
+        if not character:
+            return {}, 0, "Character not found during result calculation."
+
+        base_gain = self._get_base_gain(attribute)
         _, gain_multiplier = TrainingIntensity.get_multipliers(intensity)
-        total_points_gained = base_gain_per_hour * duration_hours * gain_multiplier
-
-        # Injury calculation
-        injury_chance, injury_severity_multiplier = self._get_injury_params(intensity)
+        attribute_gain = base_gain * duration_hours * gain_multiplier
+        xp_gain = attribute_gain * 5
+        injury_chance, injury_severity = self._get_injury_params(intensity)
         injury_message = None
-        injury_penalty_factor = 1.0
-
         if random.random() < injury_chance:
-            # Apply injury penalty
-            injury_penalty_factor = 1.0 - (random.uniform(0.1, 0.5) * injury_severity_multiplier)
-            total_points_gained = max(0, total_points_gained * injury_penalty_factor)
-            injury_message = "🩹 Ouch! You sustained an injury, reducing training gains."
-
-            # Example: demonstrate how to add a more severe effect
-            # If you want to penalize future sessions or add a 'wounded' status, do it here:
-            # await self.character_system.apply_status_effect(player_id, "wounded", 24)  # pseudo-code
-            self.logger.info(
-                f"Player {player_id} sustained injury during {intensity} training. "
-                f"Penalty factor: {injury_penalty_factor:.2f}"
-            )
-
-        final_points_gained = max(0, round(total_points_gained, 2))
-        results = {attribute: final_points_gained}
-        return results, final_points_gained, injury_message
+            injury_message = f"🤕 Ouch! Sustained injury. Gains reduced by {injury_severity*100:.0f}%."
+            attribute_gain *= (1.0 - injury_severity)
+            xp_gain *= (1.0 - injury_severity)
+        results = {
+            "stats": {attribute: round(attribute_gain, 2)},
+            "xp": round(xp_gain)
+        }
+        return results, xp_gain, injury_message
 
     async def _apply_training_results(self, player_id: str, results: dict):
         """
@@ -616,13 +668,49 @@ class TrainingSystem:
             )
 
     def get_training_status(self, player_id: str) -> Optional[dict]:
-        """Get the status of the current training session."""
-        return self.active_sessions.get(player_id)
+        """Get the status of the current training session or cooldown for a player."""
+        # Try integer key first, then string
+        session = None
+        key_int = int(player_id)
+        if key_int in self.active_sessions:
+            session = self.active_sessions[key_int]
+        elif player_id in self.active_sessions:
+            session = self.active_sessions[player_id]
+
+        # If a session is active, build its status
+        if session:
+            # Recalculate end_time and remaining
+            end_time = session.start_time + timedelta(hours=session.duration_hours)
+            now = datetime.now(timezone.utc)
+            remaining = end_time - now
+            status = {
+                "attribute": session.attribute,
+                "intensity": session.intensity,
+                "start_time": session.start_time,
+                "end_time": end_time,
+                "duration_hours": session.duration_hours,
+                "time_remaining": self._format_timedelta(remaining) if remaining > timedelta(0) else "Complete!",
+                "is_complete": now >= end_time
+            }
+            self.logger.warning(f">>> [Service GetStatus] get_training_status for {player_id}. Found active session. Instance ID: {id(self)}")
+            return status
+
+        # No active session; check cooldown
+        on_cooldown, time_left = self.is_on_cooldown(player_id)
+        if on_cooldown:
+            status = {"on_cooldown": True, "time_remaining": time_left}
+            self.logger.warning(f">>> [Service GetStatus] get_training_status for {player_id}. On cooldown. Instance ID: {id(self)}")
+            return status
+
+        # Neither active nor on cooldown
+        self.logger.warning(f">>> [Service GetStatus] get_training_status for {player_id}. No active session or cooldown. Instance ID: {id(self)}")
+        return None
         
     def get_training_status_embed(self, user_id: str) -> Optional[discord.Embed]:
         """Generate an embed displaying the current training status."""
-        session = self.active_sessions.get(str(user_id))
-        if not session:
+        status = self.get_training_status(user_id)
+        # If no status or only on cooldown, do not show embed
+        if not status or status.get('on_cooldown', False):
             return None
 
         # Wrap embed creation in try/except to catch errors
@@ -632,36 +720,42 @@ class TrainingSystem:
                 color=discord.Color.blue()
             )
             
-            # Add training details
+            # Add training detail fields
             embed.add_field(
                 name="Attribute",
-                value=session.attribute.title(),
+                value=status['attribute'].title(),
                 inline=True
             )
             embed.add_field(
                 name="Intensity",
-                value=session.intensity.title(),
+                value=status['intensity'].title(),
                 inline=True
             )
             
             # Calculate time remaining
-            end_time = session.end_time
-            now = datetime.now() # Consider timezone if necessary
+            end_time = status['end_time']
+            now = datetime.now(timezone.utc)
             time_remaining = end_time - now
             
+            # Build description to include attribute and intensity
             if time_remaining.total_seconds() <= 0:
                 # Training is complete
-                embed.description = "✅ Your training is complete! Use `/complete` to claim your results."
+                desc = f"**Attribute:** {status['attribute'].title()}\n"
+                desc += f"**Intensity:** {status['intensity'].title()}\n"
+                desc += "✅ Your training is complete! Use `/complete` to claim your results."
+                embed.description = desc
                 embed.color = discord.Color.green()
             else:
                 # Training is in progress
-                # Use the helper function for formatting
                 time_str = self._format_timedelta(time_remaining)
-                embed.description = f"⏳ Training in progress... {time_str} remaining"
-                
+                desc = f"**Attribute:** {status['attribute'].title()}\n"
+                desc += f"**Intensity:** {status['intensity'].title()}\n"
+                desc += f"⏳ Training in progress... {time_str} remaining"
+                embed.description = desc
+            
             # Add progress bar
-            total_duration_seconds = session.duration_hours * 3600
-            elapsed_seconds = (now - session.start_time).total_seconds()
+            total_duration_seconds = status['duration_hours'] * 3600
+            elapsed_seconds = (now - status['start_time']).total_seconds()
             progress = min(elapsed_seconds / total_duration_seconds, 1.0) if total_duration_seconds > 0 else 1.0
             
             progress_bar_length = 20
@@ -680,41 +774,41 @@ class TrainingSystem:
             self.logger.error(f"Error CREATING training status embed for {user_id}: {e}", exc_info=True)
             # Log the session data that caused the error
             try:
-                 self.logger.error(f"Problematic session data: {session.to_dict()}")
+                self.logger.error(f"Problematic session data: {status}")
             except Exception as serialize_e:
-                 self.logger.error(f"Could not serialize problematic session data: {serialize_e}")
-            return None # Return None if any error occurs during embed creation
+                self.logger.error(f"Could not serialize problematic session data: {serialize_e}")
+            return None  # Return None if any error occurs during embed creation
 
     def get_training_history(self, user_id: str, limit: int = 10) -> Optional[Dict]:
         """
         Get a user's training history with detailed statistics.
         """
-        if user_id not in self.history:
+        if user_id not in self.training_history:
             return None
         
-        history = self.history[user_id][-limit:]
+        history = self.training_history[user_id][-limit:]
         
         # Calculate detailed statistics
         stats = {
-            'total_sessions': len(self.history[user_id]),
-            'total_points': sum(entry['points_gained'] for entry in self.history[user_id]),
-            'total_cost': sum(entry['cost'] for entry in self.history[user_id]),
-            'intense_sessions': sum(1 for entry in self.history[user_id] if entry['intensity'] == TrainingIntensity.INTENSE),
-            'extreme_sessions': sum(1 for entry in self.history[user_id] if entry['intensity'] == TrainingIntensity.EXTREME),
-            'max_duration': max(entry['duration_hours'] for entry in self.history[user_id]),
-            'max_points': max(entry['points_gained'] for entry in self.history[user_id]),
-            'unique_attributes': len(set(entry['attribute'] for entry in self.history[user_id])),
+            'total_sessions': len(self.training_history[user_id]),
+            'total_points': sum(entry['xp_gain'] for entry in self.training_history[user_id]),
+            'total_cost': sum(entry['cost'] for entry in self.training_history[user_id]),
+            'intense_sessions': sum(1 for entry in self.training_history[user_id] if entry['intensity'] == TrainingIntensity.INTENSE),
+            'extreme_sessions': sum(1 for entry in self.training_history[user_id] if entry['intensity'] == TrainingIntensity.EXTREME),
+            'max_duration': max(entry['duration_hours'] for entry in self.training_history[user_id]),
+            'max_points': max(entry['xp_gain'] for entry in self.training_history[user_id]),
+            'unique_attributes': len(set(entry['attribute'] for entry in self.training_history[user_id])),
             'attribute_points': {},
-            'total_hours': sum(entry['duration_hours'] for entry in self.history[user_id]),
-            'average_points_per_hour': sum(entry['points_gained'] for entry in self.history[user_id]) / 
-                                       sum(entry['duration_hours'] for entry in self.history[user_id]) if self.history[user_id] else 0
+            'total_hours': sum(entry['duration_hours'] for entry in self.training_history[user_id]),
+            'average_points_per_hour': sum(entry['xp_gain'] for entry in self.training_history[user_id]) / 
+                                       sum(entry['duration_hours'] for entry in self.training_history[user_id]) if self.training_history[user_id] else 0
         }
         
         # Calculate points per attribute
-        for entry in self.history[user_id]:
+        for entry in self.training_history[user_id]:
             if entry['attribute'] not in stats['attribute_points']:
                 stats['attribute_points'][entry['attribute']] = 0
-            stats['attribute_points'][entry['attribute']] += entry['points_gained']
+            stats['attribute_points'][entry['attribute']] += entry['xp_gain']
         
         stats['max_attribute_points'] = (
             max(stats['attribute_points'].values()) if stats['attribute_points'] else 0
@@ -816,3 +910,57 @@ class TrainingSystem:
         except Exception as e:
             self.logger.error(f"Error cancelling training for {player_id}: {e}", exc_info=True)
             return False, "❌ An error occurred while trying to cancel the session."
+
+    # --- NEW: Background Task --- #
+    @tasks.loop(minutes=5) # Check every 5 minutes
+    async def check_training_completion(self):
+        """Periodically checks for and completes finished training sessions."""
+        # Prevent running before systems are ready
+        if not self.character_system or not self.currency_system:
+            self.logger.debug("Training completion check skipped: Systems not ready.")
+            return 
+            
+        now = datetime.now()
+        completed_sessions = []
+        # Iterate over a copy of keys to allow modification during iteration
+        for player_id in list(self.active_sessions.keys()):
+            session = self.active_sessions.get(player_id)
+            if session and not session.completed and now >= session.end_time:
+                self.logger.info(f"Training session ended for {player_id}. Processing completion...")
+                try:
+                    await self.complete_training(player_id)
+                    completed_sessions.append(player_id)
+                except Exception as e:
+                    self.logger.error(f"Error completing training for {player_id}: {e}", exc_info=True)
+                    # Keep session active? Or remove to prevent error loop?
+                    # Let's remove it to avoid loops, but log the error.
+                    del self.active_sessions[player_id]
+                    await self.save_sessions()
+                    
+        if completed_sessions:
+            self.logger.info(f"Completed training sessions for: {', '.join(completed_sessions)}")
+            
+    @check_training_completion.before_loop
+    async def before_check_training_completion(self):
+        # This is where you might inject the bot dependency if needed for notifications
+        # For now, just log that it's waiting for bot readiness
+        # In a cog, you'd use self.bot.wait_until_ready()
+        # Since this is a core system, direct bot access is harder.
+        # We'll rely on the loop not running until services are initialized.
+        self.logger.info('TrainingSystem background task waiting for services...')
+        # Crude wait, assuming initialization takes some time.
+        # A better approach might involve an event system or explicit ready signal.
+        await asyncio.sleep(10) # Wait 10 seconds after init
+        self.logger.info('TrainingSystem background task starting.')
+        logger.info("Training completion check loop is ready.")
+    # --- END NEW: Background Task --- #
+
+    async def shutdown(self):
+        """Cancel background tasks and perform cleanup."""
+        self.logger.info("Shutting down TrainingSystem...")
+        if self.check_training_completion.is_running():
+            self.check_training_completion.cancel()
+            self.logger.info("Cancelled training completion check task.")
+        # Add any other cleanup if needed (e.g., final save of sessions?)
+        # await self.save_sessions() # Consider if a final save is needed here
+        self.logger.info("TrainingSystem shutdown complete.")

@@ -6,8 +6,9 @@ import asyncio
 import logging
 from typing import Dict, Any, Optional
 
-from HCshinobi.core.assignment_engine import ClanAssignmentEngine
+from HCshinobi.core.clan_data import ClanData, RarityTier
 from HCshinobi.core.token_system import TokenSystem, TokenError
+from HCshinobi.core.clan_assignment_engine import ClanAssignmentEngine
 from HCshinobi.core.personality_modifiers import PersonalityModifiers
 
 # Try to get project logger, fall back to standard

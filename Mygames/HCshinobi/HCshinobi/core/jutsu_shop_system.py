@@ -90,7 +90,7 @@ class JutsuShopSystem:
         }
         try:
             # Use self.state_file_path constructed in __init__
-            await save_json(self.state_file_path, state_data)
+            save_json(self.state_file_path, state_data)
             logger.debug(f"Saved Jutsu shop state to {self.state_file_path}")
         except Exception as e:
             logger.error(f"Error saving Jutsu shop state to {self.state_file_path}: {e}")
