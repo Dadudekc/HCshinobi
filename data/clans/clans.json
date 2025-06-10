@@ -1,0 +1,162 @@
+[
+  {
+    "name": "Inuzuka",
+    "rarity": "Common",
+    "lore": "Known for their ninja dogs.",
+    "suggested_personalities": [
+      "Loyal",
+      "Energetic"
+    ],
+    "strength_bonus": 2,
+    "defense_bonus": 1,
+    "speed_bonus": 3,
+    "starting_jutsu": [
+      "Fang Over Fang",
+      "Fang Passing Fang"
+    ]
+  },
+  {
+    "name": "Akimichi",
+    "rarity": "Common",
+    "lore": "Known for body expansion jutsu.",
+    "suggested_personalities": [
+      "Kind",
+      "Generous"
+    ],
+    "strength_bonus": 3,
+    "defense_bonus": 2,
+    "speed_bonus": 1,
+    "starting_jutsu": [
+      "Expansion Jutsu",
+      "Human Bullet Tank"
+    ]
+  },
+  {
+    "name": "Nara",
+    "rarity": "Common",
+    "lore": "Known for shadow manipulation.",
+    "suggested_personalities": [
+      "Intelligent",
+      "Strategic"
+    ],
+    "strength_bonus": 1,
+    "defense_bonus": 1,
+    "speed_bonus": 2,
+    "starting_jutsu": [
+      "Shadow Imitation",
+      "Shadow Sewing"
+    ]
+  },
+  {
+    "name": "Yamanaka",
+    "rarity": "Common",
+    "lore": "Known for mind-related techniques.",
+    "suggested_personalities": [
+      "Sociable",
+      "Intuitive"
+    ],
+    "strength_bonus": 1,
+    "defense_bonus": 1,
+    "speed_bonus": 2,
+    "starting_jutsu": [
+      "Mind Transfer",
+      "Mind Transmission"
+    ]
+  },
+  {
+    "name": "Sarutobi",
+    "rarity": "Common",
+    "lore": "Known for strong chakra and fire affinity.",
+    "suggested_personalities": [
+      "Wise",
+      "Honorable"
+    ],
+    "strength_bonus": 2,
+    "defense_bonus": 2,
+    "speed_bonus": 1,
+    "starting_jutsu": [
+      "Enma Staff",
+      "Fire Release: Fireball"
+    ]
+  },
+  {
+    "name": "Aburame",
+    "rarity": "Uncommon",
+    "lore": "Known for insect manipulation.",
+    "suggested_personalities": [
+      "Calm",
+      "Analytical"
+    ],
+    "strength_bonus": 2,
+    "defense_bonus": 2,
+    "speed_bonus": 2,
+    "starting_jutsu": [
+      "Insect Sphere",
+      "Insect Clone"
+    ]
+  },
+  {
+    "name": "Hyuga",
+    "rarity": "Uncommon",
+    "lore": "Known for Byakugan and gentle fist.",
+    "suggested_personalities": [
+      "Proud",
+      "Disciplined"
+    ],
+    "strength_bonus": 3,
+    "defense_bonus": 2,
+    "speed_bonus": 3,
+    "starting_jutsu": [
+      "Gentle Fist",
+      "Eight Trigrams Palm Rotation"
+    ]
+  },
+  {
+    "name": "Uchiha",
+    "rarity": "Uncommon",
+    "lore": "Known for Sharingan and fire techniques.",
+    "suggested_personalities": [
+      "Proud",
+      "Determined"
+    ],
+    "strength_bonus": 3,
+    "defense_bonus": 2,
+    "speed_bonus": 3,
+    "starting_jutsu": [
+      "Fire Release: Fireball",
+      "Shuriken Shadow Clone"
+    ]
+  },
+  {
+    "name": "Senju",
+    "rarity": "Uncommon",
+    "lore": "Known for strong life force and wood release.",
+    "suggested_personalities": [
+      "Noble",
+      "Protective"
+    ],
+    "strength_bonus": 3,
+    "defense_bonus": 3,
+    "speed_bonus": 2,
+    "starting_jutsu": [
+      "Wood Release: Wood Clone",
+      "Wood Release: Wood Wall"
+    ]
+  },
+  {
+    "name": "Uzumaki",
+    "rarity": "Uncommon",
+    "lore": "Known for sealing techniques and strong life force.",
+    "suggested_personalities": [
+      "Resilient",
+      "Creative"
+    ],
+    "strength_bonus": 2,
+    "defense_bonus": 3,
+    "speed_bonus": 2,
+    "starting_jutsu": [
+      "Adamantine Sealing Chains",
+      "Uzumaki Sealing Method"
+    ]
+  }
+]

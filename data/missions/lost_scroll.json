@@ -1,0 +1,91 @@
+{
+    "mission_id": "lost_scroll",
+    "title": "The Lost Scroll",
+    "description": "An important scroll containing village secrets has been stolen. You must track down the thief and recover the scroll before its contents are exposed.",
+    "required_level": 2,
+    "required_rank": "Genin",
+    "location": "Forest outside the village",
+    "reward_exp": 150,
+    "reward_ryo": 200,
+    "is_d20_mission": true,
+    "time_limit": "2 days",
+    "challenges": [
+        {
+            "id": "track_thief",
+            "title": "Track the Thief",
+            "description": "Use your tracking skills to find where the thief has gone. Look for footprints, broken branches, or other signs of passage.",
+            "type": "tracking",
+            "difficulty": "moderate",
+            "primary_skill": "perception",
+            "secondary_skill": "intelligence",
+            "success_message": "You spot a trail of disturbed underbrush and occasional footprints leading deeper into the forest.",
+            "failure_message": "You struggle to find any clear signs of the thief's passage.",
+            "critical_success_message": "Your expert tracking reveals not only the thief's trail but also tells you they are carrying a heavy object and moving with a slight limp."
+        },
+        {
+            "id": "navigate_traps",
+            "title": "Navigate the Trapped Path",
+            "description": "The thief has laid traps along their escape route. You must carefully navigate past them.",
+            "type": "trap",
+            "difficulty": "hard",
+            "primary_skill": "speed",
+            "secondary_skill": "perception",
+            "success_message": "You carefully make your way through the trapped area, avoiding tripwires and pitfalls.",
+            "failure_message": "You trigger one of the traps, taking damage but managing to continue.",
+            "critical_failure_message": "You trigger a cascading series of traps that leaves you bruised and disoriented."
+        },
+        {
+            "id": "ambush",
+            "title": "Ambush by Bandits",
+            "description": "A group of bandits allied with the thief ambushes you on the path.",
+            "type": "combat",
+            "difficulty": "moderate",
+            "primary_skill": "taijutsu",
+            "secondary_skill": "speed",
+            "enemy_level": 3,
+            "enemy_stats": {
+                "hp": 80,
+                "strength": 12,
+                "speed": 11,
+                "defense": 10,
+                "level": 3
+            },
+            "success_message": "You defeat the bandit and continue on your way, more cautious than before.",
+            "failure_message": "The bandit overwhelms you, but you manage to escape, though injured."
+        },
+        {
+            "id": "cross_river",
+            "title": "Cross the Raging River",
+            "description": "A fast-flowing river blocks your path. You must find a way across.",
+            "type": "survival",
+            "difficulty": "moderate",
+            "primary_skill": "strength",
+            "secondary_skill": "chakra_control",
+            "success_message": "Using your ninja skills, you successfully cross the river using a fallen log as a bridge.",
+            "failure_message": "You slip while crossing and are swept downstream, eventually making it to shore but losing time."
+        },
+        {
+            "id": "final_confrontation",
+            "title": "Confront the Thief",
+            "description": "You've tracked the thief to their hideout. Now you must defeat them and recover the scroll.",
+            "type": "combat",
+            "difficulty": "hard",
+            "primary_skill": "ninjutsu",
+            "secondary_skill": "taijutsu",
+            "enemy_level": 4,
+            "enemy_stats": {
+                "hp": 120,
+                "strength": 13,
+                "speed": 14,
+                "defense": 11,
+                "level": 4
+            },
+            "success_message": "After a difficult battle, you defeat the thief and recover the stolen scroll.",
+            "failure_message": "The thief proves too powerful, but as they're about to escape, backup arrives from the village, capturing them and recovering the scroll."
+        }
+    ],
+    "reward_items": [
+        "minor_healing_potion",
+        "kunai_set"
+    ]
+} 
