@@ -1,0 +1,182 @@
+[
+  {
+    "name": "Inuzuka",
+    "rarity": "Common",
+    "lore": "A clan renowned for their close bond with ninja dogs and fierce, instinct-driven combat.",
+    "suggested_personalities": [
+      "Loyal",
+      "Energetic"
+    ],
+    "starting_bonuses": {
+      "strength": 2,
+      "defense": 1,
+      "speed": 3
+    },
+    "starting_jutsu": [
+      "Basic Fang Attack",
+      "Coordinated Howl"
+    ]
+  },
+  {
+    "name": "Akimichi",
+    "rarity": "Common",
+    "lore": "A clan known for their body expansion techniques and raw physical power in close combat.",
+    "suggested_personalities": [
+      "Kind",
+      "Generous"
+    ],
+    "starting_bonuses": {
+      "strength": 3,
+      "defense": 2,
+      "speed": 1
+    },
+    "starting_jutsu": [
+      "Partial Expansion",
+      "Calorie Control Drill"
+    ]
+  },
+  {
+    "name": "Nara",
+    "rarity": "Common",
+    "lore": "Masters of shadow manipulation, they use basic techniques to bind and control their foes.",
+    "suggested_personalities": [
+      "Intelligent",
+      "Strategic"
+    ],
+    "starting_bonuses": {
+      "strength": 1,
+      "defense": 1,
+      "speed": 2
+    },
+    "starting_jutsu": [
+      "Shadow Imitation",
+      "Basic Shadow Bind"
+    ]
+  },
+  {
+    "name": "Yamanaka",
+    "rarity": "Common",
+    "lore": "A clan of mentalists who use subtle mind transfer techniques and genjutsu to support their allies.",
+    "suggested_personalities": [
+      "Sociable",
+      "Intuitive"
+    ],
+    "starting_bonuses": {
+      "strength": 1,
+      "defense": 1,
+      "speed": 2
+    },
+    "starting_jutsu": [
+      "Mind Transfer",
+      "Basic Sensory Link"
+    ]
+  },
+  {
+    "name": "Sarutobi",
+    "rarity": "Common",
+    "lore": "A storied clan with a deep connection to fire, embodying tradition and a steadfast spirit.",
+    "suggested_personalities": [
+      "Wise",
+      "Honorable"
+    ],
+    "starting_bonuses": {
+      "strength": 2,
+      "defense": 2,
+      "speed": 1
+    },
+    "starting_jutsu": [
+      "Basic Fireball Jutsu",
+      "Simple Ash Cloud"
+    ]
+  },
+  {
+    "name": "Aburame",
+    "rarity": "Uncommon",
+    "lore": "A secretive clan that harnesses insect-based ninjutsu through chakra symbiosis for precision strikes.",
+    "suggested_personalities": [
+      "Calm",
+      "Analytical"
+    ],
+    "starting_bonuses": {
+      "strength": 2,
+      "defense": 2,
+      "speed": 2
+    },
+    "starting_jutsu": [
+      "Insect Infestation",
+      "Basic Insect Strike"
+    ]
+  },
+  {
+    "name": "Hyūga",
+    "rarity": "Uncommon",
+    "lore": "An ancient clan famed for the Byakugan and Gentle Fist techniques, excelling in close-quarters combat.",
+    "suggested_personalities": [
+      "Proud",
+      "Disciplined"
+    ],
+    "starting_bonuses": {
+      "strength": 3,
+      "defense": 2,
+      "speed": 3
+    },
+    "starting_jutsu": [
+      "Gentle Fist",
+      "Basic Eight Trigrams Rotation"
+    ]
+  },
+  {
+    "name": "Uchiha",
+    "rarity": "Legendary",
+    "lore": "A powerful clan of Hidden Leaf renowned for their Sharingan and fire techniques, carrying a heavy emotional legacy.",
+    "suggested_personalities": [
+      "Proud",
+      "Passionate"
+    ],
+    "starting_bonuses": {
+      "strength": 4,
+      "defense": 3,
+      "speed": 4
+    },
+    "starting_jutsu": [
+      "Advanced Fireball Jutsu",
+      "Refined Genjutsu"
+    ]
+  },
+  {
+    "name": "Senju",
+    "rarity": "Uncommon",
+    "lore": "One of the founding clans, celebrated for their mastery of Wood Release and natural leadership.",
+    "suggested_personalities": [
+      "Noble",
+      "Protective"
+    ],
+    "starting_bonuses": {
+      "strength": 3,
+      "defense": 3,
+      "speed": 2
+    },
+    "starting_jutsu": [
+      "Wood Clone",
+      "Basic Wood Wall"
+    ]
+  },
+  {
+    "name": "Uzumaki",
+    "rarity": "Legendary",
+    "lore": "A resilient clan famed for their sealing techniques and robust chakra reserves, guardians of forbidden knowledge.",
+    "suggested_personalities": [
+      "Resilient",
+      "Innovative"
+    ],
+    "starting_bonuses": {
+      "strength": 3,
+      "defense": 4,
+      "speed": 2
+    },
+    "starting_jutsu": [
+      "Adamantine Sealing Chains",
+      "Uzumaki Sealing Method"
+    ]
+  }
+]

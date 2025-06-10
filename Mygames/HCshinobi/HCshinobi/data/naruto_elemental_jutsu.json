@@ -1,0 +1,375 @@
+{
+  "quick_reference": {
+    "Katon": {
+      "E": [
+        "Katon: Spark Flicker",
+        "Katon: Ember Palm",
+        "Katon: Smoke Wisp"
+      ],
+      "D": [
+        "Katon: Ember Shuriken",
+        "Katon: Fire Fang",
+        "Katon: Blister Dash",
+        "Katon: Burning Feint"
+      ],
+      "C": [
+        "Katon: Fireball Jutsu",
+        "Katon: Flame Serpent",
+        "Katon: Scorch Barrage",
+        "Katon: Ashen Armor",
+        "Katon: Heat Mirage"
+      ],
+      "B": [
+        "Katon: Blazing Talon",
+        "Katon: Incineration Clones",
+        "Katon: Inferno Net",
+        "Katon: Pillar of Flame"
+      ],
+      "A": [
+        "Katon: Dragon's Breath",
+        "Katon: Hellfire Prison",
+        "Katon: Ashen Tempest"
+      ],
+      "S": [
+        "Katon: Black Phoenix Rebirth"
+      ]
+    },
+    "Suiton": {
+      "E": [
+        "Suiton: Moisture Sense",
+        "Suiton: Bubble Veil",
+        "Suiton: Wet Palm"
+      ],
+      "D": [
+        "Suiton: Water Needle Shot",
+        "Suiton: Ripple Step",
+        "Suiton: Aqua Lash",
+        "Suiton: Drizzle Cloak"
+      ],
+      "C": [
+        "Suiton: Water Bullet Jutsu",
+        "Suiton: Water Clone Jutsu",
+        "Suiton: Flowing Wall",
+        "Suiton: Torrent Fang",
+        "Suiton: Mist Blade Technique"
+      ],
+      "B": [
+        "Suiton: Riptide Crash",
+        "Suiton: Binding Current",
+        "Suiton: Aqua Pulse Field",
+        "Suiton: Rain of Sorrow"
+      ],
+      "A": [
+        "Suiton: Great Water Dragon",
+        "Suiton: Abyss Maw",
+        "Suiton: Oceanic Armor"
+      ],
+      "S": [
+        "Suiton: Leviathan's Wrath"
+      ]
+    },
+    "Doton": {
+      "E": [
+        "Doton: Pebble Shot",
+        "Doton: Mud Seal",
+        "Doton: Dust Sight"
+      ],
+      "D": [
+        "Doton: Stone Fist",
+        "Doton: Gravel Spit",
+        "Doton: Earthen Pads",
+        "Doton: Soil Grip"
+      ],
+      "C": [
+        "Doton: Earth Wall",
+        "Doton: Rock Clone Jutsu",
+        "Doton: Spire Burst",
+        "Doton: Ground Pulse",
+        "Doton: Earthen Maw"
+      ],
+      "B": [
+        "Doton: Armor of Gaia",
+        "Doton: Shifting Terrain",
+        "Doton: Stone Coffin",
+        "Doton: Quake Palm"
+      ],
+      "A": [
+        "Doton: Earth Dragon Barrage",
+        "Doton: Fortress Technique",
+        "Doton: Seismic Rift"
+      ],
+      "S": [
+        "Doton: Titan's Wrath"
+      ]
+    },
+    "Raiton": {
+      "E": [
+        "Raiton: Static Touch",
+        "Raiton: Spark Glimmer",
+        "Raiton: Hair Stand Technique"
+      ],
+      "D": [
+        "Raiton: Shock Darts",
+        "Raiton: Conductive Fist",
+        "Raiton: Charge Step",
+        "Raiton: Pulse Wire"
+      ],
+      "C": [
+        "Raiton: Lightning Clone",
+        "Raiton: Thunder Line",
+        "Raiton: Arc Cage",
+        "Raiton: Volt Trap",
+        "Raiton: Flash Bolt"
+      ],
+      "B": [
+        "Raiton: Thunder Fist",
+        "Raiton: Lightning Rain",
+        "Raiton: Coil Serpent",
+        "Raiton: Shock Net"
+      ],
+      "A": [
+        "Raiton: Black Current Surge",
+        "Raiton: Plasma Cutter",
+        "Raiton: Stormstep Cloak"
+      ],
+      "S": [
+        "Raiton: Raijin's Wrath"
+      ]
+    },
+    "Fuuton": {
+      "E": [
+        "Fūton: Breeze Flick",
+        "Fūton: Wind Whisper",
+        "Fūton: Puff Step"
+      ],
+      "D": [
+        "Fūton: Gale Shuriken",
+        "Fūton: Cutter Palm",
+        "Fūton: Wind Veil",
+        "Fūton: Dust Dance"
+      ],
+      "C": [
+        "Fūton: Wind Bullet",
+        "Fūton: Air Clone",
+        "Fūton: Crescent Slash",
+        "Fūton: Pressure Dome",
+        "Fūton: Vortex Fist"
+      ],
+      "B": [
+        "Fūton: Razor Tempest",
+        "Fūton: Cyclone Bind",
+        "Fūton: Whisper Step",
+        "Fūton: Wind Scythe"
+      ],
+      "A": [
+        "Fūton: Divine Gale Dance",
+        "Fūton: Vacuum Field",
+        "Fūton: Howling Typhoon"
+      ],
+      "S": [
+        "Fūton: Sky Severance"
+      ]
+    }
+  },
+  "detailed_jutsu": {
+    "fire": {
+      "basic": [
+        {
+          "name": "Fireball Jutsu",
+          "japanese": "火遁・豪火球の術",
+          "romanji": "Katon: Gōkakyū no Jutsu",
+          "rank": "C",
+          "chakra_cost": 20,
+          "description": "A basic fire technique that creates a large fireball. The user forms the Tiger hand seal and exhales a stream of fire that forms into a large sphere.",
+          "hand_seals": ["Tiger"],
+          "creator": "Uchiha Clan",
+          "users": ["Sasuke Uchiha", "Itachi Uchiha", "Madara Uchiha"],
+          "variations": ["Great Fireball Jutsu", "Phoenix Flower Jutsu"]
+        },
+        {
+          "name": "Phoenix Flower Jutsu",
+          "japanese": "火遁・鳳仙火の術",
+          "romanji": "Katon: Hōsenka no Jutsu",
+          "rank": "C",
+          "chakra_cost": 15,
+          "description": "Creates multiple small fireballs that can be directed at the target. The fireballs can be controlled to follow the target.",
+          "hand_seals": ["Tiger", "Dragon", "Snake"],
+          "creator": "Uchiha Clan",
+          "users": ["Sasuke Uchiha", "Itachi Uchiha"],
+          "variations": ["Phoenix Sage Fire Technique"]
+        }
+      ],
+      "advanced": [
+        {
+          "name": "Amaterasu",
+          "japanese": "天照",
+          "romanji": "Amaterasu",
+          "rank": "S",
+          "chakra_cost": 50,
+          "description": "Creates black flames that burn anything they touch until they are completely destroyed. The flames cannot be extinguished by normal means.",
+          "hand_seals": [],
+          "creator": "Uchiha Clan",
+          "users": ["Itachi Uchiha", "Sasuke Uchiha"],
+          "variations": ["Kagutsuchi"]
+        }
+      ]
+    },
+    "water": {
+      "basic": [
+        {
+          "name": "Water Bullet Jutsu",
+          "japanese": "水遁・水鉄砲の術",
+          "romanji": "Suiton: Mizurappa no Jutsu",
+          "rank": "C",
+          "chakra_cost": 15,
+          "description": "Creates a high-pressure stream of water that can pierce through objects.",
+          "hand_seals": ["Tiger", "Dragon", "Snake"],
+          "creator": "Kirigakure",
+          "users": ["Zabuza Momochi", "Kisame Hoshigaki"],
+          "variations": ["Water Gun Jutsu"]
+        }
+      ],
+      "advanced": [
+        {
+          "name": "Water Dragon Jutsu",
+          "japanese": "水遁・水龍弾の術",
+          "romanji": "Suiton: Suiryūdan no Jutsu",
+          "rank": "B",
+          "chakra_cost": 30,
+          "description": "Creates a dragon-shaped water projectile that can be controlled to follow the target.",
+          "hand_seals": ["Tiger", "Dragon", "Snake", "Rat", "Dragon"],
+          "creator": "Kirigakure",
+          "users": ["Zabuza Momochi", "Kakashi Hatake"],
+          "variations": ["Water Dragon Bullet"]
+        }
+      ]
+    },
+    "earth": {
+      "basic": [
+        {
+          "name": "Earth Wall Jutsu",
+          "japanese": "土遁・土流壁の術",
+          "romanji": "Doton: Doryūheki no Jutsu",
+          "rank": "C",
+          "chakra_cost": 20,
+          "description": "Creates a wall of earth to block attacks. The wall can be customized with additional features like spikes or patterns.",
+          "hand_seals": ["Tiger", "Dragon", "Snake", "Rat"],
+          "creator": "Iwagakure",
+          "users": ["Kakashi Hatake", "Jiraiya"],
+          "variations": ["Earth Wall Dome"]
+        }
+      ],
+      "advanced": [
+        {
+          "name": "Earth-Style: Mud Dragon Jutsu",
+          "japanese": "土遁・土龍弾の術",
+          "romanji": "Doton: Doryūdan no Jutsu",
+          "rank": "B",
+          "chakra_cost": 35,
+          "description": "Creates a dragon made of mud that can be controlled to attack the target. The mud can harden upon impact.",
+          "hand_seals": ["Tiger", "Dragon", "Snake", "Rat", "Dragon"],
+          "creator": "Iwagakure",
+          "users": ["Kakashi Hatake", "Jiraiya"],
+          "variations": ["Mud Dragon Bullet"]
+        }
+      ]
+    },
+    "wind": {
+      "basic": [
+        {
+          "name": "Wind Cutter Jutsu",
+          "japanese": "風遁・風切りの術",
+          "romanji": "Fūton: Kaze Kirino Jutsu",
+          "rank": "C",
+          "chakra_cost": 15,
+          "description": "Creates sharp blades of wind that can cut through objects.",
+          "hand_seals": ["Tiger", "Dragon"],
+          "creator": "Sunagakure",
+          "users": ["Temari", "Gaara"],
+          "variations": ["Wind Scythe Jutsu"]
+        }
+      ],
+      "advanced": [
+        {
+          "name": "Wind Style: Rasenshuriken",
+          "japanese": "風遁・螺旋手裏剣",
+          "romanji": "Fūton: Rasenshuriken",
+          "rank": "S",
+          "chakra_cost": 45,
+          "description": "Creates a large shuriken made of wind chakra that can cut through anything at the cellular level.",
+          "hand_seals": [],
+          "creator": "Naruto Uzumaki",
+          "users": ["Naruto Uzumaki"],
+          "variations": ["Sage Art: Rasenshuriken"]
+        }
+      ]
+    },
+    "lightning": {
+      "basic": [
+        {
+          "name": "Lightning Cutter",
+          "japanese": "雷切",
+          "romanji": "Raikiri",
+          "rank": "A",
+          "chakra_cost": 25,
+          "description": "Creates a blade of lightning in the user's hand that can pierce through almost anything.",
+          "hand_seals": ["Tiger", "Dragon", "Snake"],
+          "creator": "Kakashi Hatake",
+          "users": ["Kakashi Hatake", "Sasuke Uchiha"],
+          "variations": ["Chidori"]
+        }
+      ],
+      "advanced": [
+        {
+          "name": "Chidori",
+          "japanese": "千鳥",
+          "romanji": "Chidori",
+          "rank": "A",
+          "chakra_cost": 25,
+          "description": "Creates a blade of lightning in the user's hand that produces a sound like a thousand birds chirping.",
+          "hand_seals": ["Tiger", "Dragon", "Snake"],
+          "creator": "Kakashi Hatake",
+          "users": ["Sasuke Uchiha", "Kakashi Hatake"],
+          "variations": ["Chidori Stream", "Chidori Spear"]
+        }
+      ]
+    }
+  },
+  "combination_jutsu": [
+    {
+      "name": "Scorch Release: Halo Hurricane Jet",
+      "japanese": "灼遁・光輪疾風",
+      "romanji": "Shakuton: Kōrin Shippū",
+      "rank": "S",
+      "chakra_cost": 40,
+      "description": "Combines wind and fire elements to create a powerful hurricane of flames.",
+      "elements": ["wind", "fire"],
+      "hand_seals": ["Tiger", "Dragon", "Snake", "Rat", "Dragon"],
+      "creator": "Gaara",
+      "users": ["Gaara", "Temari"],
+      "variations": ["Scorch Release: Halo Hurricane"]
+    }
+  ],
+  "hand_seals": {
+    "Tiger": "寅",
+    "Dragon": "辰",
+    "Snake": "巳",
+    "Rat": "子",
+    "Ox": "丑",
+    "Hare": "卯",
+    "Horse": "午",
+    "Ram": "未",
+    "Monkey": "申",
+    "Bird": "酉",
+    "Dog": "戌",
+    "Boar": "亥"
+  },
+  "ranks": {
+    "E": "Entry Level",
+    "D": "Basic",
+    "C": "Intermediate",
+    "B": "Advanced",
+    "A": "Expert",
+    "S": "Master"
+  }
+} 

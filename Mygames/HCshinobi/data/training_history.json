@@ -1,0 +1,28 @@
+{
+    "448863996905521162": [
+        {
+            "timestamp": "2025-04-04T18:39:12.694704",
+            "attribute": "genjutsu",
+            "intensity": "light",
+            "duration_hours": 1,
+            "actual_duration_hours": 1,
+            "cost": 60,
+            "points_gained": 0.8,
+            "outcome": "Completed",
+            "injury": "None"
+        }
+    ],
+    "335942294492676097": [
+        {
+            "timestamp": "2025-04-04T20:10:13.421500",
+            "attribute": "speed",
+            "intensity": "intense",
+            "duration_hours": 3,
+            "actual_duration_hours": 3,
+            "cost": 135,
+            "points_gained": 8.25,
+            "outcome": "Completed",
+            "injury": "None"
+        }
+    ]
+}

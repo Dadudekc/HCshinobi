@@ -1,0 +1,51 @@
+{
+  "Legendary Tier (~1%)": {
+    "description": "Godlike clans with world-shaking potential. If you roll this, you're living a myth. Tread carefully\u2014your story will be legendary, or tragic.",
+    "clans": {
+      "Sekkan": "Wielders of Particle Release, able to disintegrate matter on a molecular level. Their power is absolute\u2014and terrifying.",
+      "Shinkan": "Masters of gravity. Battlefield architects who can crush, levitate, or control the terrain itself with a thought.",
+      "Uchiha": "The iconic flame of tragedy and genius. Sharingan, Mangeky\u014d, and the curse of deep emotion make them powerful and unstable.",
+      "Namikaze": "Masters of space and time, famed for their godlike speed and instantaneous teleportation. Fleeting legends whose mere presence alters fate\u2014blink, and they're already gone.",
+      "Chinoike": "Blood manipulators wielding the sinister Ketsury\u016bgan. They turn veins into weapons, controlling blood and senses alike. Feared as cursed demons\u2014whose crimson gaze brings madness or death."
+    }
+  },
+  "Epic Tier (~5%)": {
+    "description": "Rare, elite, or prestigious clans. Their names echo in history, and their powers shape the battlefield.",
+    "clans": {
+      "Senju": "Founders of Konoha, Wood Release legends, and chakra titans. Versatile, spiritual, and revered.",
+      "Shumyakuro": "Atmospheric manipulators who twist perception and pressure. Reality warps around them.",
+      "Raiketsu": "Living lightning circuits with nerve-crushing touch. Ultra-fast, ultra-deadly, ultra-short-lived.",
+      "Yuki": "Ice Release elegance and battlefield lockdown. Snipers, skaters, and silent killers.",
+      "Kurama": "Genjutsu prodigies whose illusions can break minds\u2014and sometimes bodies. Beautiful, horrifying, and rare.",
+      "Terum\u012b": "Lava-wielders of molten power. Tactical, explosive, and politically cunning.",
+      "H\u014dzuki": "Water-bodied assassins who can melt through cracks, blades, and your last hope.",
+      "Uzumaki": "Seal masters with monstrous stamina. Born to contain tailed beasts, protect villages, and endure anything."
+    }
+  },
+  "Rare Tier (~15%)": {
+    "description": "Clans with deadly specialties, powerful niches, or explosive potential. You're not common, but you're still watched.",
+    "clans": {
+      "Hy\u016bga": "All-seeing eyes and chakra-destroying fists. The guardians of Konoha\u2019s legacy and internal order.",
+      "Enraik\u014d": "Flashfire blitzers who blind and burn in a heartbeat. If you see them, it\u2019s already too late.",
+      "Yotsuki": "Lightning-wrapped brawlers descended from Raikage. Strength, speed, and swagger.",
+      "Kaguya": "Bone-breaking berserkers with savage instincts and tragic fates. Unkillable, but unstable.",
+      "Gansho": "Explosion release maniacs who leave craters and silence behind. Live loud, die louder.",
+      "En\u2019y\u014d": "Boil mist tacticians. Slow, creeping death wrapped in a calm mask.",
+      "Kozame": "Crystal release artists who trap, slice, and sculpt the battlefield into a graveyard.",
+      "Soragane": "Sound engineers and comm-saboteurs. You don\u2019t see them\u2014but they hear everything.",
+      "Tsuyugiri": "Mist puppeteers who animate corpses. The dead don\u2019t stay down when they\u2019re near."
+    }
+  },
+  "Standard Tier (~79%)": {
+    "description": "These clans are the shinobi foundation. You may not be flashy\u2014but you're clever, reliable, and still dangerous as hell. Your rise is yours to earn.",
+    "clans": {
+      "Nara": "Shadow tacticians who win before the first kunai flies. Lazy brilliance is still brilliance.",
+      "Yamanaka": "Mental invaders and battlefield communicators. They see into minds and turn them inside out.",
+      "Aburame": "Bug hosts with cold precision. If the swarm is moving\u2026 someone\u2019s already losing.",
+      "Akimichi": "Giants with warm hearts and terrifying fists. Butterfly mode turns snacks into shockwaves.",
+      "Sarutobi": "Ash-bending veterans with fire, wisdom, and summoning beasts. The Will of Fire smolders.",
+      "Kamizuru": "Chakra bee handlers who sting, swarm, and sabotage. Don't underestimate the hive.",
+      "Inuzuka": "Wild trackers with loyal ninken. They fight as a pack\u2014and they never lose the scent."
+    }
+  }
+}

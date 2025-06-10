@@ -1,0 +1,93 @@
+{
+  "Amegakure Clans": [
+    {
+      "name": "Aokami",
+      "village": "Amegakure",
+      "kekkei_genkai": "Paper Release – Chakra-Infused Origami Manipulation",
+      "abilities": [
+        "Dance of the Shikigami",
+        "Paper Clone Technique",
+        "Paper Ocean Burial",
+        "Divine Paper Wings"
+      ],
+      "traits": [
+        "Pale skin, soft voices, distant gazes",
+        "Layered robes with paper seals",
+        "Value silence, artistry, and ritual",
+        "Rain strengthens their paper"
+      ],
+      "role": "Message-bearers, demolitionists, assassins"
+    },
+    {
+      "name": "Iburi",
+      "village": "Amegakure",
+      "kekkei_genkai": "Smoke Body Transformation – Partial Vaporization Technique",
+      "abilities": [
+        "Smoke Body Technique",
+        "Gray Stranglehold",
+        "Mist-Drift Clone",
+        "Ash Drift Mantle"
+      ],
+      "traits": [
+        "Pale, veiled, breathy voices",
+        "Carry smoke gourds or incense",
+        "Prefer dim light and silence",
+        "Survive through stealth and subterfuge"
+      ],
+      "role": "Assassins, scouts, political saboteurs"
+    },
+    {
+      "name": "Kirisame",
+      "village": "Amegakure",
+      "kekkei_genkai": "Rain Needle Manipulation – Atmospheric Condensation Control",
+      "abilities": [
+        "Rain Needle Barrage",
+        "Drizzle Veil Technique",
+        "Humidity Spike Field",
+        "Mirage Rain Circle"
+      ],
+      "traits": [
+        "Slate-gray hair, muted blue eyes",
+        "Damp skin, ripple-patterned attire",
+        "Precise, quiet, natural ambushers"
+      ],
+      "role": "Environmental assassins, battlefield controllers"
+    },
+    {
+      "name": "Chigusatsu",
+      "village": "Amegakure",
+      "kekkei_genkai": "Poison Release – Internal Venom Manipulation",
+      "abilities": [
+        "Toxic Miasma Shroud",
+        "Venom Blade Secretion",
+        "Coagulation Pulse",
+        "Bloodsmoke Requiem"
+      ],
+      "traits": [
+        "Sallow skin, toxin-adapted eyes",
+        "Gas masks, plague motifs",
+        "Speak in monotone, live in isolation",
+        "Smell of antiseptic or rot"
+      ],
+      "role": "Chemical warfare experts, field purifiers"
+    },
+    {
+      "name": "Fudehane",
+      "village": "Amegakure",
+      "kekkei_genkai": "Ink Release – Living Calligraphy Chakra",
+      "abilities": [
+        "Ink Clone Technique",
+        "Sealed Script Bind",
+        "Ink Flow Dragon",
+        "Null Scroll Field"
+      ],
+      "traits": [
+        "Tattooed arms, ink-stained fingers",
+        "Smudged, reflective eyes",
+        "Parchment-like robes, brush holsters",
+        "Haiku-writing meditators"
+      ],
+      "role": "Sealmasters, lore-keepers, anti-jutsu specialists"
+    }
+  ]
+}

@@ -1,0 +1,947 @@
+{
+    "clan_data.py": {
+        "language": ".py",
+        "functions": [
+            "get_all_clans",
+            "get_clan_rarity"
+        ],
+        "classes": {
+            "RarityTier": {
+                "methods": [],
+                "docstring": null,
+                "base_classes": [
+                    "enum.Enum"
+                ]
+            }
+        },
+        "routes": [],
+        "complexity": 2
+    },
+    "discord_integration.py": {
+        "language": ".py",
+        "functions": [
+            "run_bot"
+        ],
+        "classes": {},
+        "routes": [],
+        "complexity": 1
+    },
+    "npc_manager.py": {
+        "language": ".py",
+        "functions": [
+            "__init__",
+            "_load_npcs",
+            "_save_npcs",
+            "convert_player_to_npc",
+            "get_all_npcs",
+            "get_npc_by_discord_id",
+            "get_npc_count",
+            "get_npcs_by_clan"
+        ],
+        "classes": {
+            "NPCManager": {
+                "methods": [
+                    "__init__",
+                    "_load_npcs",
+                    "_save_npcs",
+                    "convert_player_to_npc",
+                    "get_all_npcs",
+                    "get_npc_by_discord_id",
+                    "get_npc_count",
+                    "get_npcs_by_clan"
+                ],
+                "docstring": "Manages player deaths and NPC lifecycle.\nDead players are converted to NPCs and maintained up to the MAX_NPC_COUNT.",
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 16
+    },
+    "tests\\test_clan_assignment.py": {
+        "language": ".py",
+        "functions": [
+            "setup_temp_files",
+            "test_simulate_clan_assignment",
+            "setUp",
+            "tearDown",
+            "test_get_all_clans",
+            "test_get_clan_by_name",
+            "setUp",
+            "tearDown",
+            "test_get_all_personalities",
+            "test_get_clan_modifiers",
+            "test_add_personality",
+            "test_update_personality",
+            "test_remove_personality",
+            "setUp",
+            "tearDown",
+            "test_convert_player_to_npc",
+            "test_npc_limit",
+            "setUp",
+            "tearDown",
+            "test_calculate_base_weights",
+            "test_normalize_weights",
+            "test_apply_population_adjustments",
+            "test_apply_token_boost",
+            "test_assign_clan",
+            "test_mark_player_death"
+        ],
+        "classes": {
+            "TestClanData": {
+                "methods": [
+                    "setUp",
+                    "tearDown",
+                    "test_get_all_clans",
+                    "test_get_clan_by_name"
+                ],
+                "docstring": "Tests for the clan data module (using dependency injection).",
+                "base_classes": [
+                    "unittest.TestCase"
+                ]
+            },
+            "TestPersonalityModifiers": {
+                "methods": [
+                    "setUp",
+                    "tearDown",
+                    "test_get_all_personalities",
+                    "test_get_clan_modifiers",
+                    "test_add_personality",
+                    "test_update_personality",
+                    "test_remove_personality"
+                ],
+                "docstring": "Tests for the personality modifiers module (using dependency injection).",
+                "base_classes": [
+                    "unittest.TestCase"
+                ]
+            },
+            "TestNPCManager": {
+                "methods": [
+                    "setUp",
+                    "tearDown",
+                    "test_convert_player_to_npc",
+                    "test_npc_limit"
+                ],
+                "docstring": "Tests for the NPC manager (using dependency injection).",
+                "base_classes": [
+                    "unittest.TestCase"
+                ]
+            },
+            "TestClanAssignmentEngine": {
+                "methods": [
+                    "setUp",
+                    "tearDown",
+                    "test_calculate_base_weights",
+                    "test_normalize_weights",
+                    "test_apply_population_adjustments",
+                    "test_apply_token_boost",
+                    "test_assign_clan",
+                    "test_mark_player_death"
+                ],
+                "docstring": "Tests for the clan assignment engine (using dependency injection).",
+                "base_classes": [
+                    "unittest.TestCase"
+                ]
+            }
+        },
+        "routes": [],
+        "complexity": 48
+    },
+    "personality_modifiers.py": {
+        "language": ".py",
+        "functions": [
+            "get_valid_personalities",
+            "get_clan_modifier",
+            "apply_personality_modifiers"
+        ],
+        "classes": {
+            "PersonalityModifier": {
+                "methods": [
+                    "get_valid_personalities",
+                    "get_clan_modifier",
+                    "apply_personality_modifiers"
+                ],
+                "docstring": "Calculates clan probability adjustments based on player personality traits.",
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 6
+    },
+    "clan_assignment_engine.py": {
+        "language": ".py",
+        "functions": [
+            "simulate_clan_assignment",
+            "__init__",
+            "_load_clan_data",
+            "_save_clan_data",
+            "_calculate_base_weights",
+            "_apply_population_adjustments",
+            "_apply_token_boost",
+            "_normalize_weights",
+            "_select_clan_from_weights",
+            "assign_clan",
+            "_log_assignment",
+            "get_clan_populations",
+            "mark_player_death"
+        ],
+        "classes": {
+            "ClanAssignmentEngine": {
+                "methods": [
+                    "__init__",
+                    "_load_clan_data",
+                    "_save_clan_data",
+                    "_calculate_base_weights",
+                    "_apply_population_adjustments",
+                    "_apply_token_boost",
+                    "_normalize_weights",
+                    "_select_clan_from_weights",
+                    "assign_clan",
+                    "_log_assignment",
+                    "get_clan_populations",
+                    "mark_player_death"
+                ],
+                "docstring": "Main engine for assigning clans to players based on weighted probabilities,\nadjusted by population, personality traits, and token boosts.",
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 25
+    },
+    "HCshinobi\\__init__.py": {
+        "language": ".py",
+        "functions": [],
+        "classes": {},
+        "routes": [],
+        "complexity": 0
+    },
+    "HCshinobi\\core\\__init__.py": {
+        "language": ".py",
+        "functions": [],
+        "classes": {},
+        "routes": [],
+        "complexity": 0
+    },
+    "HCshinobi\\discord\\__init__.py": {
+        "language": ".py",
+        "functions": [],
+        "classes": {},
+        "routes": [],
+        "complexity": 0
+    },
+    "HCshinobi\\discord\\rolling.py": {
+        "language": ".py",
+        "functions": [],
+        "classes": {},
+        "routes": [],
+        "complexity": 0
+    },
+    "HCshinobi\\utils\\logging.py": {
+        "language": ".py",
+        "functions": [
+            "setup_logging",
+            "log_event",
+            "get_logger",
+            "log_error",
+            "log_command"
+        ],
+        "classes": {},
+        "routes": [],
+        "complexity": 5
+    },
+    "HCshinobi\\utils\\__init__.py": {
+        "language": ".py",
+        "functions": [],
+        "classes": {},
+        "routes": [],
+        "complexity": 0
+    },
+    "HCshinobi\\main.py": {
+        "language": ".py",
+        "functions": [
+            "main",
+            "__init__"
+        ],
+        "classes": {
+            "HCShinobiBot": {
+                "methods": [
+                    "__init__"
+                ],
+                "docstring": "Custom Bot class for HCshinobi.",
+                "base_classes": [
+                    "commands.Bot"
+                ]
+            }
+        },
+        "routes": [],
+        "complexity": 3
+    },
+    "HCshinobi\\ai\\npc_prompt_generator.py": {
+        "language": ".py",
+        "functions": [
+            "generate_npc_content",
+            "__init__",
+            "format_prompt_data",
+            "_get_system_prompt",
+            "_format_npc_context",
+            "generate_prompt",
+            "mock_ai_response"
+        ],
+        "classes": {
+            "NPCPromptGenerator": {
+                "methods": [
+                    "__init__",
+                    "format_prompt_data",
+                    "_get_system_prompt",
+                    "_format_npc_context",
+                    "generate_prompt",
+                    "mock_ai_response"
+                ],
+                "docstring": "Generates prompts for AI models to create NPC-related content.\nSupports different AI providers: OpenAI API or local models.",
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 13
+    },
+    "HCshinobi\\core\\clan_data.py": {
+        "language": ".py",
+        "functions": [
+            "__init__",
+            "_load_or_create_clans",
+            "_save_clans",
+            "_create_default_clans",
+            "get_all_clans",
+            "get_clan_by_name",
+            "get_clans_by_rarity",
+            "add_clan",
+            "update_clan",
+            "get_clan_base_weights"
+        ],
+        "classes": {
+            "ClanData": {
+                "methods": [
+                    "__init__",
+                    "_load_or_create_clans",
+                    "_save_clans",
+                    "_create_default_clans",
+                    "get_all_clans",
+                    "get_clan_by_name",
+                    "get_clans_by_rarity",
+                    "add_clan",
+                    "update_clan",
+                    "get_clan_base_weights"
+                ],
+                "docstring": "Manages data related to clans, loading from and saving to a file.\nProvides methods to access and manipulate clan information.",
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 20
+    },
+    "HCshinobi\\core\\assignment_engine.py": {
+        "language": ".py",
+        "functions": [
+            "__init__",
+            "_load_history",
+            "_save_history",
+            "get_clan_weights",
+            "assign_clan",
+            "get_player_clan",
+            "get_clan_population",
+            "get_all_clan_populations",
+            "get_rarity_statistics"
+        ],
+        "classes": {
+            "ClanAssignmentEngine": {
+                "methods": [
+                    "__init__",
+                    "_load_history",
+                    "_save_history",
+                    "get_clan_weights",
+                    "assign_clan",
+                    "get_player_clan",
+                    "get_clan_population",
+                    "get_all_clan_populations",
+                    "get_rarity_statistics"
+                ],
+                "docstring": "Engine responsible for assigning clans to players based on various factors\n(randomness, personality, token boosts) and tracks assignment history.",
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 18
+    },
+    "HCshinobi\\core\\npc_manager.py": {
+        "language": ".py",
+        "functions": [
+            "__init__",
+            "_load_npcs",
+            "_save_npcs",
+            "_get_active_npc_count",
+            "convert_player_to_npc",
+            "get_npc",
+            "get_npc_by_former_player",
+            "get_all_npcs",
+            "get_npcs_by_clan",
+            "get_active_npcs",
+            "update_npc",
+            "deactivate_npc",
+            "record_npc_interaction",
+            "add_plot_hook",
+            "mark_plot_hook_used"
+        ],
+        "classes": {
+            "NPCManagerError": {
+                "methods": [],
+                "docstring": "Custom exception for NPC Manager errors.",
+                "base_classes": [
+                    "Exception"
+                ]
+            },
+            "NPCManager": {
+                "methods": [
+                    "__init__",
+                    "_load_npcs",
+                    "_save_npcs",
+                    "_get_active_npc_count",
+                    "convert_player_to_npc",
+                    "get_npc",
+                    "get_npc_by_former_player",
+                    "get_all_npcs",
+                    "get_npcs_by_clan",
+                    "get_active_npcs",
+                    "update_npc",
+                    "deactivate_npc",
+                    "record_npc_interaction",
+                    "add_plot_hook",
+                    "mark_plot_hook_used"
+                ],
+                "docstring": "Manages NPC lifecycle, including player-to-NPC conversion,\ndata storage, and NPC interaction capabilities.\nEnforces NPC limits (MAX_NPC_COUNT).",
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 30
+    },
+    "HCshinobi\\core\\personality_modifiers.py": {
+        "language": ".py",
+        "functions": [
+            "__init__",
+            "_load_or_create_modifiers",
+            "_save_modifiers",
+            "_create_default_modifiers",
+            "get_clan_modifiers",
+            "get_all_personalities",
+            "add_personality",
+            "update_personality",
+            "remove_personality",
+            "get_suggested_personalities_for_clan"
+        ],
+        "classes": {
+            "PersonalityModifiers": {
+                "methods": [
+                    "__init__",
+                    "_load_or_create_modifiers",
+                    "_save_modifiers",
+                    "_create_default_modifiers",
+                    "get_clan_modifiers",
+                    "get_all_personalities",
+                    "add_personality",
+                    "update_personality",
+                    "remove_personality",
+                    "get_suggested_personalities_for_clan"
+                ],
+                "docstring": "Manages personality-based modifiers for clan assignment, loading from \nand saving to a JSON file.",
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 20
+    },
+    "HCshinobi\\core\\token_system.py": {
+        "language": ".py",
+        "functions": [
+            "__init__",
+            "_load_tokens",
+            "_save_tokens",
+            "_log_transaction",
+            "get_player_tokens",
+            "ensure_player_exists",
+            "add_tokens",
+            "use_tokens",
+            "use_tokens_for_clan_boost",
+            "use_tokens_for_reroll",
+            "get_player_unlocks",
+            "has_unlock",
+            "unlock_feature"
+        ],
+        "classes": {
+            "TokenError": {
+                "methods": [],
+                "docstring": "Exception raised for token-related errors (e.g., insufficient funds).",
+                "base_classes": [
+                    "Exception"
+                ]
+            },
+            "TokenSystem": {
+                "methods": [
+                    "__init__",
+                    "_load_tokens",
+                    "_save_tokens",
+                    "_log_transaction",
+                    "get_player_tokens",
+                    "ensure_player_exists",
+                    "add_tokens",
+                    "use_tokens",
+                    "use_tokens_for_clan_boost",
+                    "use_tokens_for_reroll",
+                    "get_player_unlocks",
+                    "has_unlock",
+                    "unlock_feature"
+                ],
+                "docstring": "Manages tokens for players: balances, unlocks, spending, logging.\nUses TOKEN_FILE for state and TOKEN_LOG_FILE for history.",
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 26
+    },
+    "HCshinobi\\discord\\bot_commands.py": {
+        "language": ".py",
+        "functions": [
+            "setup",
+            "__init__",
+            "_get_rarity_color",
+            "__init__",
+            "__init__"
+        ],
+        "classes": {
+            "ClanCommands": {
+                "methods": [
+                    "__init__",
+                    "_get_rarity_color"
+                ],
+                "docstring": "Commands for clan assignments and related functionality.",
+                "base_classes": [
+                    "commands.Cog"
+                ]
+            },
+            "TokenCommands": {
+                "methods": [
+                    "__init__"
+                ],
+                "docstring": "Commands for token management and usage.",
+                "base_classes": [
+                    "commands.Cog"
+                ]
+            },
+            "NPCCommands": {
+                "methods": [
+                    "__init__"
+                ],
+                "docstring": "Commands for NPC management and interaction.",
+                "base_classes": [
+                    "commands.Cog"
+                ]
+            }
+        },
+        "routes": [],
+        "complexity": 9
+    },
+    "run.py": {
+        "language": ".py",
+        "functions": [
+            "main"
+        ],
+        "classes": {},
+        "routes": [],
+        "complexity": 1
+    },
+    "setup.py": {
+        "language": ".py",
+        "functions": [],
+        "classes": {},
+        "routes": [],
+        "complexity": 0
+    },
+    "HCshinobi\\core\\character_manager.py": {
+        "language": ".py",
+        "functions": [
+            "__init__",
+            "_load_characters",
+            "get_character",
+            "get_all_characters",
+            "reload_characters"
+        ],
+        "classes": {
+            "CharacterManager": {
+                "methods": [
+                    "__init__",
+                    "_load_characters",
+                    "get_character",
+                    "get_all_characters",
+                    "reload_characters"
+                ],
+                "docstring": "Handles loading and accessing character data from JSON files.",
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 10
+    },
+    "HCshinobi\\core\\clan_assignment_engine.py": {
+        "language": ".py",
+        "functions": [
+            "simulate_clan_assignment",
+            "__init__",
+            "_load_clan_population_data",
+            "_save_clan_population_data",
+            "_calculate_base_weights",
+            "_apply_population_adjustments",
+            "_apply_token_boost",
+            "_normalize_weights",
+            "_apply_personality_modifiers",
+            "assign_clan",
+            "mark_player_death"
+        ],
+        "classes": {
+            "ClanAssignmentEngine": {
+                "methods": [
+                    "__init__",
+                    "_load_clan_population_data",
+                    "_save_clan_population_data",
+                    "_calculate_base_weights",
+                    "_apply_population_adjustments",
+                    "_apply_token_boost",
+                    "_normalize_weights",
+                    "_apply_personality_modifiers",
+                    "assign_clan",
+                    "mark_player_death"
+                ],
+                "docstring": "Main engine for assigning clans to players based on weighted probabilities,\nadjusted by population, personality traits, and token boosts.\nHandles persistence of clan population data.",
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 21
+    },
+    "HCshinobi\\core\\constants.py": {
+        "language": ".py",
+        "functions": [],
+        "classes": {
+            "RarityTier": {
+                "methods": [],
+                "docstring": "Enum for clan rarity tiers.",
+                "base_classes": [
+                    "Enum"
+                ]
+            }
+        },
+        "routes": [],
+        "complexity": 0
+    },
+    "HCshinobi\\discord\\bot.py": {
+        "language": ".py",
+        "functions": [
+            "__init__",
+            "log_error"
+        ],
+        "classes": {
+            "HCShinobiBot": {
+                "methods": [
+                    "__init__"
+                ],
+                "docstring": "Custom Bot class for HCshinobi, holding core service instances.",
+                "base_classes": [
+                    "commands.Bot"
+                ]
+            }
+        },
+        "routes": [],
+        "complexity": 3
+    },
+    "HCshinobi\\discord\\extensions\\announcements.py": {
+        "language": ".py",
+        "functions": [
+            "__init__"
+        ],
+        "classes": {
+            "Announcements": {
+                "methods": [
+                    "__init__"
+                ],
+                "docstring": "Admin commands to send announcements and manage server-wide notifications.",
+                "base_classes": [
+                    "commands.Cog"
+                ]
+            }
+        },
+        "routes": [],
+        "complexity": 2
+    },
+    "HCshinobi\\discord\\extensions\\clans.py": {
+        "language": ".py",
+        "functions": [
+            "__init__",
+            "_get_rarity_color"
+        ],
+        "classes": {
+            "ClanCommands": {
+                "methods": [
+                    "__init__",
+                    "_get_rarity_color"
+                ],
+                "docstring": "Commands for clan assignments and related functionality.",
+                "base_classes": [
+                    "commands.Cog"
+                ]
+            },
+            "TokenError": {
+                "methods": [],
+                "docstring": null,
+                "base_classes": [
+                    "Exception"
+                ]
+            }
+        },
+        "routes": [],
+        "complexity": 4
+    },
+    "HCshinobi\\discord\\extensions\\npcs.py": {
+        "language": ".py",
+        "functions": [
+            "__init__"
+        ],
+        "classes": {
+            "NPCCommands": {
+                "methods": [
+                    "__init__"
+                ],
+                "docstring": "Commands for NPC management and interaction.",
+                "base_classes": [
+                    "commands.Cog"
+                ]
+            }
+        },
+        "routes": [],
+        "complexity": 2
+    },
+    "HCshinobi\\discord\\extensions\\rolling.py": {
+        "language": ".py",
+        "functions": [
+            "__init__"
+        ],
+        "classes": {
+            "Rolling": {
+                "methods": [
+                    "__init__"
+                ],
+                "docstring": "Commands related to RNG mechanics like dice rolls and clan assignments.",
+                "base_classes": [
+                    "commands.Cog"
+                ]
+            }
+        },
+        "routes": [],
+        "complexity": 2
+    },
+    "HCshinobi\\discord\\extensions\\__init__.py": {
+        "language": ".py",
+        "functions": [],
+        "classes": {},
+        "routes": [],
+        "complexity": 0
+    },
+    "HCshinobi\\discord\\extensions\\tokens.py": {
+        "language": ".py",
+        "functions": [
+            "__init__"
+        ],
+        "classes": {
+            "TokenCommands": {
+                "methods": [
+                    "__init__"
+                ],
+                "docstring": "Commands for token management and usage.",
+                "base_classes": [
+                    "commands.Cog"
+                ]
+            },
+            "TokenError": {
+                "methods": [],
+                "docstring": null,
+                "base_classes": [
+                    "Exception"
+                ]
+            }
+        },
+        "routes": [],
+        "complexity": 2
+    },
+    "HCshinobi\\utils\\file_io.py": {
+        "language": ".py",
+        "functions": [
+            "load_json",
+            "save_json"
+        ],
+        "classes": {},
+        "routes": [],
+        "complexity": 2
+    },
+    "HCshinobi\\utils\\ollama_client.py": {
+        "language": ".py",
+        "functions": [
+            "__init__"
+        ],
+        "classes": {
+            "OllamaError": {
+                "methods": [],
+                "docstring": "Custom exception for Ollama client errors.",
+                "base_classes": [
+                    "Exception"
+                ]
+            },
+            "OllamaClient": {
+                "methods": [
+                    "__init__"
+                ],
+                "docstring": "Handles asynchronous communication with an Ollama API endpoint.",
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 2
+    },
+    "htmlcov\\coverage_html.js": {
+        "language": ".js",
+        "functions": [],
+        "classes": {},
+        "routes": [],
+        "complexity": 0
+    },
+    "tests\\core\\test_clan_data.py": {
+        "language": ".py",
+        "functions": [
+            "mock_clan_data"
+        ],
+        "classes": {},
+        "routes": [],
+        "complexity": 1
+    },
+    "tests\\core\\test_personality_modifiers.py": {
+        "language": ".py",
+        "functions": [
+            "mock_modifier_data",
+            "personality_modifiers",
+            "test_initialization",
+            "test_load_existing_modifiers",
+            "test_load_invalid_data",
+            "test_get_clan_modifiers",
+            "test_get_all_personalities",
+            "test_add_personality",
+            "test_update_personality",
+            "test_remove_personality",
+            "test_get_suggested_personalities_for_clan"
+        ],
+        "classes": {},
+        "routes": [],
+        "complexity": 11
+    },
+    "tests\\core\\test_token_system.py": {
+        "language": ".py",
+        "functions": [
+            "mock_token_data"
+        ],
+        "classes": {},
+        "routes": [],
+        "complexity": 1
+    },
+    "tests\\extensions\\test_announcements.py": {
+        "language": ".py",
+        "functions": [
+            "announcements_cog"
+        ],
+        "classes": {},
+        "routes": [],
+        "complexity": 1
+    },
+    "tests\\extensions\\test_rolling.py": {
+        "language": ".py",
+        "functions": [
+            "rolling_cog"
+        ],
+        "classes": {},
+        "routes": [],
+        "complexity": 1
+    },
+    "HCshinobi\\core\\battle_manager.py": {
+        "language": ".py",
+        "functions": [
+            "__init__",
+            "_create_participant",
+            "get_battle_state",
+            "end_battle"
+        ],
+        "classes": {
+            "BattleParticipant": {
+                "methods": [],
+                "docstring": "Represents a participant (player or AI) in a battle.",
+                "base_classes": []
+            },
+            "BattleState": {
+                "methods": [],
+                "docstring": "Holds the state of an ongoing battle instance.",
+                "base_classes": []
+            },
+            "BattleManagerError": {
+                "methods": [],
+                "docstring": "Custom exception for Battle Manager errors.",
+                "base_classes": [
+                    "Exception"
+                ]
+            },
+            "BattleManager": {
+                "methods": [
+                    "__init__",
+                    "_create_participant",
+                    "get_battle_state",
+                    "end_battle"
+                ],
+                "docstring": "Handles the creation, state management, and progression of battles.",
+                "base_classes": []
+            }
+        },
+        "routes": [],
+        "complexity": 8
+    },
+    "HCshinobi\\discord\\extensions\\battle.py": {
+        "language": ".py",
+        "functions": [
+            "create_battle_embed",
+            "__init__",
+            "__init__"
+        ],
+        "classes": {
+            "BattleActionView": {
+                "methods": [
+                    "__init__"
+                ],
+                "docstring": "View containing buttons for player actions during battle.",
+                "base_classes": [
+                    "View"
+                ]
+            },
+            "BattleCommands": {
+                "methods": [
+                    "__init__"
+                ],
+                "docstring": "Commands for initiating and managing battles.",
+                "base_classes": [
+                    "commands.Cog"
+                ]
+            }
+        },
+        "routes": [],
+        "complexity": 5
+    }
+}
