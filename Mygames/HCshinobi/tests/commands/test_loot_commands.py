@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock
 import discord
 from discord.ext import commands
 
-from HCshinobi.bot.cogs.currency import CurrencyCommands
+from HCshinobi.bot.cogs.loot_commands import LootCommands
 
 @pytest.fixture
 def mock_ctx():
@@ -20,8 +20,8 @@ def mock_ctx():
 
 @pytest.fixture
 def loot_commands_cog(mock_bot):
-    """Create a CurrencyCommands cog instance for testing."""
-    return CurrencyCommands(mock_bot)
+    """Create a LootCommands cog instance for testing."""
+    return LootCommands(mock_bot)
 
 @pytest.mark.asyncio
 async def test_loot_command(loot_commands_cog, mock_ctx):

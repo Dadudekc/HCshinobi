@@ -1,17 +1,28 @@
 """
-HCShinobi - A Discord bot for managing ninja clans and missions
+HCShinobi Bot - A Discord bot for managing a Naruto-themed RPG
 """
 
-__version__ = "1.0.0"
+import logging
+from pathlib import Path
+from typing import Optional, TYPE_CHECKING
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger('HCshinobi')
+
+# Base directory for the project
+BASE_DIR = Path(__file__).parent.parent
+
+# Version info
+__version__ = "0.1.0"
 __author__ = "HCShinobi Team"
 
-import importlib
-import pkgutil
-from pathlib import Path
-from typing import List, Type
-
-import discord
-from discord.ext import commands
+# Defer heavy imports
+if TYPE_CHECKING:
+    from HCshinobi.bot.bot import HCBot
 
 # Import core modules
 from HCshinobi.core.character_system import CharacterSystem
@@ -25,35 +36,7 @@ from HCshinobi.core.room_system import RoomSystem
 from HCshinobi.core.currency_system import CurrencySystem
 
 # Import bot modules
-from HCshinobi.bot.bot import HCBot
 from HCshinobi.bot.config import BotConfig
 
-async def load_commands(bot: commands.Bot) -> List[Type[commands.Cog]]:
-    """
-    Automatically load all command modules from the commands package.
-    
-    Args:
-        bot: The Discord bot instance
-        
-    Returns:
-        List of loaded command cogs
-    """
-    loaded_cogs = []
-    commands_path = Path(__file__).parent / "commands"
-    
-    # Find all Python modules in the commands directory
-    for _, name, is_pkg in pkgutil.iter_modules([str(commands_path)]):
-        if not is_pkg and not name.startswith('_'):
-            try:
-                # Import the module
-                module = importlib.import_module(f"HCshinobi.commands.{name}")
-                
-                # If the module has a setup function, call it
-                if hasattr(module, 'setup'):
-                    await module.setup(bot)
-                    loaded_cogs.append(module)
-                    
-            except Exception as e:
-                print(f"Error loading command module {name}: {e}")
-    
-    return loaded_cogs 
+# Export command loader
+from HCshinobi.commands.loader import load_commands 

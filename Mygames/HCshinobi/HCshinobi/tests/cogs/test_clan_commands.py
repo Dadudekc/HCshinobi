@@ -80,9 +80,7 @@ async def test_clan_view_in_clan(clan_cog, mock_interaction, mock_clan_system, m
     mock_character_system.get_character.assert_awaited_once_with(user_id)
     mock_clan_system.get_clan_info.assert_awaited_once_with(clan_name)
     mock_interaction.response.send_message.assert_awaited_once()
-    args, kwargs = mock_interaction.response.send_message.call_args
-    assert 'embed' in kwargs
-    embed = kwargs['embed']
+    embed = getattr(mock_interaction.response.send_message.call_args[0][0], 'embed')
     assert clan_name in embed.title
     assert clan_info_data['description'] in embed.description
     assert str(len(clan_info_data['members'])) in embed.fields[0].value # Check member count
@@ -133,9 +131,7 @@ async def test_clan_info_success(clan_cog, mock_interaction, mock_clan_system):
 
     mock_clan_system.get_clan_info.assert_awaited_once_with(target_clan_name)
     mock_interaction.response.send_message.assert_awaited_once()
-    args, kwargs = mock_interaction.response.send_message.call_args
-    assert 'embed' in kwargs
-    embed = kwargs['embed']
+    embed = getattr(mock_interaction.response.send_message.call_args[0][0], 'embed')
     assert target_clan_name in embed.title
     assert clan_info_data['description'] in embed.description
     assert str(len(clan_info_data['members'])) in embed.fields[0].value # Check member count
@@ -169,9 +165,7 @@ async def test_clan_list_success(clan_cog, mock_interaction, mock_clan_system):
 
     mock_clan_system.list_clans.assert_awaited_once()
     mock_interaction.response.send_message.assert_awaited_once()
-    args, kwargs = mock_interaction.response.send_message.call_args
-    assert 'embed' in kwargs
-    embed = kwargs['embed']
+    embed = getattr(mock_interaction.response.send_message.call_args[0][0], 'embed')
     assert "Clan List" in embed.title
     assert len(embed.fields) == len(clan_list_data)
     assert clan_list_data[0]['name'] in embed.fields[0].name

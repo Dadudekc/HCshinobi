@@ -19,11 +19,18 @@ def mock_ctx():
     return ctx
 
 @pytest.fixture
+def mock_bot():
+    """Create a mock bot for testing."""
+    bot = MagicMock()
+    bot.services = MagicMock()
+    bot.services.mission_system = MagicMock()
+    bot.services.character_system = MagicMock()
+    return bot
+
+@pytest.fixture
 def clan_mission_commands_cog(mock_bot):
     """Create a MissionCommands cog instance for testing."""
-    mission_system = MagicMock()
-    character_system = MagicMock()
-    return MissionCommands(mock_bot, mission_system, character_system)
+    return MissionCommands(mock_bot)
 
 @pytest.mark.asyncio
 async def test_clan_mission_board_command(clan_mission_commands_cog, mock_ctx):

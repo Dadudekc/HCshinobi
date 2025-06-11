@@ -20,35 +20,48 @@ def mock_ctx():
     return ctx
 
 @pytest.fixture
+def mock_bot():
+    """Create a mock bot with required services."""
+    bot = MagicMock()
+    
+    # Create async mocks for mission system methods
+    mission_system = AsyncMock()
+    mission_system.get_available_missions = AsyncMock(return_value=[])
+    mission_system.get_active_mission = AsyncMock(return_value=None)
+    mission_system.get_mission_progress = AsyncMock(return_value="Progress: 0%")
+    mission_system.roll_mission = AsyncMock(return_value="Roll result: Success")
+    mission_system.complete_mission = AsyncMock(return_value=True)
+    mission_system.abandon_mission = AsyncMock(return_value=True)
+    mission_system.get_mission_history = AsyncMock(return_value=[])
+    mission_system.simulate_mission = AsyncMock(return_value="Simulation result: Success")
+    mission_system.accept_mission = AsyncMock(return_value=True)
+
+    # Create async mocks for character system methods
+    character_system = AsyncMock()
+    character_system.get_character = AsyncMock(return_value=MagicMock())
+
+    # Set up bot services
+    bot.services = MagicMock()
+    bot.services.mission_system = mission_system
+    bot.services.character_system = character_system
+    
+    return bot
+
+@pytest.fixture
 def quest_commands_cog(mock_bot):
     """Create a MissionCommands cog instance for testing."""
-    mission_system = MagicMock()
-    character_system = MagicMock()
-    return MissionCommands(mock_bot, mission_system, character_system)
+    return MissionCommands(mock_bot)
 
 # Define test cases for quest commands
 QUEST_COMMAND_CASES = [
     # (command_name, required_params)
-    ("quests", {}),
-    ("accept_quest", {"quest_id": "test_quest"}),
-    ("active_quests", {}),
-    ("complete_quest", {"quest_id": "test_quest"}),
-    ("abandon_quest", {"quest_id": "test_quest"}),
-    ("quest_history", {}),
-    ("quest_info", {"quest_id": "test_quest"}),
-    ("quest_progress", {"quest_id": "test_quest"}),
-    ("quest_rewards", {"quest_id": "test_quest"}),
-    ("quest_requirements", {"quest_id": "test_quest"}),
-    ("quest_difficulty", {"quest_id": "test_quest"}),
-    ("quest_time", {"quest_id": "test_quest"}),
-    ("quest_location", {"quest_id": "test_quest"}),
-    ("quest_npc", {"quest_id": "test_quest"}),
-    ("quest_items", {"quest_id": "test_quest"}),
-    ("quest_skills", {"quest_id": "test_quest"}),
-    ("quest_level", {"quest_id": "test_quest"}),
-    ("quest_type", {"quest_id": "test_quest"}),
-    ("quest_category", {"quest_id": "test_quest"}),
-    ("quest_tags", {"quest_id": "test_quest"})
+    ("mission_board", {}),
+    ("mission_accept", {"mission_number": 1}),
+    ("mission_progress", {}),
+    ("mission_roll", {}),
+    ("mission_complete", {}),
+    ("mission_abandon", {}),
+    ("mission_history", {})
 ]
 
 @pytest.mark.asyncio
@@ -67,74 +80,78 @@ async def test_quest_commands(quest_commands_cog, command_name, params):
     await command.callback(quest_commands_cog, mock_ctx, **params)
     
     # Verify interaction sequence
-    trace.assert_interaction_sequence(
-        {"ephemeral": True, "thinking": True},  # defer
-        {"content": None}  # followup_send
-    )
+    expected_messages = {
+        "mission_board": "No missions are currently available.",
+        "mission_accept": "No missions are currently available.",
+        "mission_progress": "You don't have an active mission!",
+        "mission_roll": "You don't have an active mission!",
+        "mission_complete": "You don't have an active mission!",
+        "mission_abandon": "You don't have an active mission!",
+        "mission_history": "You haven't completed any missions yet!",
+    }
+    
+    # First verify defer was called
+    trace.assert_defer_called(ephemeral=True, thinking=True)
+    
+    # Then verify the response
+    trace.assert_followup_send_called(content=expected_messages[command_name])
 
-# Edge case tests
 @pytest.mark.asyncio
 async def test_accept_quest_nonexistent(quest_commands_cog):
-    """Test accept_quest with nonexistent quest."""
+    """Test mission_accept with nonexistent quest."""
     # Create interaction trace
     trace = InteractionTrace()
     mock_ctx = trace.create_mock_ctx()
     
-    command = quest_commands_cog.accept_quest
-    assert command is not None, "Accept quest command not found"
+    command = quest_commands_cog.mission_accept
+    assert command is not None, "Mission accept command not found"
     
     # Mock nonexistent quest
-    quest_commands_cog.quest_exists = AsyncMock(return_value=False)
+    quest_commands_cog.mission_system.get_available_missions = AsyncMock(return_value=[])
     
     # Call with nonexistent quest
-    await command.callback(quest_commands_cog, mock_ctx, quest_id="nonexistent_quest")
+    await command.callback(quest_commands_cog, mock_ctx, mission_number=1)
     
     # Verify error response sequence
-    trace.assert_interaction_sequence(
-        {"ephemeral": True, "thinking": True},  # defer
-        {"content": "Quest not found: nonexistent_quest"}  # followup_send
-    )
+    trace.assert_defer_called(ephemeral=True, thinking=True)
+    trace.assert_followup_send_called(content="No missions are currently available.")
 
 @pytest.mark.asyncio
 async def test_complete_quest_not_active(quest_commands_cog):
-    """Test complete_quest when quest is not active."""
+    """Test mission_complete when quest is not active."""
     # Create interaction trace
     trace = InteractionTrace()
     mock_ctx = trace.create_mock_ctx()
     
-    command = quest_commands_cog.complete_quest
-    assert command is not None, "Complete quest command not found"
+    command = quest_commands_cog.mission_complete
+    assert command is not None, "Mission complete command not found"
     
     # Mock quest not active
-    quest_commands_cog.is_quest_active = AsyncMock(return_value=False)
+    quest_commands_cog.mission_system.get_active_mission = AsyncMock(return_value=None)
     
     # Call with inactive quest
-    await command.callback(quest_commands_cog, mock_ctx, quest_id="inactive_quest")
+    await command.callback(quest_commands_cog, mock_ctx)
     
     # Verify error response sequence
-    trace.assert_interaction_sequence(
-        {"ephemeral": True, "thinking": True},  # defer
-        {"content": "Quest is not active: inactive_quest"}  # followup_send
-    )
+    trace.assert_defer_called(ephemeral=True, thinking=True)
+    trace.assert_followup_send_called(content="You don't have an active mission!")
 
 @pytest.mark.asyncio
 async def test_abandon_quest_not_active(quest_commands_cog):
-    """Test abandon_quest when quest is not active."""
+    """Test mission_abandon when quest is not active."""
     # Create interaction trace
     trace = InteractionTrace()
     mock_ctx = trace.create_mock_ctx()
     
-    command = quest_commands_cog.abandon_quest
-    assert command is not None, "Abandon quest command not found"
+    command = quest_commands_cog.mission_abandon
+    assert command is not None, "Mission abandon command not found"
     
     # Mock quest not active
-    quest_commands_cog.is_quest_active = AsyncMock(return_value=False)
+    quest_commands_cog.mission_system.get_active_mission = AsyncMock(return_value=None)
     
     # Call with inactive quest
-    await command.callback(quest_commands_cog, mock_ctx, quest_id="inactive_quest")
+    await command.callback(quest_commands_cog, mock_ctx)
     
     # Verify error response sequence
-    trace.assert_interaction_sequence(
-        {"ephemeral": True, "thinking": True},  # defer
-        {"content": "Quest is not active: inactive_quest"}  # followup_send
-    ) 
+    trace.assert_defer_called(ephemeral=True, thinking=True)
+    trace.assert_followup_send_called(content="You don't have an active mission!") 

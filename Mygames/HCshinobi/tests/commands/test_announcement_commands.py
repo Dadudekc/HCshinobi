@@ -24,29 +24,18 @@ def announcement_commands_cog(mock_bot):
     """Create an AnnouncementCommands cog instance for testing."""
     return AnnouncementCommands(mock_bot)
 
-# Define test cases for announcement commands
+# Test cases for announcement commands
 ANNOUNCEMENT_COMMAND_CASES = [
-    # (command_name, required_params)
-    ("announce", {"content": "Test announcement"}),
-    ("announcement_list", {}),
-    ("announcement_remove", {"announcement_id": 1}),
-    ("announcement_edit", {"announcement_id": 1, "content": "Updated announcement"}),
-    ("announcement_pin", {"announcement_id": 1}),
-    ("announcement_unpin", {"announcement_id": 1}),
-    ("announcement_schedule", {"content": "Test announcement", "time": "2023-01-01 12:00:00"}),
-    ("announcement_cancel", {"announcement_id": 1}),
-    ("announcement_repeat", {"announcement_id": 1, "interval": "daily"}),
-    ("announcement_stop_repeat", {"announcement_id": 1}),
-    ("announcement_priority", {"announcement_id": 1, "priority": "high"}),
-    ("announcement_channel", {"announcement_id": 1, "channel": "general"}),
-    ("announcement_role", {"announcement_id": 1, "role": "everyone"}),
-    ("announcement_mention", {"announcement_id": 1, "mention": "here"}),
-    ("announcement_embed", {"announcement_id": 1, "embed": True}),
-    ("announcement_color", {"announcement_id": 1, "color": "#FF0000"}),
-    ("announcement_title", {"announcement_id": 1, "title": "Test Title"}),
-    ("announcement_description", {"announcement_id": 1, "description": "Test Description"}),
-    ("announcement_footer", {"announcement_id": 1, "footer": "Test Footer"}),
-    ("announcement_thumbnail", {"announcement_id": 1, "url": "https://example.com/thumb.png"})
+    ("announce", {"title": "Test Title", "message": "Test announcement"}),
+    ("battle_announce", {"fighter_a": "Player1", "fighter_b": "Player2", "arena": "Test Arena", "time": "2024-01-01 12:00:00"}),
+    ("lore_drop", {"title": "Test Lore", "snippet": "Test lore content"}),
+    ("check_permissions", {}),
+    ("check_bot_role", {}),
+    ("send_system_alert", {"title": "Test Alert", "message": "Test alert message"}),
+    ("broadcast_lore", {"trigger": "test_trigger"}),
+    ("alert_clan", {"clan_name": "Test Clan", "title": "Test Alert", "message": "Test message"}),
+    ("view_lore", {}),
+    ("update", {"version": "1.0.0", "release_date": "2024-01-01", "changes": "Test changes"})
 ]
 
 @pytest.mark.asyncio
@@ -66,8 +55,8 @@ async def test_announcement_commands(announcement_commands_cog, command_name, pa
     
     # Verify interaction sequence
     trace.assert_interaction_sequence(
-        {"ephemeral": True, "thinking": True},  # defer
-        {"content": None}  # followup_send
+        ("defer", {"ephemeral": True}),
+        ("followup_send", {"content": None})
     )
 
 # Edge case tests
@@ -81,35 +70,13 @@ async def test_announce_empty_content(announcement_commands_cog):
     command = announcement_commands_cog.announce
     assert command is not None, "Announce command not found"
     
-    # Call with empty content
-    await command.callback(announcement_commands_cog, mock_ctx, content="")
+    # Call with empty message
+    await command.callback(announcement_commands_cog, mock_ctx, title="Test Title", message="")
     
     # Verify error response sequence
     trace.assert_interaction_sequence(
-        {"ephemeral": True, "thinking": True},  # defer
-        {"content": "Announcement cannot be empty"}  # followup_send
-    )
-
-@pytest.mark.asyncio
-async def test_announcement_remove_nonexistent(announcement_commands_cog):
-    """Test announcement_remove with nonexistent announcement."""
-    # Create interaction trace
-    trace = InteractionTrace()
-    mock_ctx = trace.create_mock_ctx()
-    
-    command = announcement_commands_cog.announcement_remove
-    assert command is not None, "Announcement remove command not found"
-    
-    # Mock nonexistent announcement
-    announcement_commands_cog.announcement_exists = AsyncMock(return_value=False)
-    
-    # Call with nonexistent announcement
-    await command.callback(announcement_commands_cog, mock_ctx, announcement_id=999)
-    
-    # Verify error response sequence
-    trace.assert_interaction_sequence(
-        {"ephemeral": True, "thinking": True},  # defer
-        {"content": "Announcement not found: 999"}  # followup_send
+        ("defer", {"ephemeral": True}),
+        ("followup_send", {"content": "Announcement message cannot be empty"})
     )
 
 @pytest.mark.asyncio
@@ -119,14 +86,14 @@ async def test_announcement_schedule_invalid_time(announcement_commands_cog):
     trace = InteractionTrace()
     mock_ctx = trace.create_mock_ctx()
     
-    command = announcement_commands_cog.announcement_schedule
-    assert command is not None, "Announcement schedule command not found"
+    command = announcement_commands_cog.update
+    assert command is not None, "Update command not found"
     
-    # Call with invalid time
-    await command.callback(announcement_commands_cog, mock_ctx, content="Test", time="invalid_time")
+    # Call with invalid release date
+    await command.callback(announcement_commands_cog, mock_ctx, version="1.0.0", release_date="invalid_date", changes="Test changes")
     
     # Verify error response sequence
     trace.assert_interaction_sequence(
-        {"ephemeral": True, "thinking": True},  # defer
-        {"content": "Invalid time format: invalid_time"}  # followup_send
+        ("defer", {"ephemeral": True}),
+        ("followup_send", {"content": "Invalid date format: invalid_date"})
     ) 

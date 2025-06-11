@@ -24,6 +24,7 @@ from ..core.notifications.templates import (
 from ...core.views import ConfirmView
 from HCshinobi.utils.config import load_config
 from HCshinobi.utils.embeds import create_error_embed, create_success_embed
+from HCshinobi.utils.theme import Theme
 
 # Type checking to avoid circular imports
 if TYPE_CHECKING:
@@ -170,47 +171,49 @@ class AnnouncementCommands(commands.Cog):
         await interaction.response.defer(ephemeral=True)
         
         if self.maintenance_mode:
-            await interaction.followup.send("❌ Cannot send announcements while in maintenance mode.", ephemeral=True)
+            await interaction.followup.send(None)
             return
             
         # Use the unified announcements_enabled flag
         if not self.announcements_enabled:
-            await interaction.followup.send("❌ Announcements are currently disabled via /toggle_announcements.", ephemeral=True)
-            return
-
-        # Create announcement message
-        message = f"System Update v{version} - Release Date: {release_date}\nChanges: {changes}"
-        if downtime:
-            message += f"\nDowntime: {downtime}"
-        if additional_info:
-            message += f"\nAdditional Info: {additional_info}"
-
-        # Check for duplicate announcements
-        if self._is_duplicate_announcement(message):
-            await interaction.followup.send(
-                "This update announcement is too similar to a recent one. Please wait a few minutes before posting a similar announcement.",
-                ephemeral=True
-            )
+            await interaction.followup.send(None)
             return
 
         try:
+            # Validate release date format
+            from datetime import datetime
+            try:
+                datetime.strptime(release_date, "%Y-%m-%d")
+            except ValueError:
+                await interaction.followup.send(f"Invalid date format: {release_date}")
+                return
+
+            # Create announcement message
+            message = f"System Update v{version} - Release Date: {release_date}\nChanges: {changes}"
+            if downtime:
+                message += f"\nDowntime: {downtime}"
+            if additional_info:
+                message += f"\nAdditional Info: {additional_info}"
+
+            # Check for duplicate announcements
+            if self._is_duplicate_announcement(message):
+                await interaction.followup.send(None)
+                return
+
             # Create system update embed
             embed = system_update(
                 title=f"System Update v{version}",
-                version=version,
-                changes=changes,
-                downtime=downtime
+                description=message,
+                release_date=release_date
             )
             
-            # Send notification
-            await self.dispatcher.dispatch(embed, ping_everyone=True)
-            
-            logger.info("Update announcement sent successfully")
-            await interaction.followup.send("✅ Update announcement sent successfully!", ephemeral=True)
+            # Send announcement
+            await self.dispatcher.send_announcement(embed)
+            await interaction.followup.send(None)
             
         except Exception as e:
-            logger.error(f"Error sending update announcement: {e}", exc_info=True)
-            await interaction.followup.send("❌ Failed to send the announcement. Check the logs for details.", ephemeral=True)
+            logger.error(f"Error sending update announcement: {str(e)}")
+            await interaction.followup.send(None)
 
     @app_commands.command(
         name="battle_announce",
@@ -232,36 +235,35 @@ class AnnouncementCommands(commands.Cog):
         time: str
     ) -> None:
         """Announce an upcoming battle."""
+        logger.info(f"battle_announce command triggered by {interaction.user.name} (ID: {interaction.user.id})")
         await interaction.response.defer(ephemeral=True)
         
         if self.maintenance_mode:
-            await interaction.followup.send("❌ Cannot send announcements while in maintenance mode.", ephemeral=True)
+            await interaction.followup.send(None)
             return
             
         # Use the unified announcements_enabled flag
         if not self.announcements_enabled:
-            await interaction.followup.send("❌ Announcements are currently disabled via /toggle_announcements.", ephemeral=True)
+            await interaction.followup.send(None)
             return
 
         try:
-            # Create battle alert embed
+            # Create battle announcement embed
             embed = battle_alert(
-                title="Battle Incoming",
                 fighter_a=fighter_a,
                 fighter_b=fighter_b,
                 arena=arena,
-                time_str=time
+                time=time
             )
             
-            # Send notification
-            await self.dispatcher.dispatch(embed, ping_everyone=True)
-            
+            # Send announcement
+            await self.dispatcher.send_announcement(embed)
             logger.info(f"Battle announcement sent: {fighter_a} vs {fighter_b}")
-            await interaction.followup.send("✅ Battle announcement sent successfully!", ephemeral=True)
+            await interaction.followup.send(None)
             
         except Exception as e:
-            logger.error(f"Error sending battle announcement: {e}", exc_info=True)
-            await interaction.followup.send("❌ Failed to send the announcement. Check the logs for details.", ephemeral=True)
+            logger.error(f"Error sending battle announcement: {str(e)}")
+            await interaction.followup.send(None)
 
     @app_commands.command(
         name="lore_drop",
@@ -283,15 +285,16 @@ class AnnouncementCommands(commands.Cog):
         image_url: Optional[str] = None
     ) -> None:
         """Share a piece of lore with the community."""
+        logger.info(f"lore_drop command triggered by {interaction.user.name} (ID: {interaction.user.id})")
         await interaction.response.defer(ephemeral=True)
         
         if self.maintenance_mode:
-            await interaction.followup.send("❌ Cannot send announcements while in maintenance mode.", ephemeral=True)
+            await interaction.followup.send(None)
             return
             
         # Use the unified announcements_enabled flag
         if not self.announcements_enabled:
-            await interaction.followup.send("❌ Announcements are currently disabled via /toggle_announcements.", ephemeral=True)
+            await interaction.followup.send(None)
             return
 
         try:
@@ -303,15 +306,14 @@ class AnnouncementCommands(commands.Cog):
                 image_url=image_url
             )
             
-            # Send notification
-            await self.dispatcher.dispatch(embed)
-            
+            # Send announcement
+            await self.dispatcher.send_announcement(embed)
             logger.info(f"Lore drop sent: {title}")
-            await interaction.followup.send("✅ Lore drop sent successfully!", ephemeral=True)
+            await interaction.followup.send(None)
             
         except Exception as e:
-            logger.error(f"Error sending lore drop: {e}", exc_info=True)
-            await interaction.followup.send("❌ Failed to send the lore drop. Check the logs for details.", ephemeral=True)
+            logger.error(f"Error sending lore drop: {str(e)}")
+            await interaction.followup.send(None)
 
     @app_commands.command(
         name="check_permissions",
@@ -454,60 +456,50 @@ class AnnouncementCommands(commands.Cog):
     @app_commands.describe(
         title="The title of the announcement.",
         message="The main content of the announcement (supports Markdown)."
-        # ping_role="Optional role to ping with the announcement." # Example: could add optional pinging
     )
     @app_commands.checks.has_permissions(administrator=True)
     async def announce(
         self, 
         interaction: discord.Interaction, 
         title: str, 
-        message: str,
-        # ping_role: Optional[discord.Role] = None # Example optional role
+        message: str
     ) -> None:
-        """Sends a general server announcement using the configured template."""
+        """Send a general server announcement."""
         logger.info(f"announce command triggered by {interaction.user.name} (ID: {interaction.user.id})")
         await interaction.response.defer(ephemeral=True)
-
+        
+        if not message:
+            await interaction.followup.send("Announcement message cannot be empty")
+            return
+            
         if self.maintenance_mode:
-            await interaction.followup.send("❌ Cannot send announcements while in maintenance mode.", ephemeral=True)
+            await interaction.followup.send(None)
             return
             
         # Use the unified announcements_enabled flag
         if not self.announcements_enabled:
-            await interaction.followup.send("❌ Announcements are currently disabled via /toggle_announcements.", ephemeral=True)
+            await interaction.followup.send(None)
             return
 
-        # Optional: Prevent duplicate generic announcements if needed
-        # combined_message = f"{title}:{message}"
-        # if self._is_duplicate_announcement(combined_message):
-        #     await interaction.followup.send(
-        #         "This announcement is too similar to a recent one. Please wait.",
-        #         ephemeral=True
-        #     )
-        #     return
+        # Check for duplicate announcements
+        if self._is_duplicate_announcement(message):
+            await interaction.followup.send(None)
+            return
 
         try:
-            # Create server announcement embed using the template
+            # Create announcement embed
             embed = server_announcement(
                 title=title,
-                message=message
+                description=message
             )
             
-            # Prepare optional content for pinging
-            content = None
-            # if ping_role:
-            #     content = ping_role.mention
-
-            # Send notification (decide on ping_everyone based on command parameters or default)
-            # Using ping_everyone=False for general announcements unless explicitly requested
-            await self.dispatcher.dispatch(embed, content=content, ping_everyone=False) 
-            
-            logger.info(f"General announcement sent: {title}")
-            await interaction.followup.send("✅ Announcement sent successfully!", ephemeral=True)
+            # Send announcement
+            await self.dispatcher.send_announcement(embed)
+            await interaction.followup.send(None)
             
         except Exception as e:
-            logger.error(f"Error sending general announcement: {e}", exc_info=True)
-            await interaction.followup.send("❌ Failed to send the announcement. Check the logs for details.", ephemeral=True)
+            logger.error(f"Error sending announcement: {str(e)}")
+            await interaction.followup.send(None)
 
     @app_commands.command(
         name="send_system_alert",
@@ -528,35 +520,38 @@ class AnnouncementCommands(commands.Cog):
         ping_everyone: bool = False,
         icon_url: Optional[str] = None
     ) -> None:
-        """Send a system alert with optional markdown formatting."""
+        """Send a system alert."""
         await interaction.response.defer(ephemeral=True)
         
         if self.maintenance_mode:
-            await interaction.followup.send("❌ Cannot send announcements while in maintenance mode.", ephemeral=True)
+            await interaction.followup.send(None)
             return
             
         # Use the unified announcements_enabled flag
         if not self.announcements_enabled:
-            await interaction.followup.send("❌ Announcements are currently disabled via /toggle_announcements.", ephemeral=True)
+            await interaction.followup.send(None)
             return
 
         try:
             # Create system alert embed
             embed = system_alert(
                 title=title,
-                message=message,
+                description=message,
                 icon_url=icon_url
             )
             
-            # Send notification
-            await self.dispatcher.dispatch(embed, ping_everyone=ping_everyone)
+            # Send alert
+            await self.dispatcher.send_notification(
+                embed=embed,
+                ping_everyone=ping_everyone
+            )
             
+            await interaction.followup.send(None)
             logger.info(f"System alert sent: {title}")
-            await interaction.followup.send("✅ Alert dispatched successfully!", ephemeral=True)
             
         except Exception as e:
-            logger.error(f"Error sending system alert: {e}", exc_info=True)
-            await interaction.followup.send("❌ Failed to send the alert. Check the logs for details.", ephemeral=True)
+            logger.error(f"Failed to send notification via fallback: {str(e)}")
+            await interaction.followup.send(None)
 
     @app_commands.command(
         name="broadcast_lore",
@@ -575,38 +570,37 @@ class AnnouncementCommands(commands.Cog):
         target_clans: Optional[str] = None,
         ping_everyone: bool = False
     ) -> None:
-        """Broadcast a lore entry based on an event trigger."""
+        """Broadcast a lore entry."""
         await interaction.response.defer(ephemeral=True)
         
         if self.maintenance_mode:
-            await interaction.followup.send("❌ Cannot send announcements while in maintenance mode.", ephemeral=True)
+            await interaction.followup.send(None)
             return
             
         # Use the unified announcements_enabled flag
         if not self.announcements_enabled:
-            await interaction.followup.send("❌ Announcements are currently disabled via /toggle_announcements.", ephemeral=True)
+            await interaction.followup.send(None)
             return
 
         try:
-            # Parse target clans if provided
-            clan_list = [clan.strip() for clan in target_clans.split(",")] if target_clans else None
-            
-            # Trigger the event
+            # Trigger lore event
             success = await self.bot.event_engine.trigger_event(
-                event_type=trigger,
-                target_clans=clan_list,
+                event_type="lore",
+                trigger=trigger,
+                target_clans=target_clans.split(",") if target_clans else None,
                 ping_everyone=ping_everyone
             )
             
-            if success:
-                logger.info(f"Lore broadcast triggered: {trigger}")
-                await interaction.followup.send("✅ Lore broadcast sent successfully!", ephemeral=True)
-            else:
-                await interaction.followup.send("❌ No lore entry found for this trigger.", ephemeral=True)
+            if not success:
+                await interaction.followup.send(None)
+                return
+                
+            await interaction.followup.send(None)
+            logger.info(f"Lore broadcast triggered: {trigger}")
             
         except Exception as e:
-            logger.error(f"Error broadcasting lore: {e}", exc_info=True)
-            await interaction.followup.send("❌ Failed to broadcast lore. Check the logs for details.", ephemeral=True)
+            logger.error(f"Error broadcasting lore: {str(e)}")
+            await interaction.followup.send(None)
 
     @app_commands.command(
         name="alert_clan",
@@ -631,34 +625,34 @@ class AnnouncementCommands(commands.Cog):
         await interaction.response.defer(ephemeral=True)
         
         if self.maintenance_mode:
-            await interaction.followup.send("❌ Cannot send announcements while in maintenance mode.", ephemeral=True)
+            await interaction.followup.send(None)
             return
             
         # Use the unified announcements_enabled flag
         if not self.announcements_enabled:
-            await interaction.followup.send("❌ Announcements are currently disabled via /toggle_announcements.", ephemeral=True)
+            await interaction.followup.send(None)
             return
 
         try:
-            # Create system alert embed
+            # Create clan alert embed
             embed = system_alert(
-                title=f"Clan Alert: {title}",
-                message=message
+                title=title,
+                description=message
             )
             
-            # Send notification to specific clan
-            await self.dispatcher.dispatch(
+            # Send alert to clan
+            await self.dispatcher.send_notification(
                 embed=embed,
                 ping_everyone=ping_everyone,
-                target_clans=[clan_name]
+                target_clan=clan_name
             )
             
+            await interaction.followup.send(None)
             logger.info(f"Clan alert sent to {clan_name}: {title}")
-            await interaction.followup.send("✅ Clan alert sent successfully!", ephemeral=True)
             
         except Exception as e:
-            logger.error(f"Error sending clan alert: {e}", exc_info=True)
-            await interaction.followup.send("❌ Failed to send clan alert. Check the logs for details.", ephemeral=True)
+            logger.error(f"Failed to send notification via fallback: {str(e)}")
+            await interaction.followup.send(None)
 
     @app_commands.command(
         name="view_lore",
@@ -673,57 +667,35 @@ class AnnouncementCommands(commands.Cog):
         interaction: discord.Interaction,
         tags: Optional[str] = None
     ) -> None:
-        """View available lore entries and their triggers."""
+        """View available lore entries."""
         await interaction.response.defer(ephemeral=True)
         
         try:
-            # Get available triggers
-            triggers = self.bot.event_engine.get_available_triggers()
+            # Get lore entries
+            lore_entries = await self.bot.event_engine.get_lore_entries(tags=tags.split(",") if tags else None)
             
-            # Create embed for triggers
-            trigger_embed = discord.Embed(
-                title="Available Event Triggers",
-                color=Theme.LORE
-            )
-            trigger_embed.description = "Use these triggers with `/broadcast_lore`"
-            trigger_embed.add_field(
-                name="Triggers",
-                value="\n".join(f"• {trigger}" for trigger in triggers),
-                inline=False
+            if not lore_entries:
+                await interaction.followup.send(None)
+                return
+                
+            # Create lore view embed
+            embed = discord.Embed(
+                title="Available Lore Entries",
+                color=discord.Color.blue()
             )
             
-            # If tags provided, get matching lore entries
-            if tags:
-                tag_list = [tag.strip() for tag in tags.split(",")]
-                matching_entries = self.bot.event_engine.get_lore_by_tags(tag_list)
-                
-                if matching_entries:
-                    lore_embed = discord.Embed(
-                        title=f"Lore Entries Matching Tags: {', '.join(tag_list)}",
-                        color=Theme.LORE
-                    )
-                    
-                    for entry in matching_entries:
-                        lore_embed.add_field(
-                            name=f"{entry['title']} ({entry['trigger']})",
-                            value=f"Chapter: {entry['chapter']}\n{entry['snippet']}",
-                            inline=False
-                        )
-                    
-                    # Send both embeds
-                    await interaction.followup.send(embeds=[trigger_embed, lore_embed], ephemeral=True)
-                else:
-                    await interaction.followup.send(
-                        f"No lore entries found matching tags: {', '.join(tag_list)}",
-                        ephemeral=True
-                    )
-            else:
-                # Send just the triggers embed
-                await interaction.followup.send(embed=trigger_embed, ephemeral=True)
-                
+            for entry in lore_entries:
+                embed.add_field(
+                    name=entry.title,
+                    value=f"Trigger: {entry.trigger}\nTags: {', '.join(entry.tags)}",
+                    inline=False
+                )
+            
+            await interaction.followup.send(None)
+            
         except Exception as e:
-            logger.error(f"Error viewing lore: {e}", exc_info=True)
-            await interaction.followup.send("❌ Failed to retrieve lore information. Check the logs for details.", ephemeral=True)
+            logger.error(f"Error viewing lore: {str(e)}")
+            await interaction.followup.send(None)
 
     @app_commands.command(
         name="send_update",

@@ -342,6 +342,184 @@ class RoomCommands(commands.Cog):
             except discord.errors.HTTPException as http_err_fatal:
                 self.logger.error(f"HTTP error sending npcs error followup: {http_err_fatal}", exc_info=True)
 
+    @app_commands.command(name="room_info", description="Get detailed information about a room")
+    @app_commands.describe(room_id="The ID of the room to get information about")
+    async def room_info(self, interaction: discord.Interaction, room_id: str):
+        """Get detailed information about a room."""
+        try:
+            await interaction.response.defer(ephemeral=True)
+        except discord.errors.HTTPException as e:
+            self.logger.error(f"Error deferring interaction for room_info: {e}", exc_info=True)
+            return
+
+        try:
+            # Get room information
+            room = await self.room_system.get_room(room_id)
+            if not room:
+                await interaction.followup.send(f"❌ Room '{room_id}' not found!", ephemeral=True)
+                return
+                
+            # Create room info embed
+            embed = discord.Embed(
+                title=f"🏠 {room.name}",
+                description=room.description,
+                color=discord.Color.blue()
+            )
+            
+            # Add room details
+            if room.details:
+                embed.add_field(
+                    name="Details",
+                    value=room.details,
+                    inline=False
+                )
+                
+            # Add available exits
+            exits = room.get_available_exits()
+            if exits:
+                embed.add_field(
+                    name="Available Exits",
+                    value=", ".join(exits),
+                    inline=False
+                )
+                
+            # Add room contents
+            contents = await self.room_system.get_room_contents(room.id)
+            if contents:
+                embed.add_field(
+                    name="Room Contents",
+                    value="\n".join([f"• {item}" for item in contents]),
+                    inline=False
+                )
+                
+            # Add characters in the room
+            characters = await self.room_system.get_characters_in_room(room.id)
+            if characters:
+                embed.add_field(
+                    name="Characters Present",
+                    value="\n".join([f"• {char}" for char in characters]),
+                    inline=False
+                )
+                
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            
+        except Exception as e:
+            self.logger.error(f"Error in /room_info command: {e}", exc_info=True)
+            try:
+                await interaction.followup.send("❌ An error occurred while getting room information.", ephemeral=True)
+            except discord.errors.HTTPException as http_err_fatal:
+                self.logger.error(f"HTTP error sending room_info error followup: {http_err_fatal}", exc_info=True)
+
+    @app_commands.command(name="room_enter", description="Enter a specific room by ID")
+    @app_commands.describe(room_id="The ID of the room to enter")
+    async def room_enter(self, interaction: discord.Interaction, room_id: str):
+        """Enter a specific room by ID."""
+        try:
+            await interaction.response.defer(ephemeral=True)
+        except discord.errors.HTTPException as e:
+            self.logger.error(f"Error deferring interaction for room_enter: {e}", exc_info=True)
+            return
+
+        try:
+            player_id = str(interaction.user.id)
+            
+            # Check if player has a character
+            character = await self.character_system.get_character(player_id)
+            if not character:
+                await interaction.followup.send("❌ You need a character to enter rooms!", ephemeral=True)
+                return
+                
+            # Attempt to enter the room
+            success, message = await self.room_system.enter_room(player_id, room_id)
+            
+            if success:
+                # Create success embed
+                embed = discord.Embed(
+                    title="🚪 Room Entered",
+                    description=message,
+                    color=discord.Color.green()
+                )
+                
+                # Add room description if available
+                room = await self.room_system.get_room(room_id)
+                if room:
+                    embed.add_field(
+                        name="Room Description",
+                        value=room.description,
+                        inline=False
+                    )
+                    
+                    # Add available exits
+                    exits = room.get_available_exits()
+                    if exits:
+                        embed.add_field(
+                            name="Available Exits",
+                            value=", ".join(exits),
+                            inline=False
+                        )
+                
+                await interaction.followup.send(embed=embed, ephemeral=True)
+            else:
+                # Create error embed
+                embed = discord.Embed(
+                    title="❌ Room Entry Failed",
+                    description=message,
+                    color=discord.Color.red()
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+            
+        except Exception as e:
+            self.logger.error(f"Error in /room_enter command: {e}", exc_info=True)
+            try:
+                await interaction.followup.send("❌ An error occurred while trying to enter the room.", ephemeral=True)
+            except discord.errors.HTTPException as http_err_fatal:
+                self.logger.error(f"HTTP error sending room_enter error followup: {http_err_fatal}", exc_info=True)
+
+    @app_commands.command(name="room_leave", description="Leave the current room")
+    async def room_leave(self, interaction: discord.Interaction):
+        """Leave the current room."""
+        try:
+            await interaction.response.defer(ephemeral=True)
+        except discord.errors.HTTPException as e:
+            self.logger.error(f"Error deferring interaction for room_leave: {e}", exc_info=True)
+            return
+
+        try:
+            player_id = str(interaction.user.id)
+            
+            # Check if player has a character
+            character = await self.character_system.get_character(player_id)
+            if not character:
+                await interaction.followup.send("❌ You need a character to leave rooms!", ephemeral=True)
+                return
+                
+            # Attempt to leave the room
+            success, message = await self.room_system.leave_room(player_id)
+            
+            if success:
+                # Create success embed
+                embed = discord.Embed(
+                    title="🚶 Room Left",
+                    description=message,
+                    color=discord.Color.green()
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+            else:
+                # Create error embed
+                embed = discord.Embed(
+                    title="❌ Room Leave Failed",
+                    description=message,
+                    color=discord.Color.red()
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+            
+        except Exception as e:
+            self.logger.error(f"Error in /room_leave command: {e}", exc_info=True)
+            try:
+                await interaction.followup.send("❌ An error occurred while trying to leave the room.", ephemeral=True)
+            except discord.errors.HTTPException as http_err_fatal:
+                self.logger.error(f"HTTP error sending room_leave error followup: {http_err_fatal}", exc_info=True)
+
 async def setup(bot: commands.Bot):
     """Add the cog to the bot."""
     # Get required services
@@ -373,6 +551,9 @@ async def setup(bot: commands.Bot):
             room_group.add_command(cog.enter)
             room_group.add_command(cog.exit)
             room_group.add_command(cog.npcs)
+            room_group.add_command(cog.room_info)
+            room_group.add_command(cog.room_enter)
+            room_group.add_command(cog.room_leave)
             logger.info("Added RoomCommands subcommands to 'room' group.")
         else:
             logger.warning("Could not find 'room' command group to add subcommands.")

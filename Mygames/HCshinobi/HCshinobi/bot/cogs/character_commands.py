@@ -1290,7 +1290,7 @@ class CharacterCommands(commands.Cog):
         # Assuming progression_engine has a method like get_available_specializations()
         # If not, define a default list here.
         try:
-            available_specs = self.progression_engine.get_available_specializations(character) # Pass character for potential checks
+            available_specs = await self.progression_engine.get_available_specializations(character) # Pass character for potential checks
         except AttributeError:
             self.logger.warning("ProgressionEngine does not have get_available_specializations method. Using default list.")
             available_specs = ["Ninjutsu", "Taijutsu", "Genjutsu", "Medical", "Sensory"] # Default list

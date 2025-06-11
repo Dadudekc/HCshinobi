@@ -6,7 +6,9 @@ import logging
 from typing import TYPE_CHECKING, Optional, List, Dict, Any
 import os # Import os
 import aiofiles # Import aiofiles
+from datetime import datetime # Import datetime
 from ...core.constants import DATA_DIR, LOG_DIR # Assuming DEV_LOG_FILE might be in LOG_DIR or DATA_DIR
+import re # Import re for regular expressions
 
 # Type checking to avoid circular imports
 if TYPE_CHECKING:
@@ -76,6 +78,176 @@ class DevlogCommands(commands.Cog):
                 await interaction.followup.send("❌ An error occurred while fetching the devlog.", ephemeral=True)
             except discord.errors.HTTPException as http_err_fatal:
                 self.logger.error(f"HTTP error sending devlog error followup: {http_err_fatal}", exc_info=True)
+
+    @app_commands.command(name="devlog_add", description="Add a new entry to the devlog (Admin only)")
+    @app_commands.describe(
+        title="The title of the entry",
+        content="The content of the entry",
+        category="The category of the entry (feature, bugfix, update, etc.)"
+    )
+    @app_commands.default_permissions(administrator=True)
+    async def devlog_add(
+        self, 
+        interaction: discord.Interaction, 
+        title: str, 
+        content: str,
+        category: str = "update"
+    ):
+        """Add a new entry to the devlog."""
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message(
+                "❌ You don't have permission to use this command.",
+                ephemeral=True
+            )
+            return
+
+        try:
+            await interaction.response.defer(ephemeral=True)
+            
+            # Read existing content
+            try:
+                async with aiofiles.open(DEVLOG_FILE_PATH, mode='r', encoding='utf-8') as f:
+                    current_content = await f.read()
+            except FileNotFoundError:
+                current_content = "# HCShinobi Development Log\n\n"
+            
+            # Format the new entry
+            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            new_entry = f"\n## {title} ({category})\n*Added by {interaction.user.name} on {timestamp}*\n\n{content}\n"
+            
+            # Append the new entry
+            updated_content = current_content + new_entry
+            
+            # Write back to file
+            async with aiofiles.open(DEVLOG_FILE_PATH, mode='w', encoding='utf-8') as f:
+                await f.write(updated_content)
+            
+            await interaction.followup.send("✅ Devlog entry added successfully!", ephemeral=True)
+            
+        except Exception as e:
+            self.logger.error(f"Error in /devlog_add command: {e}", exc_info=True)
+            await interaction.followup.send("❌ An error occurred while adding the devlog entry.", ephemeral=True)
+
+    @app_commands.command(name="devlog_remove", description="Remove an entry from the devlog (Admin only)")
+    @app_commands.describe(
+        entry_number="The number of the entry to remove (use /devlog to see entry numbers)"
+    )
+    @app_commands.default_permissions(administrator=True)
+    async def devlog_remove(self, interaction: discord.Interaction, entry_number: int):
+        """Remove an entry from the devlog."""
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message(
+                "❌ You don't have permission to use this command.",
+                ephemeral=True
+            )
+            return
+
+        try:
+            await interaction.response.defer(ephemeral=True)
+            
+            # Read current content
+            try:
+                async with aiofiles.open(DEVLOG_FILE_PATH, mode='r', encoding='utf-8') as f:
+                    content = await f.read()
+            except FileNotFoundError:
+                await interaction.followup.send("❌ The devlog file doesn't exist.", ephemeral=True)
+                return
+            
+            # Split into entries (each entry starts with ##)
+            entries = content.split('##')
+            if len(entries) <= entry_number:
+                await interaction.followup.send("❌ Invalid entry number.", ephemeral=True)
+                return
+            
+            # Remove the specified entry
+            entries.pop(entry_number)
+            
+            # Reconstruct the content
+            updated_content = '##'.join(entries)
+            
+            # Write back to file
+            async with aiofiles.open(DEVLOG_FILE_PATH, mode='w', encoding='utf-8') as f:
+                await f.write(updated_content)
+            
+            await interaction.followup.send("✅ Devlog entry removed successfully!", ephemeral=True)
+            
+        except Exception as e:
+            self.logger.error(f"Error in /devlog_remove command: {e}", exc_info=True)
+            await interaction.followup.send("❌ An error occurred while removing the devlog entry.", ephemeral=True)
+
+    @app_commands.command(name="devlog_edit", description="Edit an existing devlog entry (Admin only)")
+    @app_commands.describe(
+        entry_number="The number of the entry to edit (use /devlog to see entry numbers)",
+        new_title="The new title for the entry",
+        new_content="The new content for the entry",
+        new_category="The new category for the entry"
+    )
+    @app_commands.default_permissions(administrator=True)
+    async def devlog_edit(
+        self,
+        interaction: discord.Interaction,
+        entry_number: int,
+        new_title: str,
+        new_content: str,
+        new_category: str = None
+    ):
+        """Edit an existing devlog entry."""
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message(
+                "❌ You don't have permission to use this command.",
+                ephemeral=True
+            )
+            return
+
+        try:
+            await interaction.response.defer(ephemeral=True)
+            
+            # Read current content
+            try:
+                async with aiofiles.open(DEVLOG_FILE_PATH, mode='r', encoding='utf-8') as f:
+                    content = await f.read()
+            except FileNotFoundError:
+                await interaction.followup.send("❌ The devlog file doesn't exist.", ephemeral=True)
+                return
+            
+            # Split into entries
+            entries = content.split('##')
+            if len(entries) <= entry_number:
+                await interaction.followup.send("❌ Invalid entry number.", ephemeral=True)
+                return
+            
+            # Get the entry to edit
+            entry = entries[entry_number]
+            
+            # Extract the timestamp and author from the original entry
+            timestamp_match = re.search(r'\*Added by .* on (.*?)\*', entry)
+            author_match = re.search(r'\*Added by (.*?) on', entry)
+            
+            if timestamp_match and author_match:
+                timestamp = timestamp_match.group(1)
+                author = author_match.group(1)
+            else:
+                timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                author = interaction.user.name
+            
+            # Create the new entry
+            new_entry = f"\n## {new_title} ({new_category or 'update'})\n*Added by {author} on {timestamp}*\n\n{new_content}\n"
+            
+            # Replace the old entry
+            entries[entry_number] = new_entry
+            
+            # Reconstruct the content
+            updated_content = '##'.join(entries)
+            
+            # Write back to file
+            async with aiofiles.open(DEVLOG_FILE_PATH, mode='w', encoding='utf-8') as f:
+                await f.write(updated_content)
+            
+            await interaction.followup.send("✅ Devlog entry edited successfully!", ephemeral=True)
+            
+        except Exception as e:
+            self.logger.error(f"Error in /devlog_edit command: {e}", exc_info=True)
+            await interaction.followup.send("❌ An error occurred while editing the devlog entry.", ephemeral=True)
 
     @app_commands.command(name="bug_report", description="Report a bug or issue")
     async def bug_report(self, interaction: discord.Interaction, description: str):

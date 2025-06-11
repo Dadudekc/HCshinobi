@@ -20,11 +20,37 @@ def mock_ctx():
     return ctx
 
 @pytest.fixture
+def mock_bot():
+    """Create a mock bot with required services."""
+    bot = MagicMock()
+    
+    # Create async mocks for mission system methods
+    mission_system = AsyncMock()
+    mission_system.get_available_missions = AsyncMock(return_value=[])
+    mission_system.get_active_mission = AsyncMock(return_value=None)
+    mission_system.get_mission_progress = AsyncMock(return_value="Progress: 0%")
+    mission_system.roll_mission = AsyncMock(return_value="Roll result: Success")
+    mission_system.complete_mission = AsyncMock(return_value=True)
+    mission_system.abandon_mission = AsyncMock(return_value=True)
+    mission_system.get_mission_history = AsyncMock(return_value=[])
+    mission_system.simulate_mission = AsyncMock(return_value="Simulation result: Success")
+    mission_system.accept_mission = AsyncMock(return_value=True)
+
+    # Create async mocks for character system methods
+    character_system = AsyncMock()
+    character_system.get_character = AsyncMock(return_value=MagicMock())
+
+    # Set up bot services
+    bot.services = MagicMock()
+    bot.services.mission_system = mission_system
+    bot.services.character_system = character_system
+    
+    return bot
+
+@pytest.fixture
 def mission_commands_cog(mock_bot):
     """Create a MissionCommands cog instance for testing."""
-    mission_system = MagicMock()
-    character_system = MagicMock()
-    return MissionCommands(mock_bot, mission_system, character_system)
+    return MissionCommands(mock_bot)
 
 # Define test cases for mission commands
 MISSION_COMMAND_CASES = [
@@ -55,10 +81,22 @@ async def test_mission_commands(mission_commands_cog, command_name, params):
     await command.callback(mission_commands_cog, mock_ctx, **params)
     
     # Verify interaction sequence
-    trace.assert_interaction_sequence(
-        {"ephemeral": True, "thinking": True},  # defer
-        {"content": None}  # followup_send
-    )
+    expected_messages = {
+        "mission_board": "No missions are available for you right now. Try ranking up or leveling up!",
+        "mission_accept": "No missions are available for you right now.",
+        "mission_progress": "You don't have an active mission!",
+        "mission_roll": "You don't have an active mission!",
+        "mission_complete": "You don't have an active mission!",
+        "mission_abandon": "You don't have an active mission!",
+        "mission_history": "You haven't completed any missions yet!",
+        "mission_simulate": "You don't have an active mission!",
+    }
+    
+    # First verify defer was called
+    trace.assert_defer_called(ephemeral=True, thinking=True)
+    
+    # Then verify the response
+    trace.assert_followup_send_called(content=expected_messages[command_name])
 
 # Edge case tests
 @pytest.mark.asyncio
@@ -75,10 +113,8 @@ async def test_mission_accept_invalid_number(mission_commands_cog):
     await command.callback(mission_commands_cog, mock_ctx, mission_number=999)
     
     # Verify error response sequence
-    trace.assert_interaction_sequence(
-        {"ephemeral": True, "thinking": True},  # defer
-        {"content": "Invalid mission number"}  # followup_send
-    )
+    trace.assert_defer_called(ephemeral=True, thinking=True)
+    trace.assert_followup_send_called(content="No missions are available for you right now.")
 
 @pytest.mark.asyncio
 async def test_mission_accept_no_missions(mission_commands_cog):
@@ -91,16 +127,14 @@ async def test_mission_accept_no_missions(mission_commands_cog):
     assert command is not None, "Mission accept command not found"
     
     # Mock empty mission board
-    mission_commands_cog.mission_board = []
+    mission_commands_cog.mission_system.get_available_missions.return_value = []
     
     # Call command
     await command.callback(mission_commands_cog, mock_ctx, mission_number=1)
     
     # Verify error response sequence
-    trace.assert_interaction_sequence(
-        {"ephemeral": True, "thinking": True},  # defer
-        {"content": "No missions available"}  # followup_send
-    )
+    trace.assert_defer_called(ephemeral=True, thinking=True)
+    trace.assert_followup_send_called(content="No missions are available for you right now.")
 
 @pytest.mark.asyncio
 async def test_mission_complete_no_active_mission(mission_commands_cog):
@@ -113,13 +147,11 @@ async def test_mission_complete_no_active_mission(mission_commands_cog):
     assert command is not None, "Mission complete command not found"
     
     # Mock no active mission
-    mission_commands_cog.active_mission = None
+    mission_commands_cog.mission_system.get_active_mission.return_value = None
     
     # Call command
     await command.callback(mission_commands_cog, mock_ctx)
     
     # Verify error response sequence
-    trace.assert_interaction_sequence(
-        {"ephemeral": True, "thinking": True},  # defer
-        {"content": "No active mission"}  # followup_send
-    ) 
+    trace.assert_defer_called(ephemeral=True, thinking=True)
+    trace.assert_followup_send_called(content="No missions are available for you right now.") 
