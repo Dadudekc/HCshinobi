@@ -16,8 +16,8 @@ from .constants import (
     CLAN_POPULATION_FILE, ASSIGNMENT_HISTORY_FILE, 
     CLAN_FORMAT_TRANSITION_VERSION, CLAN_FORMAT_TRANSITION_MESSAGE
 )
-from ..utils.file_io import load_json, save_json, async_save_json
-from ..utils.logging import get_logger
+from HCshinobi.utils.file_io import load_json, save_json, async_save_json
+from HCshinobi.utils.logging import get_logger
 from HCshinobi.utils.config import DEFAULT_CLANS_PATH # Added import
 
 logger = logging.getLogger(__name__)

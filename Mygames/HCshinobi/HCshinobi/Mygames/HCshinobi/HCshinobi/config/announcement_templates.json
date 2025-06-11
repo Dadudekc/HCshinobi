@@ -1,0 +1,45 @@
+{
+  "battle_alert": {
+    "title_format": "⚔️ {title}",
+    "description_format": "**{fighter_a}** vs **{fighter_b}**\\n📍 Location: *{arena}*\\n🕒 Time: *{time_str}*",
+    "color": "#ff0000",
+    "footer_text": "Prepare for battle..."
+  },
+  "server_announcement": {
+    "title_format": "📢 {title}",
+    "description_format": "{message}",
+    "color": "#0000ff",
+    "footer_text": "Stay informed, stay sharp."
+  },
+  "lore_drop": {
+    "title_format": "📖 {title}",
+    "description_format": "{snippet}",
+    "color": "#800080",
+    "footer_format": "Lore Drop{chapter_suffix}" 
+  },
+  "system_update": {
+    "title_format": "🔄 {title}",
+    "description_format": "**Version:** `{version}`\\n\\n**Changes:**\\n{changes}",
+    "color": "#008000",
+    "footer_text": "Thank you for your patience!",
+    "fields": {
+       "Downtime": "{downtime}" 
+    }
+  },
+  "training_mission": {
+    "title_format": "🎯 {title}",
+    "description_format": "{description}",
+    "color": "#ffd700",
+    "footer_text": "Ready to train?",
+    "fields": {
+        "Difficulty": "**{difficulty}**",
+        "Rewards": "{rewards}"
+    }
+  },
+  "system_alert": {
+    "title_format": "⚠️ {title}",
+    "description_format": "{message}",
+    "color": "#ffa500",
+    "footer_text": "System Alert"
+  }
+} 

@@ -32,8 +32,8 @@ from ..core.constants import (
 from .core.notifications.notification_dispatcher import NotificationDispatcher
 
 # AI Clients
-from ..utils.ollama_client import OllamaClient, OllamaError
-from ..utils.openai_client import OpenAIClient
+from HCshinobi.utils.ollama_client import OllamaClient, OllamaError
+from HCshinobi.utils.openai_client import OpenAIClient
 
 # Config
 from .config import BotConfig

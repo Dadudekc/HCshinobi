@@ -7,7 +7,9 @@
         "element": "Katon",
         "description": "No description available.",
         "chakra_cost": 5,
-        "shop_cost": 50
+        "shop_cost": 50,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "katon_ember_palm",
@@ -17,7 +19,9 @@
         "element": "Katon",
         "description": "No description available.",
         "chakra_cost": 5,
-        "shop_cost": 50
+        "shop_cost": 50,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "katon_smoke_wisp",
@@ -27,7 +31,9 @@
         "element": "Katon",
         "description": "No description available.",
         "chakra_cost": 5,
-        "shop_cost": 50
+        "shop_cost": 50,
+        "target_type": "utility",
+        "can_miss": false
     },
     {
         "id": "katon_ember_shuriken",
@@ -37,7 +43,9 @@
         "element": "Katon",
         "description": "No description available.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "katon_fire_fang",
@@ -47,7 +55,9 @@
         "element": "Katon",
         "description": "No description available.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "katon_blister_dash",
@@ -55,9 +65,11 @@
         "rank": "D",
         "type": "Ninjutsu",
         "element": "Katon",
-        "description": "No description available.",
+        "description": "Channels fire chakra into the user's legs, allowing for a burst of speed and leaving a trail of heat in their wake.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "katon_burning_feint",
@@ -67,7 +79,9 @@
         "element": "Katon",
         "description": "No description available.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "katon_fireball_jutsu",
@@ -77,7 +91,9 @@
         "element": "Katon",
         "description": "No description available.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "katon_flame_serpent",
@@ -87,7 +103,9 @@
         "element": "Katon",
         "description": "No description available.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "katon_scorch_barrage",
@@ -97,7 +115,9 @@
         "element": "Katon",
         "description": "No description available.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "katon_ashen_armor",
@@ -107,7 +127,9 @@
         "element": "Katon",
         "description": "No description available.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "katon_heat_mirage",
@@ -115,9 +137,11 @@
         "rank": "C",
         "type": "Ninjutsu",
         "element": "Katon",
-        "description": "No description available.",
+        "description": "Creates a heat distortion that makes the user's movements appear blurred and creates multiple afterimages, making them harder to hit.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "katon_blazing_talon",
@@ -127,7 +151,9 @@
         "element": "Katon",
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "katon_incineration_clones",
@@ -137,7 +163,9 @@
         "element": "Katon",
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "katon_inferno_net",
@@ -147,7 +175,9 @@
         "element": "Katon",
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "katon_pillar_of_flame",
@@ -157,7 +187,9 @@
         "element": "Katon",
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "katon_dragon_s_breath",
@@ -167,7 +199,9 @@
         "element": "Katon",
         "description": "No description available.",
         "chakra_cost": 80,
-        "shop_cost": 5000
+        "shop_cost": 5000,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "katon_hellfire_prison",
@@ -177,7 +211,9 @@
         "element": "Katon",
         "description": "No description available.",
         "chakra_cost": 80,
-        "shop_cost": 5000
+        "shop_cost": 5000,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "katon_ashen_tempest",
@@ -187,7 +223,9 @@
         "element": "Katon",
         "description": "No description available.",
         "chakra_cost": 80,
-        "shop_cost": 5000
+        "shop_cost": 5000,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "katon_black_phoenix_rebirth",
@@ -197,7 +235,9 @@
         "element": "Katon",
         "description": "No description available.",
         "chakra_cost": 150,
-        "shop_cost": 15000
+        "shop_cost": 15000,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "suiton_moisture_sense",
@@ -207,7 +247,9 @@
         "element": "Suiton",
         "description": "No description available.",
         "chakra_cost": 5,
-        "shop_cost": 50
+        "shop_cost": 50,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "suiton_bubble_veil",
@@ -217,7 +259,9 @@
         "element": "Suiton",
         "description": "No description available.",
         "chakra_cost": 5,
-        "shop_cost": 50
+        "shop_cost": 50,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "suiton_wet_palm",
@@ -227,7 +271,9 @@
         "element": "Suiton",
         "description": "No description available.",
         "chakra_cost": 5,
-        "shop_cost": 50
+        "shop_cost": 50,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "suiton_water_needle_shot",
@@ -237,7 +283,9 @@
         "element": "Suiton",
         "description": "No description available.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "suiton_ripple_step",
@@ -247,7 +295,9 @@
         "element": "Suiton",
         "description": "No description available.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "suiton_aqua_lash",
@@ -257,7 +307,9 @@
         "element": "Suiton",
         "description": "No description available.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "suiton_drizzle_cloak",
@@ -267,7 +319,9 @@
         "element": "Suiton",
         "description": "No description available.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "suiton_water_bullet_jutsu",
@@ -275,9 +329,11 @@
         "rank": "C",
         "type": "Ninjutsu",
         "element": "Suiton",
-        "description": "No description available.",
+        "description": "Compresses water into high-velocity projectiles that can pierce through light armor and cause significant impact damage.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "suiton_water_clone_jutsu",
@@ -285,9 +341,11 @@
         "rank": "C",
         "type": "Ninjutsu",
         "element": "Suiton",
-        "description": "No description available.",
+        "description": "Creates a clone made of water that can physically interact with the environment and absorb damage before dispersing.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "suiton_flowing_wall",
@@ -297,7 +355,9 @@
         "element": "Suiton",
         "description": "No description available.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "suiton_torrent_fang",
@@ -307,7 +367,9 @@
         "element": "Suiton",
         "description": "No description available.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "suiton_mist_blade_technique",
@@ -317,7 +379,9 @@
         "element": "Suiton",
         "description": "No description available.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "suiton_riptide_crash",
@@ -327,7 +391,9 @@
         "element": "Suiton",
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "suiton_binding_current",
@@ -337,7 +403,9 @@
         "element": "Suiton",
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "suiton_aqua_pulse_field",
@@ -347,7 +415,9 @@
         "element": "Suiton",
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "suiton_rain_of_sorrow",
@@ -357,7 +427,9 @@
         "element": "Suiton",
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "suiton_great_water_dragon",
@@ -367,7 +439,9 @@
         "element": "Suiton",
         "description": "No description available.",
         "chakra_cost": 80,
-        "shop_cost": 5000
+        "shop_cost": 5000,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "suiton_abyss_maw",
@@ -377,7 +451,9 @@
         "element": "Suiton",
         "description": "No description available.",
         "chakra_cost": 80,
-        "shop_cost": 5000
+        "shop_cost": 5000,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "suiton_oceanic_armor",
@@ -387,7 +463,9 @@
         "element": "Suiton",
         "description": "No description available.",
         "chakra_cost": 80,
-        "shop_cost": 5000
+        "shop_cost": 5000,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "suiton_leviathan_s_wrath",
@@ -397,7 +475,9 @@
         "element": "Suiton",
         "description": "No description available.",
         "chakra_cost": 150,
-        "shop_cost": 15000
+        "shop_cost": 15000,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "doton_pebble_shot",
@@ -405,9 +485,11 @@
         "rank": "E",
         "type": "Ninjutsu",
         "element": "Doton",
-        "description": "No description available.",
+        "description": "Launches small rocks at high velocity towards the target, dealing minor damage but potentially disrupting their focus.",
         "chakra_cost": 5,
-        "shop_cost": 50
+        "shop_cost": 50,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "doton_mud_seal",
@@ -417,7 +499,9 @@
         "element": "Doton",
         "description": "No description available.",
         "chakra_cost": 5,
-        "shop_cost": 50
+        "shop_cost": 50,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "doton_dust_sight",
@@ -425,9 +509,11 @@
         "rank": "E",
         "type": "Ninjutsu",
         "element": "Doton",
-        "description": "No description available.",
+        "description": "Manipulates dust particles to enhance the user's vision, allowing them to see through light obscuring conditions.",
         "chakra_cost": 5,
-        "shop_cost": 50
+        "shop_cost": 50,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "doton_stone_fist",
@@ -437,7 +523,9 @@
         "element": "Doton",
         "description": "No description available.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "doton_gravel_spit",
@@ -447,7 +535,9 @@
         "element": "Doton",
         "description": "No description available.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "doton_earthen_pads",
@@ -457,7 +547,9 @@
         "element": "Doton",
         "description": "No description available.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "doton_soil_grip",
@@ -467,7 +559,9 @@
         "element": "Doton",
         "description": "No description available.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "doton_earth_wall",
@@ -477,7 +571,9 @@
         "element": "Doton",
         "description": "No description available.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "doton_rock_clone_jutsu",
@@ -485,9 +581,11 @@
         "rank": "C",
         "type": "Ninjutsu",
         "element": "Doton",
-        "description": "No description available.",
+        "description": "Creates a solid clone made of rock that can physically interact with the environment and absorb damage before dispersing.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "doton_spire_burst",
@@ -497,7 +595,9 @@
         "element": "Doton",
         "description": "No description available.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "doton_ground_pulse",
@@ -507,7 +607,9 @@
         "element": "Doton",
         "description": "No description available.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "doton_earthen_maw",
@@ -517,7 +619,9 @@
         "element": "Doton",
         "description": "No description available.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "doton_armor_of_gaia",
@@ -527,7 +631,9 @@
         "element": "Doton",
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "doton_shifting_terrain",
@@ -537,7 +643,9 @@
         "element": "Doton",
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "doton_stone_coffin",
@@ -547,7 +655,9 @@
         "element": "Doton",
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "doton_quake_palm",
@@ -557,7 +667,9 @@
         "element": "Doton",
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "doton_earth_dragon_barrage",
@@ -567,7 +679,9 @@
         "element": "Doton",
         "description": "No description available.",
         "chakra_cost": 80,
-        "shop_cost": 5000
+        "shop_cost": 5000,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "doton_fortress_technique",
@@ -577,7 +691,9 @@
         "element": "Doton",
         "description": "No description available.",
         "chakra_cost": 80,
-        "shop_cost": 5000
+        "shop_cost": 5000,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "doton_seismic_rift",
@@ -587,7 +703,9 @@
         "element": "Doton",
         "description": "No description available.",
         "chakra_cost": 80,
-        "shop_cost": 5000
+        "shop_cost": 5000,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "doton_titan_s_wrath",
@@ -597,7 +715,9 @@
         "element": "Doton",
         "description": "No description available.",
         "chakra_cost": 150,
-        "shop_cost": 15000
+        "shop_cost": 15000,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "raiton_static_touch",
@@ -607,7 +727,9 @@
         "element": "Raiton",
         "description": "No description available.",
         "chakra_cost": 5,
-        "shop_cost": 50
+        "shop_cost": 50,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "raiton_spark_glimmer",
@@ -617,7 +739,9 @@
         "element": "Raiton",
         "description": "No description available.",
         "chakra_cost": 5,
-        "shop_cost": 50
+        "shop_cost": 50,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "raiton_hair_stand_technique",
@@ -627,7 +751,9 @@
         "element": "Raiton",
         "description": "No description available.",
         "chakra_cost": 5,
-        "shop_cost": 50
+        "shop_cost": 50,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "raiton_shock_darts",
@@ -637,7 +763,9 @@
         "element": "Raiton",
         "description": "No description available.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "raiton_conductive_fist",
@@ -647,7 +775,9 @@
         "element": "Raiton",
         "description": "No description available.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "raiton_charge_step",
@@ -655,9 +785,11 @@
         "rank": "D",
         "type": "Ninjutsu",
         "element": "Raiton",
-        "description": "No description available.",
+        "description": "Infuses the user's movement with lightning chakra, providing a sudden burst of speed and leaving a trail of static electricity.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "raiton_pulse_wire",
@@ -665,9 +797,11 @@
         "rank": "D",
         "type": "Ninjutsu",
         "element": "Raiton",
-        "description": "No description available.",
+        "description": "Creates a thin wire of lightning chakra that can be used to trip or bind opponents, delivering a shock on contact.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "raiton_lightning_clone",
@@ -677,7 +811,9 @@
         "element": "Raiton",
         "description": "No description available.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "raiton_thunder_line",
@@ -685,9 +821,11 @@
         "rank": "C",
         "type": "Ninjutsu",
         "element": "Raiton",
-        "description": "No description available.",
+        "description": "Creates a line of lightning that travels along the ground, delivering a powerful shock to anyone in its path.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "raiton_arc_cage",
@@ -697,7 +835,9 @@
         "element": "Raiton",
         "description": "No description available.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "raiton_volt_trap",
@@ -707,7 +847,9 @@
         "element": "Raiton",
         "description": "No description available.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "raiton_flash_bolt",
@@ -717,7 +859,9 @@
         "element": "Raiton",
         "description": "No description available.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "raiton_thunder_fist",
@@ -727,7 +871,9 @@
         "element": "Raiton",
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "raiton_lightning_rain",
@@ -737,7 +883,9 @@
         "element": "Raiton",
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "raiton_coil_serpent",
@@ -747,7 +895,9 @@
         "element": "Raiton",
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "raiton_shock_net",
@@ -757,7 +907,9 @@
         "element": "Raiton",
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "raiton_black_current_surge",
@@ -767,7 +919,9 @@
         "element": "Raiton",
         "description": "No description available.",
         "chakra_cost": 80,
-        "shop_cost": 5000
+        "shop_cost": 5000,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "raiton_plasma_cutter",
@@ -777,7 +931,9 @@
         "element": "Raiton",
         "description": "No description available.",
         "chakra_cost": 80,
-        "shop_cost": 5000
+        "shop_cost": 5000,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "raiton_stormstep_cloak",
@@ -787,7 +943,9 @@
         "element": "Raiton",
         "description": "No description available.",
         "chakra_cost": 80,
-        "shop_cost": 5000
+        "shop_cost": 5000,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "raiton_raijin_s_wrath",
@@ -797,7 +955,9 @@
         "element": "Raiton",
         "description": "No description available.",
         "chakra_cost": 150,
-        "shop_cost": 15000
+        "shop_cost": 15000,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "f_ton_breeze_flick",
@@ -805,9 +965,11 @@
         "rank": "E",
         "type": "Ninjutsu",
         "element": "Fuuton",
-        "description": "No description available.",
+        "description": "Creates a small gust of wind that can deflect light projectiles or create a momentary distraction.",
         "chakra_cost": 5,
-        "shop_cost": 50
+        "shop_cost": 50,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "f_ton_wind_whisper",
@@ -815,9 +977,11 @@
         "rank": "E",
         "type": "Ninjutsu",
         "element": "Fuuton",
-        "description": "No description available.",
+        "description": "Manipulates air currents to carry sound, allowing for quiet communication over short distances.",
         "chakra_cost": 5,
-        "shop_cost": 50
+        "shop_cost": 50,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "f_ton_puff_step",
@@ -827,7 +991,9 @@
         "element": "Fuuton",
         "description": "No description available.",
         "chakra_cost": 5,
-        "shop_cost": 50
+        "shop_cost": 50,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "f_ton_gale_shuriken",
@@ -835,9 +1001,11 @@
         "rank": "D",
         "type": "Ninjutsu",
         "element": "Fuuton",
-        "description": "No description available.",
+        "description": "Enhances thrown shuriken with wind chakra, increasing their speed and cutting power.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "f_ton_cutter_palm",
@@ -845,9 +1013,11 @@
         "rank": "D",
         "type": "Ninjutsu",
         "element": "Fuuton",
-        "description": "No description available.",
+        "description": "Channels wind chakra into the user's palm, creating a sharp cutting edge that can slice through light materials.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "f_ton_wind_veil",
@@ -857,7 +1027,9 @@
         "element": "Fuuton",
         "description": "No description available.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "f_ton_dust_dance",
@@ -867,7 +1039,9 @@
         "element": "Fuuton",
         "description": "No description available.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "f_ton_wind_bullet",
@@ -877,7 +1051,9 @@
         "element": "Fuuton",
         "description": "No description available.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "f_ton_air_clone",
@@ -887,7 +1063,9 @@
         "element": "Fuuton",
         "description": "No description available.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "f_ton_crescent_slash",
@@ -897,7 +1075,9 @@
         "element": "Fuuton",
         "description": "No description available.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "f_ton_pressure_dome",
@@ -905,9 +1085,11 @@
         "rank": "C",
         "type": "Ninjutsu",
         "element": "Fuuton",
-        "description": "No description available.",
+        "description": "Creates a dome of compressed air around the user, deflecting incoming attacks and creating a barrier against projectiles.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "f_ton_vortex_fist",
@@ -915,9 +1097,11 @@
         "rank": "C",
         "type": "Ninjutsu",
         "element": "Fuuton",
-        "description": "No description available.",
+        "description": "Channels wind chakra into a powerful punch, creating a spiraling vortex of air that can knock back and damage opponents.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "f_ton_razor_tempest",
@@ -927,7 +1111,9 @@
         "element": "Fuuton",
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "f_ton_cyclone_bind",
@@ -937,7 +1123,9 @@
         "element": "Fuuton",
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "f_ton_whisper_step",
@@ -947,7 +1135,9 @@
         "element": "Fuuton",
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "f_ton_wind_scythe",
@@ -957,7 +1147,9 @@
         "element": "Fuuton",
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "f_ton_divine_gale_dance",
@@ -967,7 +1159,9 @@
         "element": "Fuuton",
         "description": "No description available.",
         "chakra_cost": 80,
-        "shop_cost": 5000
+        "shop_cost": 5000,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "f_ton_vacuum_field",
@@ -977,7 +1171,9 @@
         "element": "Fuuton",
         "description": "No description available.",
         "chakra_cost": 80,
-        "shop_cost": 5000
+        "shop_cost": 5000,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "f_ton_howling_typhoon",
@@ -987,7 +1183,9 @@
         "element": "Fuuton",
         "description": "No description available.",
         "chakra_cost": 80,
-        "shop_cost": 5000
+        "shop_cost": 5000,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "f_ton_sky_severance",
@@ -997,7 +1195,9 @@
         "element": "Fuuton",
         "description": "No description available.",
         "chakra_cost": 150,
-        "shop_cost": 15000
+        "shop_cost": 15000,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "henge_no_jutsu",
@@ -1005,9 +1205,11 @@
         "rank": "E",
         "type": "General",
         "element": null,
-        "description": "No description available.",
+        "description": "Allows the user to transform their appearance into that of another person or object. The transformation is purely visual and does not grant any abilities of the transformed form.",
         "chakra_cost": 5,
-        "shop_cost": 50
+        "shop_cost": 50,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "kawarimi_no_jutsu",
@@ -1017,7 +1219,9 @@
         "element": null,
         "description": "No description available.",
         "chakra_cost": 5,
-        "shop_cost": 50
+        "shop_cost": 50,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "bunshin_no_jutsu",
@@ -1025,9 +1229,11 @@
         "rank": "E",
         "type": "Ninjutsu",
         "element": null,
-        "description": "No description available.",
+        "description": "Creates a non-physical illusionary clone of the user. While the clone cannot attack, it can be used for distraction and misdirection.",
         "chakra_cost": 5,
-        "shop_cost": 50
+        "shop_cost": 50,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "nawanuke_no_jutsu",
@@ -1037,7 +1243,9 @@
         "element": null,
         "description": "No description available.",
         "chakra_cost": 5,
-        "shop_cost": 50
+        "shop_cost": 50,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "kakuremino_no_jutsu",
@@ -1045,9 +1253,11 @@
         "rank": "E",
         "type": "General",
         "element": null,
-        "description": "No description available.",
+        "description": "Creates a simple illusion that makes the user appear invisible. The technique is easily broken by physical contact or chakra detection.",
         "chakra_cost": 5,
-        "shop_cost": 50
+        "shop_cost": 50,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "kinobori",
@@ -1057,7 +1267,9 @@
         "element": null,
         "description": "No description available.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "suimen_hokou_no_gyou",
@@ -1067,7 +1279,9 @@
         "element": null,
         "description": "No description available.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "shunshin_no_jutsu",
@@ -1077,7 +1291,9 @@
         "element": null,
         "description": "No description available.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "meisai_gakure_no_jutsu",
@@ -1087,7 +1303,9 @@
         "element": null,
         "description": "No description available.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "shuriken_kage_bunshin_no_jutsu",
@@ -1097,7 +1315,9 @@
         "element": null,
         "description": "No description available.",
         "chakra_cost": 10,
-        "shop_cost": 150
+        "shop_cost": 150,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "kage_bunshin_no_jutsu",
@@ -1107,7 +1327,9 @@
         "element": null,
         "description": "No description available.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "chakra_suppression_technique",
@@ -1117,7 +1339,9 @@
         "element": null,
         "description": "No description available.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "kaif_no_jutsu",
@@ -1127,7 +1351,9 @@
         "element": null,
         "description": "No description available.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "f_in_chakra_tag_bind",
@@ -1137,7 +1363,9 @@
         "element": null,
         "description": "No description available.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "medical_ninjutsu_minor_healing_touch",
@@ -1145,9 +1373,11 @@
         "rank": "C",
         "type": "Medical Ninjutsu",
         "element": null,
-        "description": "No description available.",
+        "description": "Channels healing chakra through the user's hands to mend minor wounds and restore a small amount of vitality.",
         "chakra_cost": 20,
-        "shop_cost": 500
+        "shop_cost": 500,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "genjutsu_false_surroundings",
@@ -1157,7 +1387,9 @@
         "element": null,
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "opponent",
+        "can_miss": true
     },
     {
         "id": "f_in_chakra_lock_seal",
@@ -1167,7 +1399,9 @@
         "element": null,
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "sensory_perception_technique",
@@ -1177,7 +1411,9 @@
         "element": null,
         "description": "No description available.",
         "chakra_cost": 40,
-        "shop_cost": 1500
+        "shop_cost": 1500,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "taj_kage_bunshin_no_jutsu",
@@ -1187,7 +1423,9 @@
         "element": null,
         "description": "No description available.",
         "chakra_cost": 80,
-        "shop_cost": 5000
+        "shop_cost": 5000,
+        "target_type": "self",
+        "can_miss": false
     },
     {
         "id": "hiraishin_no_jutsu",
@@ -1197,6 +1435,121 @@
         "element": null,
         "description": "No description available.",
         "chakra_cost": 150,
-        "shop_cost": 15000
+        "shop_cost": 15000,
+        "target_type": "utility",
+        "can_miss": false
+    },
+    {
+        "id": "Kamui Phase",
+        "name": "Kamui Phase",
+        "rank": "S",
+        "type": "Utility",
+        "element": "None",
+        "description": "Temporarily shifts the user's body partially into the Kamui dimension, making them intangible.",
+        "cost_type": "chakra",
+        "cost_amount": 150,
+        "target_type": "self",
+        "can_miss": false,
+        "effects": [
+            {
+                "type": "apply_buff", 
+                "buff_id": "Phasing", 
+                "duration": 2, 
+                "magnitude": 80
+            }
+        ]
+    },
+    {
+        "id": "Amaterasu",
+        "name": "Amaterasu",
+        "rank": "S",
+        "type": "Ninjutsu",
+        "element": "Blaze",
+        "description": "Summons inextinguishable black flames at the user's focal point.",
+        "cost_type": "chakra",
+        "cost_amount": 200,
+        "target_type": "opponent",
+        "can_miss": true,
+        "accuracy_bonus": -10,
+        "effects": [
+            {
+                "type": "apply_status", 
+                "status_id": "Amaterasu Burn",
+                "duration": 5,
+                "potency": 0.08,
+                "effect_timing": "start_turn",
+                "description": "Engulfed in inextinguishable black flames!",
+                "max_stacks": 1
+            }
+        ]
+    },
+    {
+        "id": "katon_hosenka_tsumabeni",
+        "name": "Katon: Hōsenka Tsumabeni",
+        "rank": "C",
+        "type": "Ninjutsu",
+        "element": "Katon",
+        "description": "The user unleashes a volley of small fireballs, often concealing shuriken.",
+        "cost_type": "chakra",
+        "cost_amount": 25,
+        "target_type": "opponent",
+        "can_miss": true,
+        "damage": 40,
+        "effects": [
+            {
+                "type": "apply_status", 
+                "status_id": "Burn", 
+                "duration": 2, 
+                "potency": 0.03,
+                "effect_timing": "start_turn",
+                "max_stacks": 1
+            }
+        ]
+    },
+    {
+        "id": "katon_goryuka_no_jutsu",
+        "name": "Katon: Gōryūka no Jutsu",
+        "rank": "B",
+        "type": "Ninjutsu",
+        "element": "Katon",
+        "description": "The user compresses chakra into a dragon-headed fireball that incinerates the target.",
+        "cost_type": "chakra",
+        "cost_amount": 50,
+        "target_type": "opponent",
+        "can_miss": true,
+        "damage": 80,
+        "effects": [
+            {
+                "type": "apply_status", 
+                "status_id": "Burn", 
+                "duration": 3, 
+                "potency": 0.05,
+                "effect_timing": "start_turn",
+                "max_stacks": 1
+            }
+        ]
+    },
+    {
+        "id": "katon_goka_messhitsu",
+        "name": "Katon: Gōka Messhitsu",
+        "rank": "A",
+        "type": "Ninjutsu",
+        "element": "Katon",
+        "description": "The user expels a massive wall of intense flames that covers a wide area.",
+        "cost_type": "chakra",
+        "cost_amount": 90,
+        "target_type": "opponent",
+        "can_miss": true,
+        "damage": 150,
+        "effects": [
+            {
+                "type": "apply_status", 
+                "status_id": "Burn", 
+                "duration": 3, 
+                "potency": 0.06,
+                "effect_timing": "start_turn",
+                "max_stacks": 1
+            }
+        ]
     }
 ]

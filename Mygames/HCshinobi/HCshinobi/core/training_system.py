@@ -914,32 +914,50 @@ class TrainingSystem:
     # --- NEW: Background Task --- #
     @tasks.loop(minutes=5) # Check every 5 minutes
     async def check_training_completion(self):
-        """Periodically checks for and completes finished training sessions."""
-        # Prevent running before systems are ready
-        if not self.character_system or not self.currency_system:
-            self.logger.debug("Training completion check skipped: Systems not ready.")
-            return 
+        """Check for completed training sessions."""
+        try:
+            now = datetime.now(timezone.utc)
+            for user_id, session in self.active_sessions.items():
+                if session and not session.completed and now >= session.end_time:
+                    # Training completed
+                    session.completed = True
+                    await self._handle_training_completion(user_id, session)
+                    self.logger.info(f"Training completed for user {user_id}")
+        except Exception as e:
+            self.logger.error(f"Error in training completion check: {e}", exc_info=True)
+
+    async def _handle_training_completion(self, user_id: str, session: TrainingSession):
+        """Handle a completed training session."""
+        try:
+            # Calculate results
+            results, xp_gain, injury_message = await self._calculate_training_results(
+                user_id,
+                session.attribute,
+                session.duration_hours,
+                session.intensity
+            )
             
-        now = datetime.now()
-        completed_sessions = []
-        # Iterate over a copy of keys to allow modification during iteration
-        for player_id in list(self.active_sessions.keys()):
-            session = self.active_sessions.get(player_id)
-            if session and not session.completed and now >= session.end_time:
-                self.logger.info(f"Training session ended for {player_id}. Processing completion...")
-                try:
-                    await self.complete_training(player_id)
-                    completed_sessions.append(player_id)
-                except Exception as e:
-                    self.logger.error(f"Error completing training for {player_id}: {e}", exc_info=True)
-                    # Keep session active? Or remove to prevent error loop?
-                    # Let's remove it to avoid loops, but log the error.
-                    del self.active_sessions[player_id]
-                    await self.save_sessions()
-                    
-        if completed_sessions:
-            self.logger.info(f"Completed training sessions for: {', '.join(completed_sessions)}")
+            # Apply results
+            await self._apply_training_results(user_id, results)
             
+            # Update history
+            self._update_training_history(user_id, session, xp_gain, results.get('attribute_gain', 0))
+            
+            # Save changes
+            await self.save_history_async()
+            await self.save_active_sessions_async()
+            
+            # Log completion
+            self.logger.info(
+                f"Training completed for {user_id}. "
+                f"Attribute: {session.attribute}, "
+                f"Intensity: {session.intensity}, "
+                f"XP Gain: {xp_gain}"
+            )
+            
+        except Exception as e:
+            self.logger.error(f"Error handling training completion for {user_id}: {e}", exc_info=True)
+
     @check_training_completion.before_loop
     async def before_check_training_completion(self):
         # This is where you might inject the bot dependency if needed for notifications

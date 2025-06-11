@@ -1,0 +1,130 @@
+{
+  "Kirigakure Clans": [
+    {
+      "name": "Hōzuki",
+      "village": "Kirigakure",
+      "kekkei_genkai": "Hydrification Technique",
+      "abilities": [
+        "Hydrification Technique",
+        "Water Gun Technique",
+        "Hydrified Clone",
+        "Tidal Guillotine"
+      ],
+      "traits": [
+        "Must remain hydrated",
+        "Glassy blue eyes or water-like veins",
+        "Detached, fluid personalities",
+        "Waterproof or hydration-sustaining gear"
+      ],
+      "role": "Shock troops, assassins, and infiltration units"
+    },
+    {
+      "name": "Yuki",
+      "village": "Kirigakure",
+      "kekkei_genkai": "Ice Release",
+      "abilities": [
+        "Crystal Ice Mirrors",
+        "Frozen Thorn Barrage",
+        "Frostbite Coffin",
+        "Glacial Step Technique"
+      ],
+      "traits": [
+        "Resistant to cold",
+        "Pale skin, white hair",
+        "Emotionally distant",
+        "Snowflake motifs in clothing"
+      ],
+      "role": "Elite scouts, assassins, battlefield controllers"
+    },
+    {
+      "name": "Kaguya",
+      "village": "Kirigakure",
+      "kekkei_genkai": "Shikotsumyaku",
+      "abilities": [
+        "Dance of the Camellia",
+        "Dance of the Clematis: Vine & Flower",
+        "Dance of the Larch",
+        "Dance of the Seedling Fern"
+      ],
+      "traits": [
+        "Strong skeletal system",
+        "Accelerated healing",
+        "Aggressive, unstable tendencies",
+        "Bone-themed war paint"
+      ],
+      "role": "Frontline berserkers, shock units"
+    },
+    {
+      "name": "Terumī",
+      "village": "Kirigakure",
+      "kekkei_genkai": "Lava Release",
+      "abilities": [
+        "Melting Apparition Technique",
+        "Eruption Line",
+        "Flowing Magma Wall",
+        "Volcanic Shock Seal"
+      ],
+      "traits": [
+        "Refined chakra control",
+        "Heat-resistant, unique eye/hair colors",
+        "Diplomatic and tactical",
+        "Volcanic or spiral motifs"
+      ],
+      "role": "Tacticians, diplomats, siege breakers"
+    },
+    {
+      "name": "En’yō",
+      "village": "Kirigakure",
+      "kekkei_genkai": "Boil Release",
+      "abilities": [
+        "Vapor Serpent Fang",
+        "Caustic Curtain Field",
+        "Pressure Scald Pulse",
+        "Mist Crown Technique"
+      ],
+      "traits": [
+        "Resistant to acid/heat",
+        "Steam scars or burns",
+        "Disciplined, calculated",
+        "Ceremonial filtration masks"
+      ],
+      "role": "Combat instructors, siege tacticians, vanguard"
+    },
+    {
+      "name": "Tsuyugiri",
+      "village": "Kirigakure",
+      "kekkei_genkai": "Mist Thread Technique",
+      "abilities": [
+        "Blood Thread Binding Technique",
+        "Mist Marionette Field",
+        "Crimson Web Requiem",
+        "Dead Strings Ascension"
+      ],
+      "traits": [
+        "Bloodshot eyes, pale skin",
+        "Stealth and chakra thread experts",
+        "Ritualistic combat style",
+        "Corpse manipulation traditions"
+      ],
+      "role": "Infiltrators, executioners, counter-espionage"
+    },
+    {
+      "name": "Chinoike",
+      "village": "Kirigakure",
+      "kekkei_genkai": "Ketsuryūgan",
+      "abilities": [
+        "Ketsuryūgan Genjutsu",
+        "Crimson Bind",
+        "Hemorrhage Pulse",
+        "Blood Weapon Creation"
+      ],
+      "traits": [
+        "Crimson eyes",
+        "Pale or gray-toned skin",
+        "Iron affinity",
+        "Blood-seal tattoos"
+      ],
+      "role": "Covert ops, genjutsu warfare, medical containment"
+    }
+  ]
+}

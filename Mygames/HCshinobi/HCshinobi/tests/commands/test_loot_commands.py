@@ -1,3 +1,7 @@
+"""
+Tests for the loot commands cog.
+"""
+
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 import discord

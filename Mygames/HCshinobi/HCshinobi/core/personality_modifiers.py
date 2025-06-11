@@ -10,8 +10,8 @@ import asyncio # Add asyncio import
 # --- MODIFIED: Remove MODIFIERS_FILE import --- #
 # from .constants import MODIFIERS_FILE
 # --- END MODIFIED --- #
-from ..utils.file_io import load_json, save_json
-from ..utils.logging import get_logger
+from HCshinobi.utils.file_io import load_json, save_json
+from HCshinobi.utils.logging import get_logger
 
 logger = get_logger(__name__)
 

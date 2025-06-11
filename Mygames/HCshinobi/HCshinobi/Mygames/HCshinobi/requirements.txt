@@ -1,0 +1,49 @@
+# Core dependencies
+discord.py>=2.0.0
+python-dotenv>=0.19.0
+aiohttp>=3.8.0
+dataclasses-json>=0.5.7
+aiofiles
+
+# Development dependencies
+pytest>=6.0.0
+pytest-asyncio>=0.18.0
+pytest-cov>=2.12.0
+black>=22.0.0
+isort>=5.10.0
+flake8>=4.0.0
+mypy>=0.910
+
+# Documentation dependencies
+sphinx>=4.0.0
+sphinx-rtd-theme>=1.0.0
+sphinx-autodoc-typehints>=1.12.0
+
+# Dependencies for utils.openai_client (Web Scraping Custom GPT)
+selenium>=4.0.0
+undetected-chromedriver>=3.1.0
+
+# Added from the code block
+openai
+setuptools
+
+# Optional dependencies for features
+requests
+pillow
+psutil
+# Add other feature dependencies here
+
+# Optional: Type checking
+types-requests
+types-pillow
+types-psutil
+# Add other types-* packages as needed
+
+# Optional: Linting/Formatting
+flake8
+black
+isort
+
+# Project specific core dependencies
+aiosqlite  # Example if you were using async sqlite
+# Add other core dependencies here 

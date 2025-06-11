@@ -2,7 +2,7 @@
 import discord
 from discord.ext import commands
 from discord import app_commands, ui
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, TYPE_CHECKING
 import logging
 import asyncio
 from datetime import datetime, timedelta
@@ -10,6 +10,11 @@ from datetime import datetime, timedelta
 from HCshinobi.core.training_system import TrainingSystem, TrainingIntensity, TrainingSession
 from HCshinobi.core.character_system import CharacterSystem
 from HCshinobi.core.character import Character
+from HCshinobi.utils.embed_utils import create_error_embed
+
+# Type checking to avoid circular imports
+if TYPE_CHECKING:
+    from HCshinobi.bot.bot import HCBot
 
 # Available attributes for training
 TRAINING_ATTRIBUTES = {
@@ -222,11 +227,11 @@ class TrainingView(ui.View):
         await interaction.response.edit_message(embed=embed, view=self)
 
 class TrainingCommands(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: "HCBot"):
         """Initialize training commands."""
         self.bot = bot
-        self.character_system: Optional[CharacterSystem] = getattr(bot.services, 'character_system', None)
-        self.training_system: Optional[TrainingSystem] = getattr(bot.services, 'training_system', None)
+        self.character_system = bot.services.character_system
+        self.training_system = bot.services.training_system
         self.logger = logging.getLogger(__name__)
         if not all([self.character_system, self.training_system]):
             self.logger.error("TrainingCommands initialized without required systems!")

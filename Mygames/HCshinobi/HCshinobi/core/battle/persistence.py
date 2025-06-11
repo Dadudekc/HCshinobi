@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 
 from .state import BattleState, deserialize_battle_state
 from ..constants import BATTLES_SUBDIR, ACTIVE_BATTLES_FILENAME, BATTLE_HISTORY_FILENAME
-from ...utils.file_io import async_load_json as load_json, async_save_json as save_json
+from HCshinobi.utils.file_io import async_load_json as load_json, async_save_json as save_json
 
 logger = logging.getLogger(__name__)
 

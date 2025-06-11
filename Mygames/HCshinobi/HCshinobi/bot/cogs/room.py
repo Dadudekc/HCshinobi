@@ -3,11 +3,21 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 import logging
-from typing import Optional, Dict, List
+from typing import TYPE_CHECKING, Optional, Dict, List, Any
 from datetime import datetime
 
+from HCshinobi.core.room_system import RoomSystem
+from HCshinobi.core.character_system import CharacterSystem
+from HCshinobi.utils.embed_utils import create_error_embed
+
+# Type checking to avoid circular imports
+if TYPE_CHECKING:
+    from HCshinobi.bot.bot import HCBot
+
+logger = logging.getLogger(__name__)
+
 class RoomCommands(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: "HCBot"):
         """Initialize room commands."""
         self.bot = bot
         # Get systems from bot services

@@ -1,0 +1,12 @@
+{
+    "tutorial_fetch": {
+        "name": "Tutorial: Fetch Quest",
+        "rank": "D",
+        "description": "Fetch 5 herbs.",
+        "reward": {
+            "ryo": 50,
+            "exp": 20
+        },
+        "achievement_key": "first_mission"
+    }
+}

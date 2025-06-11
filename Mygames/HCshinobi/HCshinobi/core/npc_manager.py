@@ -10,8 +10,8 @@ import asyncio # Added import
 
 # Use centralized constants, utils
 from .constants import NPC_FILE, MAX_NPC_COUNT, DEFAULT_NPC_STATUS
-from ..utils.file_io import load_json, save_json
-from ..utils.logging import get_logger, log_event
+from HCshinobi.utils.file_io import load_json, save_json
+from HCshinobi.utils.logging import get_logger, log_event
 
 logger = get_logger(__name__)
 

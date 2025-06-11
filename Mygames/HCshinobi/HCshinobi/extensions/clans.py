@@ -6,7 +6,7 @@ from typing import Optional
 
 from ..core.clan import Clan
 from ..core.character import Character
-from ..utils.embeds import create_clan_embed
+from HCshinobi.utils.embeds import create_clan_embed
 
 class ClanCommands(commands.Cog):
     """Clan related commands."""

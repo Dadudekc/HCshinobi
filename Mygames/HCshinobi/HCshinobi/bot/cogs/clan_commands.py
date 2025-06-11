@@ -5,7 +5,7 @@ import logging
 from HCshinobi.utils.embed_utils import get_rarity_color
 from HCshinobi.core.constants import RarityTier # Import necessary constants/types
 from HCshinobi.core.character import Character
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 # Assume systems/models are correctly typed/imported
 # from HCshinobi.core.clan_system import ClanSystem
@@ -13,12 +13,16 @@ from typing import Optional
 # from HCshinobi.models.character import Character 
 # from HCshinobi.bot.bot import HCShinobiBot
 
+# Type checking to avoid circular imports
+if TYPE_CHECKING:
+    from HCshinobi.bot.bot import HCBot
+
 logger = logging.getLogger(__name__)
 
 class ClanCommands(commands.Cog):
     """Cog for handling clan-related commands."""
 
-    def __init__(self, bot: 'HCShinobiBot', clan_system, character_system):
+    def __init__(self, bot: "HCBot", clan_system, character_system):
         self.bot = bot
         self.clan_system = clan_system
         self.character_system = character_system
@@ -266,7 +270,7 @@ class ClanCommands(commands.Cog):
             self.logger.error(f"Error displaying clan members for '{target_clan_name}': {e}", exc_info=True)
             await interaction.response.send_message("An error occurred while retrieving clan members.", ephemeral=True)
 
-async def setup(bot: 'HCShinobiBot'):
+async def setup(bot: "HCBot"):
     if not hasattr(bot, 'services'):
         logger.error("Service container not found on bot object.")
         return

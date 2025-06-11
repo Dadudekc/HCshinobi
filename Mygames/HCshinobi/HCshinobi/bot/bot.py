@@ -17,6 +17,7 @@ from HCshinobi.core.constants import DATA_DIR
 from ..core.constants import JUTSU_SHOP_CHANNEL_ID
 from datetime import datetime
 import aiofiles
+from ..core.utils.command_validation import post_setup_validation
 
 # --- Core Service Imports ---
 try:
@@ -54,10 +55,10 @@ except ImportError as e:
 
 # --- Utility Imports ---
 try:
-    from ..utils.logging import get_logger, log_error
-    from ..utils.ollama_client import OllamaClient, OllamaError
-    from ..utils.openai_client import OpenAIClient
-    from ..utils.discord_ui import get_rarity_color
+    from HCshinobi.utils.logging import get_logger, log_error
+    from HCshinobi.utils.ollama_client import OllamaClient, OllamaError
+    from HCshinobi.utils.openai_client import OpenAIClient
+    from HCshinobi.utils.discord_ui import get_rarity_color
 except ImportError:
     print("Warning: Could not import HCshinobi logger, using basic logging.")
     get_logger = logging.getLogger
@@ -129,80 +130,70 @@ class HCBot(commands.Bot):
     
     async def setup_hook(self) -> None:
         """Overrides commands.Bot.setup_hook. Called before on_ready."""
-        # --- Initialize Services FIRST --- 
-        self.logger.info("Initializing core services...")
         try:
-            self.services = ServiceContainer(self.config)
-            await self.services.initialize(self)
-            self._clan_data = self.services.clan_data # Assign loaded clan data
-            self._initialized_services = True
-            self.logger.info("Core services initialized successfully.")
-        except Exception as e:
-            self.logger.critical(f"Fatal error initializing services: {e}", exc_info=True)
-            # Decide whether to proceed or shutdown if services are critical
-            await self.close() # Close bot if services fail to initialize
-            return
+            # --- Initialize Services FIRST --- 
+            self.logger.info("Initializing core services...")
+            try:
+                self.services = ServiceContainer(self.config)
+                await self.services.initialize(self)
+                self._clan_data = self.services.clan_data # Assign loaded clan data
+                self._initialized_services = True
+                self.logger.info("Core services initialized successfully.")
+            except Exception as e:
+                self.logger.critical(f"Fatal error initializing services: {e}", exc_info=True)
+                # Decide whether to proceed or shutdown if services are critical
+                await self.close() # Close bot if services fail to initialize
+                return
             
-        # --- Load Cogs --- 
-        self.logger.info("Loading cogs...")
-        # Load cogs from the cogs directory
-        cogs_to_load = [
-            # Removed: CharacterCommands(self, self.services.character_system, self.services.progression_engine),
-            # ClanCommands(self, self.services.clan_system, self.services.character_system), # Removed mixed command cog
-            # MissionCommands(self, self.services.mission_system, self.services.character_system), # Removed prefix command cog
-            # TrainingCommands(self, self.services.training_system), # Removed prefix command cog
-            QuestCommands(self, self.services.quest_system),
-            LootCommands(self, self.services.loot_system, self.services.character_system, DATA_DIR),
-            RoomCommands(self),
-            AnnouncementCommands(self),
-        ]
-        
-        loaded_cog_count = 0
-        for cog_instance in cogs_to_load:
-            try:
-                await self.add_cog(cog_instance)
-                self.logger.info(f"Successfully added cog: {cog_instance.__class__.__name__}")
-                loaded_cog_count += 1
-            except Exception as e:
-                self.logger.error(f"Failed to load cog {cog_instance.__class__.__name__}: {e}", exc_info=True)
-        
-        self.logger.info(f"Loaded {loaded_cog_count}/{len(cogs_to_load)} cogs.")
-        
-        # Load core system cogs and extensions
-        extensions_to_load = [
-            "HCshinobi.core.currency_system",
-            "HCshinobi.bot.cogs.devlog",
-            "HCshinobi.bot.cogs.missions",
-            "HCshinobi.bot.cogs.battle_system",
-            "HCshinobi.bot.cogs.training",
-            "HCshinobi.bot.cogs.clans",
-            "HCshinobi.bot.cogs.currency",
-            "HCshinobi.bot.cogs.shop",
-            "HCshinobi.bot.cogs.npcs",
-            "HCshinobi.bot.cogs.tokens",
-            "HCshinobi.bot.cogs.help", # Added help command cog
-            "HCshinobi.bot.cogs.character_commands" # Added character commands cog
-        ]
-        extension_load_success = 0
-        for extension in extensions_to_load:
-            try:
-                await self.load_extension(extension)
-                self.logger.info(f"Successfully loaded extension: {extension}")
-                extension_load_success += 1
-            except Exception as e:
-                self.logger.error(f"Failed to load extension {extension}: {e}", exc_info=True)
-        
-        self.logger.info(f"Loaded {extension_load_success}/{len(extensions_to_load)} extensions.")
-        
-        # Sync application commands
-        if self.guild_id:
-            guild_object = discord.Object(id=self.guild_id)
-            self.tree.copy_global_to(guild=guild_object)
-            synced_commands = await self.tree.sync(guild=guild_object)
-            self.logger.info(f"Synced {len(synced_commands)} application commands to guild {self.guild_id}.")
-        else:
-            synced_commands = await self.tree.sync()
-            self.logger.info(f"Synced {len(synced_commands)} application commands globally.")
+            # --- Load Cogs --- 
+            self.logger.info("Loading cogs...")
+            
+            # Load core system cogs and extensions
+            extensions_to_load = [
+                "HCshinobi.bot.cogs.devlog",
+                "HCshinobi.bot.cogs.missions",
+                "HCshinobi.bot.cogs.battle_system",
+                "HCshinobi.bot.cogs.training",
+                "HCshinobi.bot.cogs.clans",
+                "HCshinobi.bot.cogs.currency",
+                "HCshinobi.bot.cogs.shop",
+                "HCshinobi.bot.cogs.npcs",
+                "HCshinobi.bot.cogs.tokens",
+                "HCshinobi.bot.cogs.help",
+                "HCshinobi.bot.cogs.character_commands",
+                "HCshinobi.bot.cogs.announcements",
+                "HCshinobi.bot.cogs.room",
+                "HCshinobi.bot.cogs.admin_commands"
+            ]
+            extension_load_success = 0
+            for extension in extensions_to_load:
+                try:
+                    await self.load_extension(extension)
+                    self.logger.info(f"Successfully loaded extension: {extension}")
+                    extension_load_success += 1
+                except Exception as e:
+                    self.logger.error(f"Failed to load extension {extension}: {e}", exc_info=True)
+            
+            self.logger.info(f"Loaded {extension_load_success}/{len(extensions_to_load)} extensions.")
+            
+            # After loading all cogs and extensions, run validation
+            await post_setup_validation(self)
+            
+            # Sync application commands
+            if self.guild_id:
+                guild_object = discord.Object(id=self.guild_id)
+                self.tree.copy_global_to(guild=guild_object)
+                synced_commands = await self.tree.sync(guild=guild_object)
+                self.logger.info(f"Synced {len(synced_commands)} application commands to guild {self.guild_id}.")
+                self.logger.info(f"Synced commands: {[cmd.name for cmd in synced_commands]}")
+            else:
+                synced_commands = await self.tree.sync()
+                self.logger.info(f"Synced {len(synced_commands)} application commands globally.")
+                self.logger.info(f"Synced commands: {[cmd.name for cmd in synced_commands]}")
+                
+        except Exception as e:
+            self.logger.error(f"Error in setup_hook: {e}", exc_info=True)
+            raise
 
     async def on_ready(self):
         """Called when the bot is ready."""
@@ -522,6 +513,13 @@ class HCBot(commands.Bot):
         if not self._clan_data:
             raise RuntimeError("Bot not initialized. Call setup() first.")
         return self._clan_data
+
+def register_commands_command(bot):
+    @bot.command(name="commands", help="List all available prefix commands")
+    async def list_commands(ctx):
+        cmd_list = sorted(f"!{c.name}" for c in bot.commands if not c.hidden)
+        await ctx.send("Available commands:\n" + "\n".join(cmd_list))
+    return list_commands
 
 async def run_bot():
     """

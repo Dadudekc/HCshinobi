@@ -1,18 +1,34 @@
 """
-Discord bot integration example for the Naruto MMO clan assignment system.
+Discord integration for HCShinobi.
+Handles Discord bot setup and integration.
 """
 import os
-import _discord
-from _discord import app_commands
-from typing import Optional
+import discord
+from discord.ext import commands
+from discord import app_commands
+from typing import Optional, TYPE_CHECKING
 
-from clan_assignment_engine import ClanAssignmentEngine
-from personality_modifiers import PersonalityModifier
-from clan_data import get_all_clans, get_clan_rarity
+from HCshinobi.core.clan_assignment_engine import ClanAssignmentEngine
+from HCshinobi.core.personality_modifiers import PersonalityModifier
+from HCshinobi.core.clan_data import get_all_clans, get_clan_rarity
+from HCshinobi.bot.config import BotConfig
+
+if TYPE_CHECKING:
+    from HCshinobi.bot.bot import HCBot
 
 # Set up the Discord bot
-intents = _discord.Intents.default()
-client = _discord.Client(intents=intents)
+config = BotConfig(
+    command_prefix="!",
+    application_id=int(os.getenv("DISCORD_APPLICATION_ID", "0")),
+    guild_id=int(os.getenv("DISCORD_GUILD_ID", "0")),
+    battle_channel_id=int(os.getenv("DISCORD_BATTLE_CHANNEL_ID", "0")),
+    online_channel_id=int(os.getenv("DISCORD_ONLINE_CHANNEL_ID", "0")),
+    log_level="INFO"
+)
+
+# Import HCBot here to avoid circular imports
+from HCshinobi.bot.bot import HCBot
+client: "HCBot" = HCBot(config=config)
 tree = app_commands.CommandTree(client)
 
 # Initialize the clan assignment engine
@@ -23,7 +39,7 @@ engine = ClanAssignmentEngine()
     description="Assign a clan to yourself based on the weighted system"
 )
 async def assign_clan(
-    interaction: _discord.Interaction,
+    interaction: discord.Interaction,
     personality: Optional[str] = None,
     token_boost_clan: Optional[str] = None,
     token_count: Optional[int] = 0
@@ -75,7 +91,7 @@ async def assign_clan(
     )
     
     # Create response embed
-    embed = _discord.Embed(
+    embed = discord.Embed(
         title="Clan Assignment Result",
         description=f"**{interaction.user.mention}, you have been assigned to the {result['assigned_clan']} clan!**",
         color=0x00ff00
@@ -112,12 +128,12 @@ async def assign_clan(
     name="clan_populations",
     description="View the current populations of all clans"
 )
-async def clan_populations(interaction: _discord.Interaction):
+async def clan_populations(interaction: discord.Interaction):
     """Show the current population of all clans."""
     populations = engine.get_clan_populations()
     
     # Create embed
-    embed = _discord.Embed(
+    embed = discord.Embed(
         title="Current Clan Populations",
         description="Number of active players in each clan",
         color=0x0099ff
@@ -147,8 +163,8 @@ async def clan_populations(interaction: _discord.Interaction):
 )
 @app_commands.checks.has_permissions(administrator=True)
 async def mark_death(
-    interaction: _discord.Interaction,
-    user: _discord.User,
+    interaction: discord.Interaction,
+    user: discord.User,
     clan: str
 ):
     """
@@ -175,7 +191,7 @@ async def mark_death(
     )
     
     # Create response embed
-    embed = _discord.Embed(
+    embed = discord.Embed(
         title="Player Death",
         description=f"**{user.mention} has died and been converted to an NPC**",
         color=0xff0000

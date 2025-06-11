@@ -15,15 +15,8 @@ from unittest.mock import Mock
 from enum import Enum
 
 # Import logger from utils
-try:
-    from ...utils.logging import get_logger
-    from ...utils.discord_ui import get_rarity_color
-except ImportError:
-    print("Warning: Could not import HCshinobi logger, using basic logging.")
-    get_logger = logging.getLogger
-    # Add fallback for get_rarity_color if needed for standalone testing
-    def get_rarity_color(rarity_str: str) -> discord.Color:
-        return discord.Color.default()
+from HCshinobi.utils.logging import get_logger
+from HCshinobi.utils.discord_ui import get_rarity_color
 
 # Initialize logger
 logger = get_logger("clan_commands")
@@ -47,10 +40,14 @@ from HCshinobi.utils.config import DEFAULT_CLANS_PATH
 # Fix the typo here and update the path to point to the data directory
 CLANS_FILE = DEFAULT_CLANS_PATH
 
+# Type checking to avoid circular imports
+if TYPE_CHECKING:
+    from HCshinobi.bot.bot import HCBot
+
 class ClanCommands(commands.Cog):
     """Commands for clan management."""
 
-    def __init__(self, bot: "HCShinobiBot"):
+    def __init__(self, bot: "HCBot"):
         """Initialize clan commands."""
         self.bot = bot
         # Get services from bot
@@ -374,7 +371,7 @@ class ClanCommands(commands.Cog):
                 ephemeral=True
             )
 
-async def setup(bot: "HCShinobiBot"):
+async def setup(bot: "HCBot"):
     """Sets up the ClanCommands cog."""
     # Ensure core services are present on the bot.services container before adding cog
     required_attrs = ["clan_data", "clan_assignment_engine", "token_system", "npc_manager", "personality_modifiers"]

@@ -10,7 +10,7 @@ from pathlib import Path
 from .character_system import CharacterSystem
 from .currency_system import CurrencySystem
 from .character import Character
-from ..utils.file_io import load_json, save_json
+from HCshinobi.utils.file_io import load_json, save_json
 
 # Import constants
 from .constants import (

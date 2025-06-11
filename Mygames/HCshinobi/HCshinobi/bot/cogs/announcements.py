@@ -7,7 +7,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 import logging
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, List, Dict, Any
 import os
 import sys
 import time
@@ -22,11 +22,12 @@ from ..core.notifications.templates import (
     system_alert
 )
 from ...core.views import ConfirmView
-from ...utils.config import load_config
-from ...utils.embeds import create_error_embed, create_success_embed
+from HCshinobi.utils.config import load_config
+from HCshinobi.utils.embeds import create_error_embed, create_success_embed
 
+# Type checking to avoid circular imports
 if TYPE_CHECKING:
-    from ..bot import HCBot
+    from HCshinobi.bot.bot import HCBot
 
 logger = logging.getLogger(__name__)
 

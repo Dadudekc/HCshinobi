@@ -1,115 +1,75 @@
-# HCShinobi Dream Modules
+# HCShinobi
 
-This project extracts the core functionality from the HCShinobi Discord bot into modular, reusable components that can be easily integrated into other projects.
+HCShinobi is a hardcore Naruto-themed MMO Discord bot, featuring clan assignments, token economy, NPC management, AI-driven content, and reusable RPG modules.
+
+## Features
+
+- **Clan Assignment**: Weighted rolls with personality modifiers and token boosts.
+- **Token System**: Earn and spend tokens to unlock effects or reroll.
+- **NPC System**: Fallen players become NPCs with generated backgrounds.
+- **AI Integration**: Hooks for generating quests and character narratives.
+- **Discord Slash Commands**: Intuitive commands like `/roll_clan`, `/tokens`, and more.
+- **Logging**: Configurable structured logging for operational visibility.
+- **Reusable Modules**: Pluggable components for integrating RPG systems into other bots.
 
 ## Project Structure
 
 ```
-dream_modules/
-├── core/
-│   ├── module_interface.py - Base interfaces for modules
-│   └── service_container.py - Dependency injection container
-├── modules/
-│   ├── character/
-│   │   ├── character_model.py - Character data model
-│   │   └── character_manager.py - Character management service
-│   ├── clan/
-│   │   ├── clan_model.py - Clan data model
-│   │   └── clan_manager.py - Clan management service
-│   └── discord/
-│       └── character_commands.py - Discord commands for character management
-├── __init__.py - Package exports
-├── factory.py - Factory functions for creating modules
-├── example_bot.py - Example Discord bot implementation
-└── README.md - Module documentation
+.
+├── HCshinobi/             # Main bot package
+│   ├── ai/                # AI integration modules
+│   ├── core/              # Game logic
+│   ├── data/              # JSON data files
+│   ├── discord/           # Discord command handlers
+│   ├── utils/             # Utility functions
+│   ├── main.py            # Bot entrypoint
+│   └── README.md          # In-package documentation
+├── scripts/               # Helper scripts (create_character, data fixes, etc.)
+│   ├── create_character.py
+│   └── fix_character_files.py
+├── config/                # Configuration templates
+├── tests/                 # Test suite
+├── .env-example           # Environment variable sample
+├── requirements.txt       # Core dependencies
+├── requirements-test.txt  # Test dependencies
+├── setup.py               # Package installation script
+├── run.py                 # Launcher script
+└── README.md              # This file
 ```
-
-## Features
-
-- **Modular Design**: Each component is designed to be independent and reusable.
-- **Dependency Injection**: Using a service container for managing dependencies.
-- **OOP Principles**: Clean interfaces and proper encapsulation.
-- **Discord Integration**: Ready-to-use Discord commands for character management.
-- **Extensible**: Easy to extend with new features and customizations.
 
 ## Getting Started
 
-1. Copy the `dream_modules` directory to your project.
-2. Import the modules you need:
+1. Clone the repository:
+   ```bash
+   git clone <repository_url>
+   cd <repo_root>
+   ```
+2. Create a virtual environment:
+   - PowerShell: `fix_venv.ps1`
+   - Command Prompt: `fix_venv.bat`
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   pip install -e .
+   ```
+4. Configure environment variables:
+   ```bash
+   cp .env-example .env
+   # Edit .env to set DISCORD_BOT_TOKEN, DISCORD_GUILD_ID, etc.
+   ```
+5. Run the bot:
+   ```bash
+   hcshinobi
+   # or: python run.py
+   ```
 
-```python
-# Import the factory functions
-from dream_modules.factory import setup_rpg_systems
+## Testing
 
-# Create and configure the modules
-systems = setup_rpg_systems(bot, config)
+Run all tests with:
+```bash
+pytest
 ```
-
-3. See the example bot (`dream_modules/example_bot.py`) for a complete implementation.
-
-## Usage
-
-### Basic Example
-
-```python
-import discord
-from discord.ext import commands
-from dream_modules.factory import setup_rpg_systems, shutdown_all_systems
-
-# Create bot
-bot = commands.Bot(command_prefix='!', intents=discord.Intents.default())
-
-# Configuration
-config = {
-    "character": {
-        "data_dir": "data/characters",
-    },
-    "clan": {
-        "data_dir": "data/clans",
-    },
-    "commands": {
-        "role_management": {
-            "enabled": True,
-        }
-    }
-}
-
-@bot.event
-async def on_ready():
-    # Set up RPG systems
-    systems = setup_rpg_systems(bot, config)
-    await bot.tree.sync()
-
-# Run bot
-bot.run("YOUR_TOKEN_HERE")
-```
-
-### Accessing Services
-
-You can access the services using the service container:
-
-```python
-from dream_modules.core.service_container import get_container
-
-# Get the character manager service
-character_manager = get_container().get("character_manager")
-
-# Get a character
-character = character_manager.get_character("user_id")
-```
-
-## Documentation
-
-For detailed documentation on each module, see the README file in the `dream_modules` directory.
-
-## Integration with Dream.OS
-
-These modules are designed to be compatible with Dream.OS. To integrate them:
-
-1. Copy the `dream_modules` directory to your Dream.OS project.
-2. Register the services with the Dream.OS service container.
-3. Use the factory functions to create and configure the modules.
 
 ## License
 
-This project is licensed under the MIT License. 
+This project is licensed under the MIT License.

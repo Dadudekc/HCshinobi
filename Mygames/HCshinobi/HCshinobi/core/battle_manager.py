@@ -13,7 +13,7 @@ from enum import Enum, auto
 
 # Import dependencies from other core modules and utils
 from .character_manager import CharacterManager
-from ..utils.ollama_client import OllamaClient, OllamaError
+from HCshinobi.utils.ollama_client import OllamaClient, OllamaError
 from .battle_system import BattleSystem
 from .character import Character
 from .battle.state import BattleState, BattleParticipant
@@ -32,6 +32,10 @@ class BattleError(Enum):
 
 class BattleManagerError(Exception):
     """Base exception for battle manager errors."""
+    pass
+
+class BattleNotFoundError(BattleManagerError):
+    """Raised when a requested battle cannot be found."""
     pass
 
 class BattleManager:

@@ -1,6 +1,12 @@
+"""
+Tests for the quest commands cog.
+"""
+
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 import discord
+from discord.ext import commands
+from HCshinobi.bot.cogs.missions import MissionCommands
 
 # Assuming QuestCommands is in HCshinobi.commands.quest_commands
 from HCshinobi.commands.quest_commands import QuestCommands 

@@ -1,14 +1,18 @@
-"""Tests for mission commands."""
+"""
+Tests for the mission commands cog.
+"""
+
 import pytest
-from unittest.mock import Mock, AsyncMock, MagicMock
+from unittest.mock import Mock, AsyncMock, MagicMock, patch
 import discord
 from discord import app_commands
 from datetime import datetime, timedelta
+from discord.ext import commands
 
-from HCshinobi.commands.mission_commands import MissionCommands
 from HCshinobi.core.mission_system import MissionSystem
 from HCshinobi.core.character_system import CharacterSystem
 from HCshinobi.core.character import Character
+from HCshinobi.bot.cogs.missions import MissionCommands
 
 @pytest.fixture
 def mission_system(character_system):

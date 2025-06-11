@@ -1,25 +1,35 @@
 """
-Command modules for the Shinobi bot.
+Command modules for HCShinobi
 """
 
-# from .currency_commands import CurrencyCommands # File doesn't exist here
-# from .character.creation import CharacterCreation # File doesn't exist here
-# from .character.management import CharacterManagement # File doesn't exist here
-# from .character.profile import CharacterProfile # File doesn't exist here
-# from .character.progression import CharacterProgression # File doesn't exist here
-from .clan_mission_commands import ClanMissionCommands
-from .loot_commands import LootCommands
-# from .mission_commands import MissionCommands # File doesn't exist here
-from .quest_commands import QuestCommands
+# Import cogs from the new location
+from HCshinobi.bot.cogs.currency import CurrencyCommands
+from HCshinobi.bot.cogs.character_commands import CharacterCommands
+from HCshinobi.bot.cogs.battle_system import BattleSystemCommands
+from HCshinobi.bot.cogs.training import TrainingCommands
+from HCshinobi.bot.cogs.missions import MissionCommands
+from HCshinobi.bot.cogs.clans import ClanCommands
+from HCshinobi.bot.cogs.clan_commands import ClanMissionCommands
+from HCshinobi.bot.cogs.loot_commands import LootCommands
+from HCshinobi.bot.cogs.room import RoomCommands
+from HCshinobi.bot.cogs.devlog import DevlogCommands
+from HCshinobi.bot.cogs.announcements import AnnouncementCommands
+
+# Type hint for Bot
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from HCshinobi.bot.bot import HCBot as Bot
 
 __all__ = [
-    # 'CurrencyCommands',
-    # 'CharacterCreation',
-    # 'CharacterManagement',
-    # 'CharacterProfile',
-    # 'CharacterProgression',
+    'CurrencyCommands',
+    'CharacterCommands',
+    'BattleSystemCommands',
+    'TrainingCommands',
+    'MissionCommands',
+    'ClanCommands',
     'ClanMissionCommands',
     'LootCommands',
-    # 'MissionCommands',
-    'QuestCommands'
+    'RoomCommands',
+    'DevlogCommands',
+    'AnnouncementCommands'
 ] 

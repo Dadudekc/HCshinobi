@@ -16,7 +16,7 @@ from .constants import (
     TOKEN_FILE, TOKEN_LOG_FILE, TOKEN_COSTS, MAX_CLAN_BOOST_TOKENS,
     TOKEN_START_AMOUNT, TOKENS_SUBDIR, REROLL_COOLDOWN_HOURS, TOKENS_PER_REROLL
 )
-from ..utils.logging import get_logger, log_event
+from HCshinobi.utils.logging import get_logger, log_event
 
 logger = logging.getLogger(__name__)
 

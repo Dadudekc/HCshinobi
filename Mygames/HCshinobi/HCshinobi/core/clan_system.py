@@ -6,6 +6,7 @@ from typing import Dict, List, Optional, Tuple, Any, TYPE_CHECKING
 from datetime import datetime
 
 from .database import Database
+from HCshinobi.utils.file_io import load_json, save_json
 
 # Add forward reference typing if needed
 if TYPE_CHECKING:

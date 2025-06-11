@@ -1,11 +1,15 @@
+"""
+Tests for the currency commands cog.
+"""
+
 import pytest
 import discord
 from discord.ext import commands
-from unittest.mock import AsyncMock, MagicMock, call
+from unittest.mock import AsyncMock, MagicMock, call, Mock, patch
 import pytest_asyncio
 
 # Assume these imports are correct relative to your project structure
-from HCshinobi.commands.currency_commands import CurrencyCommands
+from HCshinobi.bot.cogs.currency import CurrencyCommands
 # Systems are now mocked via conftest.py fixtures
 
 @pytest_asyncio.fixture

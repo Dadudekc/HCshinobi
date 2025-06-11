@@ -3,15 +3,19 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 import logging
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, TYPE_CHECKING
 import random
 from datetime import datetime, timedelta
 
 from HCshinobi.core.currency_system import CurrencySystem
 from HCshinobi.core.character_system import CharacterSystem
 from HCshinobi.core.clan_data import ClanData
-from HCshinobi.utils.embed_utils import get_rarity_color
+from HCshinobi.utils.embed_utils import get_rarity_color, create_error_embed
 from HCshinobi.core.constants import RarityTier
+
+# Type checking to avoid circular imports
+if TYPE_CHECKING:
+    from HCshinobi.bot.bot import HCBot
 
 # Cooldown settings
 DAILY_COOLDOWN = timedelta(minutes=30)
@@ -19,12 +23,12 @@ MIN_DAILY_REWARD = 100
 MAX_DAILY_REWARD = 500
 
 class CurrencyCommands(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: "HCBot"):
         """Initialize currency commands."""
         self.bot = bot
-        # Get systems from bot services
-        self.currency_system = bot.services.currency_system
-        self.character_system = bot.services.character_system
+        # Access services safely
+        self.currency_system: Optional[CurrencySystem] = getattr(bot.services, 'currency_system', None)
+        self.character_system: Optional[CharacterSystem] = getattr(bot.services, 'character_system', None)
         self.clan_data = bot.services.clan_data
         
         if not all([self.currency_system, self.character_system, self.clan_data]):

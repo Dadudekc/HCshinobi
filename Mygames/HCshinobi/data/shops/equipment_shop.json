@@ -5,7 +5,9 @@
     "rarity": "Common",
     "description": "Versatile throwing or close-range knife. Essential ninja tool.",
     "price": 50,
-    "stats": { "taijutsu": 1 } 
+    "stats": { "taijutsu": 1 },
+    "target_type": "none",
+    "is_usable_in_battle": false
   },
   "shuriken_set": {
     "name": "Shuriken (Set of 5)",
@@ -13,7 +15,9 @@
     "rarity": "Common",
     "description": "Throwable stars, quick and silent.",
     "price": 40,
-    "stats": {}
+    "stats": {},
+    "target_type": "none",
+    "is_usable_in_battle": false
   },
   "smoke_bomb": {
     "name": "Smoke Bomb (x1)",
@@ -21,7 +25,10 @@
     "rarity": "Common",
     "description": "Creates a smokescreen for stealth or escape.",
     "price": 60,
-    "stats": {}
+    "stats": {},
+    "effect": { "type": "apply_status_self", "status": "Smoke Screen", "duration": 2 },
+    "target_type": "self",
+    "is_usable_in_battle": true
   },
   "flash_bomb": {
     "name": "Flash Bomb (x1)",
@@ -29,7 +36,10 @@
     "rarity": "Common",
     "description": "Temporarily blinds enemies. Useful for ambushes or escapes.",
     "price": 70,
-    "stats": {}
+    "stats": {},
+    "effect": { "type": "apply_status_target", "status": "Blinded", "duration": 1 },
+    "target_type": "opponent",
+    "is_usable_in_battle": true
   },
   "explosive_tag": {
     "name": "Explosive Tag (x1)",
@@ -37,7 +47,10 @@
     "rarity": "Uncommon",
     "description": "Paper tag that explodes after a set time or trigger. Great for traps.",
     "price": 100,
-    "stats": {}
+    "stats": {},
+    "effect": { "type": "damage_target", "amount": 40, "element": "fire" },
+    "target_type": "opponent",
+    "is_usable_in_battle": true
   },
   "ninja_wire": {
     "name": "Wire (10m coil)",
@@ -45,7 +58,9 @@
     "rarity": "Common",
     "description": "Thin, durable wire for setting traps or manipulating thrown weapons.",
     "price": 40,
-    "stats": {}
+    "stats": {},
+    "target_type": "none",
+    "is_usable_in_battle": false
   },
   "chakra_seal_tag": {
     "name": "Chakra Seal Tag (x1)",
@@ -53,7 +68,9 @@
     "rarity": "Uncommon",
     "description": "Basic sealing tag used to contain small items or suppress chakra slightly.",
     "price": 120,
-    "stats": {}
+    "stats": {},
+    "target_type": "none",
+    "is_usable_in_battle": false 
   },
   "empty_scroll": {
     "name": "Scroll (Empty)",
@@ -61,7 +78,9 @@
     "rarity": "Common",
     "description": "Used to store weapons, tools, or write custom jutsu (RP flavor or utility).",
     "price": 80,
-    "stats": {}
+    "stats": {},
+    "target_type": "none",
+    "is_usable_in_battle": false
   },
   "basic_healing_salve": {
     "name": "Basic Healing Salve",
@@ -69,7 +88,10 @@
     "rarity": "Common",
     "description": "Heals minor wounds. Can be used mid-combat or after.",
     "price": 90,
-    "stats": {}
+    "stats": {},
+    "effect": { "type": "heal_hp_self", "amount": 50 },
+    "target_type": "self",
+    "is_usable_in_battle": true
   },
   "soldier_pill": {
     "name": "Soldier Pill (x1)",
@@ -77,7 +99,10 @@
     "rarity": "Uncommon",
     "description": "Temporarily boosts stamina and chakra. Side effects if overused.",
     "price": 130,
-    "stats": {}
+    "stats": {},
+    "effect": { "type": "apply_status_self", "status": "Energized", "duration": 3, "stats": { "stamina": 10, "chakra": 20 } },
+    "target_type": "self",
+    "is_usable_in_battle": true
   },
   "grappling_hook": {
     "name": "Grappling Hook",
@@ -85,7 +110,10 @@
     "rarity": "Common",
     "description": "Hook and rope used to scale walls or swing across gaps.",
     "price": 110,
-    "stats": {}
+    "stats": {},
+    "effect": { "type": "heal_hp_self", "amount": 10 },
+    "target_type": "none",
+    "is_usable_in_battle": false 
   },
   "ninja_sandals": {
     "name": "Ninja Sandals",
@@ -93,7 +121,9 @@
     "rarity": "Common",
     "description": "Standard footwear. Good grip, noise-dampening soles.",
     "price": 60,
-    "stats": { "speed": 1 } 
+    "stats": { "speed": 1 },
+    "target_type": "none",
+    "is_usable_in_battle": false
   },
   "forehead_protector": {
     "name": "Forehead Protector",
@@ -101,7 +131,9 @@
     "rarity": "Common",
     "description": "Symbol of allegiance. Offers minimal head protection.",
     "price": 50,
-    "stats": { "defense": 1 }
+    "stats": { "defense": 1 },
+    "target_type": "none",
+    "is_usable_in_battle": false
   },
   "chakra_gloves": {
     "name": "Chakra Gloves",
@@ -109,7 +141,9 @@
     "rarity": "Uncommon",
     "description": "Light gloves that improve chakra flow for taijutsu or climbing.",
     "price": 150,
-    "stats": { "chakra_control": 2 }
+    "stats": { "chakra_control": 2 },
+    "target_type": "none",
+    "is_usable_in_battle": false
   },
   "basic_armor_vest": {
     "name": "Basic Armor Vest",
@@ -117,7 +151,9 @@
     "rarity": "Common",
     "description": "Light protection vest worn over clothing.",
     "price": 200,
-    "stats": { "defense": 3 }
+    "stats": { "defense": 3 },
+    "target_type": "none",
+    "is_usable_in_battle": false
   },
   "caltrops": {
     "name": "Caltrops (Set of 10)",
@@ -125,7 +161,9 @@
     "rarity": "Common",
     "description": "Scattered on ground to slow or injure pursuers.",
     "price": 40,
-    "stats": {}
+    "stats": {},
+    "target_type": "opponent",
+    "is_usable_in_battle": false 
   },
   "ink_brush_set": {
     "name": "Ink & Brush Set",
@@ -133,7 +171,9 @@
     "rarity": "Common",
     "description": "For writing seals, messages, or jutsu scrolls.",
     "price": 30,
-    "stats": {}
+    "stats": {},
+    "target_type": "none",
+    "is_usable_in_battle": false
   },
   "water_canteen": {
     "name": "Water Canteen",
@@ -141,7 +181,9 @@
     "rarity": "Common",
     "description": "Keeps you hydrated on missions. Essential for long treks.",
     "price": 20,
-    "stats": {}
+    "stats": {},
+    "target_type": "none",
+    "is_usable_in_battle": false
   },
   "food_rations": {
     "name": "Food Rations (1 Day)",
@@ -149,6 +191,8 @@
     "rarity": "Common",
     "description": "Standard mission ration. Restores a small amount of stamina.",
     "price": 25,
-    "stats": {}
+    "stats": {},
+    "target_type": "none",
+    "is_usable_in_battle": false
   }
 }

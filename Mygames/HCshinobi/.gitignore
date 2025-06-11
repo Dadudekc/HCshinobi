@@ -1,10 +1,69 @@
-# Byte-compiled / optimized / DLL files
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs and databases
+*.log
+*.sqlite
+*.db
+logs/
+.coverage
+htmlcov/
+reports/
+
+# Test and temporary files
+.pytest_cache/
+temp_e2e_data/
+test_debug_logs.txt
+bot_logs*.txt
+debug.log
+
+# Project specific
+_agent_coordination/
+dream_modules.egg-info/
+.cursor/
+dashboard.db
+dependency_cache.json
+project_analysis.json
+chatgpt_project_context.json
+todo_report.md
+agent_onboarding_prompt.md
+
+# Environment variables
+.env
+.env.local
+
+# Local development
+.env.*.local
 
 # Distribution / packaging
 .Python
@@ -31,7 +90,6 @@ pip-delete-this-directory.txt
 htmlcov/
 .tox/
 .nox/
-.coverage
 .coverage.*
 .cache
 pytest_cache/
@@ -81,7 +139,6 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
 .env.*
 .venv
 env/

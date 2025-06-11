@@ -13,7 +13,7 @@ from .character import Character
 import aiofiles.os # Add this import if not already present near other aiofiles imports
 # Import constants for subdir
 from .constants import CHARACTERS_SUBDIR, CLANS_SUBDIR
-from ..utils.file_io import load_json, save_json, async_save_json
+from HCshinobi.utils.file_io import load_json, save_json, async_save_json
 from HCshinobi.core.clan_data import ClanData # Import ClanData
 
 # Import or define constants

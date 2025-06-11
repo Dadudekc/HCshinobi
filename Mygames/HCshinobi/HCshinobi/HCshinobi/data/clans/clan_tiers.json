@@ -1,0 +1,30 @@
+{
+    "Standard Tier (~79%)": {
+        "description": "Common clans that form the foundation of shinobi society.",
+        "clans": {
+            "Inuzuka": "Known for their ninja dogs.",
+            "Akimichi": "Known for body expansion jutsu.",
+            "Nara": "Known for shadow manipulation.",
+            "Yamanaka": "Known for mind-related techniques.",
+            "Sarutobi": "Known for strong chakra and fire affinity."
+        }
+    },
+    "Rare Tier (~15%)": {
+        "description": "Uncommon clans with special abilities.",
+        "clans": {
+            "Aburame": "Known for insect manipulation.",
+            "Hyuga": "Known for Byakugan and gentle fist.",
+            "Uchiha": "Known for Sharingan and fire techniques.",
+            "Senju": "Known for strong life force and wood release.",
+            "Uzumaki": "Known for sealing techniques and strong life force."
+        }
+    },
+    "Epic Tier (~5%)": {
+        "description": "Rare clans with powerful bloodlines.",
+        "clans": {}
+    },
+    "Legendary Tier (~1%)": {
+        "description": "Extremely rare clans with legendary abilities.",
+        "clans": {}
+    }
+}

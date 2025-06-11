@@ -14,7 +14,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from discord.ui import Button, View, Select
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, TYPE_CHECKING
 
 from HCshinobi.core.utils import format_time_delta, pretty_print_duration
 from HCshinobi.core.character import Character
@@ -22,16 +22,21 @@ from HCshinobi.core.mission_system import MissionSystem
 from HCshinobi.core.missions.mission import Mission, MissionStatus
 from HCshinobi.core.character_system import CharacterSystem
 from HCshinobi.core.progression_engine import ShinobiProgressionEngine
+from HCshinobi.utils.embed_utils import create_error_embed
+
+# Type checking to avoid circular imports
+if TYPE_CHECKING:
+    from HCshinobi.bot.bot import HCBot
 
 logger = logging.getLogger(__name__)
 
 class MissionCommands(commands.Cog):
     """Handles mission-related commands for the HCShinobi bot."""
     
-    def __init__(self, bot: 'HCShinobiBot', mission_system: MissionSystem, character_system: CharacterSystem):
+    def __init__(self, bot: "HCBot"):
         self.bot = bot
-        self.mission_system = mission_system
-        self.character_system = character_system
+        self.mission_system = bot.services.mission_system
+        self.character_system = bot.services.character_system
         
     @app_commands.command(name="mission_board", description="View the available missions for your character")
     async def mission_board(self, interaction: discord.Interaction):
@@ -471,7 +476,7 @@ class MissionCommands(commands.Cog):
         else:
             await interaction.response.send_message(message, ephemeral=True)
 
-async def setup(bot: 'HCShinobiBot'):
+async def setup(bot: "HCBot"):
     """Add the cog to the bot."""
     # Fetch required services from the bot's service container
     mission_system = getattr(bot.services, 'mission_system', None)

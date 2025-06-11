@@ -21,4 +21,20 @@ def get_rarity_emoji(rarity: str) -> str:
         "Uncommon": "🟣",
         "Common": "⚪"
     }
-    return rarity_emojis.get(rarity, "⚪") 
+    return rarity_emojis.get(rarity, "⚪")
+
+def create_error_embed(title: str, description: str) -> discord.Embed:
+    """Create an error embed with a red color scheme.
+    
+    Args:
+        title: The title of the error embed
+        description: The description/error message
+        
+    Returns:
+        A discord.Embed object configured for error messages
+    """
+    return discord.Embed(
+        title=title,
+        description=description,
+        color=discord.Color.red()
+    ) 

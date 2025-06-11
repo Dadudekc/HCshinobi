@@ -1,0 +1,172 @@
+{
+  "Katon": {
+    "E": [
+      {
+        "name": "Katon: Spark Flicker",
+        "cost": 50
+      },
+      {
+        "name": "Katon: Ember Palm",
+        "cost": 50
+      },
+      {
+        "name": "Katon: Smoke Wisp",
+        "cost": 50
+      }
+    ],
+    "D": [
+      {
+        "name": "Katon: Ember Shuriken",
+        "cost": 150
+      },
+      {
+        "name": "Katon: Fire Fang",
+        "cost": 150
+      },
+      {
+        "name": "Katon: Blister Dash",
+        "cost": 150
+      },
+      {
+        "name": "Katon: Burning Feint",
+        "cost": 150
+      }
+    ]
+  },
+  "Suiton": {
+    "E": [
+      {
+        "name": "Suiton: Moisture Sense",
+        "cost": 50
+      },
+      {
+        "name": "Suiton: Bubble Veil",
+        "cost": 50
+      },
+      {
+        "name": "Suiton: Wet Palm",
+        "cost": 50
+      }
+    ],
+    "D": [
+      {
+        "name": "Suiton: Water Needle Shot",
+        "cost": 150
+      },
+      {
+        "name": "Suiton: Ripple Step",
+        "cost": 150
+      },
+      {
+        "name": "Suiton: Aqua Lash",
+        "cost": 150
+      },
+      {
+        "name": "Suiton: Drizzle Cloak",
+        "cost": 150
+      }
+    ]
+  },
+  "Doton": {
+    "E": [
+      {
+        "name": "Doton: Pebble Shot",
+        "cost": 50
+      },
+      {
+        "name": "Doton: Mud Seal",
+        "cost": 50
+      },
+      {
+        "name": "Doton: Dust Sight",
+        "cost": 50
+      }
+    ],
+    "D": [
+      {
+        "name": "Doton: Stone Fist",
+        "cost": 150
+      },
+      {
+        "name": "Doton: Gravel Spit",
+        "cost": 150
+      },
+      {
+        "name": "Doton: Earthen Pads",
+        "cost": 150
+      },
+      {
+        "name": "Doton: Soil Grip",
+        "cost": 150
+      }
+    ]
+  },
+  "Raiton": {
+    "E": [
+      {
+        "name": "Raiton: Static Touch",
+        "cost": 50
+      },
+      {
+        "name": "Raiton: Spark Glimmer",
+        "cost": 50
+      },
+      {
+        "name": "Raiton: Hair Stand Technique",
+        "cost": 50
+      }
+    ],
+    "D": [
+      {
+        "name": "Raiton: Shock Darts",
+        "cost": 150
+      },
+      {
+        "name": "Raiton: Conductive Fist",
+        "cost": 150
+      },
+      {
+        "name": "Raiton: Charge Step",
+        "cost": 150
+      },
+      {
+        "name": "Raiton: Pulse Wire",
+        "cost": 150
+      }
+    ]
+  },
+  "Fuuton": {
+    "E": [
+      {
+        "name": "Fūton: Breeze Flick",
+        "cost": 50
+      },
+      {
+        "name": "Fūton: Wind Whisper",
+        "cost": 50
+      },
+      {
+        "name": "Fūton: Puff Step",
+        "cost": 50
+      }
+    ],
+    "D": [
+      {
+        "name": "Fūton: Gale Shuriken",
+        "cost": 150
+      },
+      {
+        "name": "Fūton: Cutter Palm",
+        "cost": 150
+      },
+      {
+        "name": "Fūton: Wind Veil",
+        "cost": 150
+      },
+      {
+        "name": "Fūton: Dust Dance",
+        "cost": 150
+      }
+    ]
+  }
+}

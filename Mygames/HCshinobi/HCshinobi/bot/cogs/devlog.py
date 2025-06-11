@@ -3,11 +3,14 @@ import discord
 from discord.ext import commands, tasks
 from discord import app_commands
 import logging
-from typing import Optional
-from datetime import datetime, timezone
+from typing import TYPE_CHECKING, Optional, List, Dict, Any
 import os # Import os
 import aiofiles # Import aiofiles
 from ...core.constants import DATA_DIR, LOG_DIR # Assuming DEV_LOG_FILE might be in LOG_DIR or DATA_DIR
+
+# Type checking to avoid circular imports
+if TYPE_CHECKING:
+    from HCshinobi.bot.bot import HCBot
 
 # Define the path to the devlog file
 DEVLOG_FILE_PATH = os.path.join(DATA_DIR, "devlog.md") # Place devlog in main data dir
@@ -15,7 +18,7 @@ DEVLOG_FILE_PATH = os.path.join(DATA_DIR, "devlog.md") # Place devlog in main da
 logger = logging.getLogger(__name__)
 
 class DevlogCommands(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: "HCBot"):
         """Initialize devlog commands."""
         self.bot = bot
         self.logger = logging.getLogger(__name__)

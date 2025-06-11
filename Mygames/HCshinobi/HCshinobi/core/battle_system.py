@@ -14,7 +14,7 @@ from .character import Character
 from .character_system import CharacterSystem
 from .progression_engine import ShinobiProgressionEngine
 from .constants import BATTLES_SUBDIR, ACTIVE_BATTLES_FILENAME, BATTLE_HISTORY_FILENAME
-from ..utils.file_io import load_json, save_json
+from HCshinobi.utils.file_io import load_json, save_json
 
 # Import from new battle module
 from .battle import (

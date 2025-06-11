@@ -1,0 +1,208 @@
+{
+  "Konohagakure Clans": [
+    {
+      "name": "Uchiha",
+      "village": "Konohagakure",
+      "kekkei_genkai": "Sharingan",
+      "abilities": [
+        "Fire Release: Great Fireball Jutsu",
+        "Tsukuyomi (Mangekyō)",
+        "Susanoo (Mangekyō)",
+        "Amaterasu / Kamui"
+      ],
+      "traits": [
+        "Jet-black hair and crimson eyes",
+        "Emotionally intense",
+        "Genjutsu and kenjutsu experts"
+      ],
+      "role": "Former Konoha police force, now legacy-bearers like Sasuke and Sarada"
+    },
+    {
+      "name": "Hyūga",
+      "village": "Konohagakure",
+      "kekkei_genkai": "Byakugan",
+      "abilities": [
+        "Eight Trigrams Sixty-Four Palms",
+        "Eight Trigrams Palm Rotation",
+        "Gentle Step Twin Lion Fists",
+        "Byakugan Sight"
+      ],
+      "traits": [
+        "White eyes",
+        "Highly disciplined",
+        "Chakra control experts"
+      ],
+      "role": "Elite defenders and intelligence specialists"
+    },
+    {
+      "name": "Senju",
+      "village": "Konohagakure",
+      "kekkei_genkai": "Wood Release",
+      "abilities": [
+        "Deep Forest Bloom",
+        "Binding Roots Coffin",
+        "Wood Clone Technique",
+        "Living Fortress Formation"
+      ],
+      "traits": [
+        "Earth and Water affinity",
+        "High stamina and longevity",
+        "Nature spirituality"
+      ],
+      "role": "Village builders, defenders, and chakra titans"
+    },
+    {
+      "name": "Nara",
+      "village": "Konohagakure",
+      "kekkei_genkai": "Shadow Manipulation",
+      "abilities": [
+        "Shadow Imitation Technique",
+        "Shadow Neck Binding",
+        "Shadow Sewing",
+        "Shadow Web Domain"
+      ],
+      "traits": [
+        "Dark-haired with tired eyes",
+        "Highly intelligent",
+        "Shadow tool users"
+      ],
+      "role": "Tacticians and battlefield coordinators"
+    },
+    {
+      "name": "Yamanaka",
+      "village": "Konohagakure",
+      "kekkei_genkai": "Mind Transfer Techniques",
+      "abilities": [
+        "Mind Transfer Jutsu",
+        "Sensory Communication Link",
+        "Mind Clone Switch",
+        "Mental Intrusion Technique"
+      ],
+      "traits": [
+        "Blonde/light hair",
+        "Calm and empathetic",
+        "Mental warfare specialists"
+      ],
+      "role": "Intelligence, interrogation, and medical corps"
+    },
+    {
+      "name": "Akimichi",
+      "village": "Konohagakure",
+      "kekkei_genkai": "Multi-Size Techniques",
+      "abilities": [
+        "Multi-Size Technique",
+        "Mega Fist Slam",
+        "Human Boulder",
+        "Butterfly Mode"
+      ],
+      "traits": [
+        "Large-bodied with red cheek markings",
+        "Disciplined eaters",
+        "Tank and support roles"
+      ],
+      "role": "Frontline defenders and support"
+    },
+    {
+      "name": "Aburame",
+      "village": "Konohagakure",
+      "kekkei_genkai": "Insect-Based Ninjutsu",
+      "abilities": [
+        "Parasitic Insect Jamming",
+        "Insect Sphere Trap",
+        "Bug Clone Technique",
+        "Hive Armor: Chitin Shell"
+      ],
+      "traits": [
+        "Wear cloaks and goggles",
+        "Emotionally reserved",
+        "Insect symbiosis"
+      ],
+      "role": "Infiltration, sabotage, and tracking"
+    },
+    {
+      "name": "Inuzuka",
+      "village": "Konohagakure",
+      "kekkei_genkai": "Beast-Human Cooperation",
+      "abilities": [
+        "Fang Passing Fang",
+        "Fang Wolf Fang",
+        "All-Fours Technique",
+        "Dynamic Marking"
+      ],
+      "traits": [
+        "Wild appearance with tattoos",
+        "Enhanced senses",
+        "Strong bonds with ninken"
+      ],
+      "role": "Trackers and pursuit specialists"
+    },
+    {
+      "name": "Uzumaki",
+      "village": "Uzushiogakure (now Konoha)",
+      "kekkei_genkai": "Sealing Jutsu Mastery",
+      "abilities": [
+        "Adamantine Sealing Chains",
+        "Four Symbols Seal",
+        "Eight Trigrams Formation",
+        "Life-Siphon Seal"
+      ],
+      "traits": [
+        "Red/orange hair",
+        "Massive chakra",
+        "Resilience"
+      ],
+      "role": "Sealing experts and chakra containers"
+    },
+    {
+      "name": "Kurama",
+      "village": "Konohagakure",
+      "kekkei_genkai": "Genjutsu Amplification",
+      "abilities": [
+        "Phantom Bloom Illusion",
+        "Mind-Flesh Disassociation",
+        "Cursed Reflection Mirage",
+        "Living Dream Domain"
+      ],
+      "traits": [
+        "Ethereal looks",
+        "High yin chakra",
+        "Illusion specialists"
+      ],
+      "role": "Genjutsu users and psychological specialists"
+    },
+    {
+      "name": "Sarutobi",
+      "village": "Konohagakure",
+      "kekkei_genkai": "Burning Ash Release",
+      "abilities": [
+        "Burning Ash Cloud",
+        "Ash Veil Ignition",
+        "Smoldering Cage",
+        "Blazing Ember Seal"
+      ],
+      "traits": [
+        "Fire + Wind chakra",
+        "Ash-themed gear",
+        "Staff users"
+      ],
+      "role": "Mid-range fighters and defenders"
+    },
+    {
+      "name": "Namikaze",
+      "village": "Konohagakure",
+      "kekkei_genkai": "Space-Time Affinity",
+      "abilities": [
+        "Flying Thunder God",
+        "Rasengan",
+        "Flying Thunder Barrage",
+        "Chakra Mark Seal"
+      ],
+      "traits": [
+        "Blond hair, blue eyes",
+        "Teleportation and precision",
+        "Mobility-based"
+      ],
+      "role": "Teleportation experts and burst-damage shinobi"
+    }
+  ]
+}

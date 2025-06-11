@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 import logging
 from typing import Optional, Dict, Any
 import json
-from ..utils.file_io import ensure_directory, load_json, save_json
+from HCshinobi.utils.file_io import ensure_directory, load_json, save_json
 from dataclasses import dataclass, field
 from urllib.parse import urlparse
 

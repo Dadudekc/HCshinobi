@@ -1,0 +1,1 @@
+from HCshinobi.core.utils.command_validation import post_setup_validation 

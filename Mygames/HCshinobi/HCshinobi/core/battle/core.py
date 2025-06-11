@@ -10,7 +10,7 @@ import random
 
 from ..character_system import CharacterSystem
 from ..constants import BATTLES_SUBDIR, ACTIVE_BATTLES_FILENAME, BATTLE_HISTORY_FILENAME
-from ...utils.file_io import load_json, save_json
+from HCshinobi.utils.file_io import load_json, save_json
 from .state import BattleState, deserialize_battle_state
 
 logger = logging.getLogger(__name__)

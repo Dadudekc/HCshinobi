@@ -1,0 +1,31 @@
+{
+    "id": "aaad10f1-9535-4d24-9fd0-5e09233caceb",
+    "name": "Test Ninja",
+    "clan": "Uchiha",
+    "level": 10,
+    "exp": 0,
+    "hp": 100,
+    "chakra": 100,
+    "stamina": 100,
+    "strength": 15,
+    "speed": 14,
+    "defense": 12,
+    "willpower": 10,
+    "chakra_control": 10,
+    "ninjutsu": 10,
+    "taijutsu": 10,
+    "genjutsu": 10,
+    "jutsu": [
+        "Fireball Jutsu"
+    ],
+    "equipment": {},
+    "inventory": [],
+    "is_active": true,
+    "status_effects": [],
+    "wins": 0,
+    "losses": 0,
+    "draws": 0,
+    "max_hp": 100,
+    "max_chakra": 100,
+    "max_stamina": 100
+}

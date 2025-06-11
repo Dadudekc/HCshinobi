@@ -1,3 +1,7 @@
+"""
+Character commands cog for HCShinobi.
+"""
+
 import discord
 from discord import app_commands, ui
 from discord.ext import commands
@@ -31,7 +35,7 @@ from HCshinobi.core.training_system import TrainingSystem
 
 # Type checking to avoid circular imports
 if TYPE_CHECKING:
-    from HCshinobi.bot.bot import HCShinobiBot
+    from HCshinobi.bot.bot import HCBot
 
 logger = logging.getLogger(__name__)
 
@@ -715,12 +719,14 @@ class StarterBattleHandler:
 class CharacterCommands(commands.Cog):
     """Commands related to character management, progression, and creation."""
 
-    def __init__(self, bot: "HCShinobiBot"):
+    def __init__(self, bot: "HCBot"):
         self.bot = bot
+        self.character_system = bot.character_system
+        self.clan_data = bot.clan_data
+        self.ollama_client = bot.ollama_client
         # Access services safely
         self.character_system: Optional[CharacterSystem] = getattr(bot.services, 'character_system', None)
         self.clan_assignment_engine: Optional[ClanAssignmentEngine] = getattr(bot.services, 'clan_assignment_engine', None)
-        self.ollama_client: Optional[OllamaClient] = getattr(bot.services, 'ollama_client', None)
         self.progression_engine: Optional[ShinobiProgressionEngine] = getattr(bot.services, 'progression_engine', None)
         self.item_registry: Optional[ItemRegistry] = getattr(bot.services, 'item_registry', None)
         self.jutsu_system: Optional[JutsuSystem] = getattr(bot.services, 'jutsu_system', None)
@@ -1324,7 +1330,7 @@ class CharacterCommands(commands.Cog):
         return embed
 
 # --- Setup Function ---
-async def setup(bot: "HCShinobiBot"):
+async def setup(bot: "HCBot"):
     """Sets up the CharacterCommands cog."""
     # Ensure core services are present
     required_services = ["character_system", "clan_assignment_engine", "progression_engine"]

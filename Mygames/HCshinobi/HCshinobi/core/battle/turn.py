@@ -7,7 +7,7 @@ from datetime import datetime, timezone, timedelta
 from enum import Enum
 import math
 from HCshinobi.bot.services import ServiceContainer
-from ...utils.ollama_client import generate_ollama_response
+from HCshinobi.utils.ollama_client import generate_ollama_response
 
 class TurnPhase(Enum):
     """Battle turn phases."""

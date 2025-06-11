@@ -15,7 +15,7 @@ import discord # Needed for posting
 # from HCshinobi.bot.bot import HCBot 
 
 from .constants import DATA_DIR, JUTSU_SHOP_REFRESH_HOURS, JUTSU_SHOP_SIZE, JUTSU_SHOP_MAX_RANK, SHOPS_SUBDIR, JUTSU_SHOP_STATE_FILE
-from ..utils.file_io import load_json, save_json
+from HCshinobi.utils.file_io import load_json, save_json
 
 logger = logging.getLogger(__name__)
 

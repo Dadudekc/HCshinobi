@@ -33,7 +33,7 @@ from .constants import (
     COMPLETED_MISSIONS_FILE,
     MISSION_DEFINITIONS_FILE
 )
-from ..utils.file_io import load_json, save_json
+from HCshinobi.utils.file_io import load_json, save_json
 from .d20_mission import (
     D20MissionRunner, D20Mission, D20Challenge, 
     SkillType, ChallengeType, DifficultyLevel

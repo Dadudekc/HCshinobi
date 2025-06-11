@@ -41,7 +41,7 @@ except ImportError as e:
 
 if TYPE_CHECKING:
     from ..bot import HCShinobiBot
-    from ...utils.openai_client import OpenAIClient
+    from HCshinobi.utils.openai_client import OpenAIClient
 
 logger = logging.getLogger(__name__)
 
