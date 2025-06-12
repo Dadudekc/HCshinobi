@@ -13,78 +13,49 @@ logger = logging.getLogger(__name__)
 
 
 class AutoReply:
-    """Service for automatically generating and posting replies."""
+    """Service for generating and posting replies."""
 
-    def __init__(self, platform: str, credentials: Dict[str, str]):
-        """Initialize the auto-reply service.
-
-        Args:
-            platform: The social media platform to post to
-            credentials: Platform-specific API credentials
-        """
-        self.platform = platform.lower()
-        self.credentials = credentials
-        self.logger = logging.getLogger(__name__)
+    def __init__(self):
+        """Initialize the auto-reply service."""
+        self.platform = "twitter"  # Default platform for posting replies
         self.reply_history: List[Dict] = []
+        self.history_file = Path("data/reply_history.json")
+        self.history_file.parent.mkdir(parents=True, exist_ok=True)
+        self.load_reply_history()
 
-    def generate_reply(self, post_content: str, context: Optional[Dict] = None) -> Optional[str]:
-        """
-        Generate a reply for a social media post.
+    def generate_reply(self, post_content: str, context: Dict) -> Optional[str]:
+        """Generate a reply for a given post.
         
         Args:
             post_content: The content of the post to reply to
-            context: Optional context for generating the reply
+            context: Additional context for reply generation
             
         Returns:
-            str: Generated reply content or None if generation fails
+            Generated reply content or None if generation fails
         """
         try:
-            # Create prompt for reply generation
-            prompt = f"Generate a reply to this social media post:\n\n{post_content}"
-            
-            # Generate reply using blog generator
-            reply = generate_content(prompt=prompt)
-            
+            prompt = f"Generate a reply to: {post_content}\nContext: {context}"
+            reply = generate_content(prompt, context)
             if reply:
-                self.logger.info("Successfully generated reply")
+                logger.info("Successfully generated reply")
                 return reply
             else:
-                self.logger.error("Failed to generate reply - empty response")
+                logger.error("Failed to generate reply - empty response")
                 return None
-                
         except Exception as e:
-            self.logger.error(f"Error generating reply: {str(e)}")
+            logger.error(f"Error generating reply: {str(e)}")
             return None
 
-    def post_reply(self, post_id: str, reply_text: str) -> bool:
-        """Post a reply to a social media post.
-
-        Args:
-            post_id: ID of the post to reply to
-            reply_text: The reply text to post
-
-        Returns:
-            True if reply was posted successfully
-        """
+    def post_reply(self, post_id: str, reply: str) -> bool:
+        """Post a reply to the specified post."""
         try:
             if self.platform == "twitter":
-                success = self._post_twitter_reply(post_id, reply_text)
+                return self._post_twitter_reply(post_id, reply)
             elif self.platform == "linkedin":
-                success = self._post_linkedin_reply(post_id, reply_text)
+                return self._post_linkedin_reply(post_id, reply)
             else:
-                logger.error(f"Unsupported platform: {self.platform}")
+                logger.warning(f"Unsupported platform: {self.platform}")
                 return False
-
-            if success:
-                # Record reply in history
-                self.reply_history.append({
-                    "post_id": post_id,
-                    "reply": reply_text,
-                    "platform": self.platform
-                })
-                return True
-            return False
-
         except Exception as e:
             logger.error(f"Error posting reply: {str(e)}")
             return False
@@ -109,26 +80,18 @@ class AutoReply:
             logger.error(f"Error posting LinkedIn reply: {str(e)}")
             return False
 
-    def save_reply_history(self, filepath: Path) -> None:
-        """Save reply history to a file.
-
-        Args:
-            filepath: Path to save the history file
-        """
+    def save_reply_history(self) -> None:
+        """Save reply history to a file."""
         try:
-            with open(filepath, "w") as f:
+            with open(self.history_file, "w") as f:
                 json.dump(self.reply_history, f, indent=2)
         except Exception as e:
             logger.error(f"Error saving reply history: {str(e)}")
 
-    def load_reply_history(self, filepath: Path) -> None:
-        """Load reply history from a file.
-
-        Args:
-            filepath: Path to load the history file from
-        """
+    def load_reply_history(self) -> None:
+        """Load reply history from a file."""
         try:
-            with open(filepath) as f:
+            with open(self.history_file) as f:
                 self.reply_history = json.load(f)
         except Exception as e:
             logger.error(f"Error loading reply history: {str(e)}")

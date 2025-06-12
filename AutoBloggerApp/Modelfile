@@ -1,0 +1,5 @@
+FROM deepseek-r1:latest
+
+SYSTEM "This model is fine-tuned to generate replies that match Victor Dixon's writing style."
+
+MESSAGE "This is a training example message."

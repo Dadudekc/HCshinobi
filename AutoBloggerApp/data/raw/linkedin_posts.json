@@ -1,0 +1,84 @@
+[
+    {
+        "text": "Start Autonomous Test-Driven Mode. Work through multiple Red-Green-Refactor cycles without waiting for my confirmation after each step. Write failing tests, implement the code to pass them, and refactor as needed until the feature is complete. Show me the final code, all test cases, and the passing test results from your environment. Only pause if there's an ambiguous logic decision that requires my input. After you deliver the tested code, I'll run it on my end, and we\u2019ll continue from there.",
+        "images": [
+            "https://media.licdn.com/dms/image/v2/D5635AQFEd_zT8iIzzA/profile-framedphoto-shrink_100_100/profile-framedphoto-shrink_100_100/0/1733968108101?e=1741140000&v=beta&t=sVgfipYX7L91_DeET4I7gxPDmvSdLGnTU4xlBneWSZw"
+        ],
+        "videos": [],
+        "reactions": "1"
+    },
+    {
+        "text": "i was todays years old when i first tried....this prompt\n\n\"Start Autonomous Test-Driven Mode. Work through multiple Red-Green-Refactor cycles without waiting for my confirmation after each step. Write failing tests, implement the code to pass them, and refactor as needed until the feature is complete. Show me the final code, all test cases, and the passing test results from your environment. Only pause if there's an ambiguous logic decision that requires my input. After you deliver the tested code, I'll run it on my end, and we\u2019ll continue from there.\"",
+        "images": [
+            "https://media.licdn.com/dms/image/v2/D5635AQFEd_zT8iIzzA/profile-framedphoto-shrink_100_100/profile-framedphoto-shrink_100_100/0/1733968108101?e=1741140000&v=beta&t=sVgfipYX7L91_DeET4I7gxPDmvSdLGnTU4xlBneWSZw"
+        ],
+        "videos": [],
+        "reactions": "Unknown"
+    },
+    {
+        "text": "What We Learned & Next Steps: TradingRobotPlug Development\nProgress on TradingRobotPlug2 continues as we refine the technical indicator engine and lay the foundation for the full system.\nKey Fixes & Progress\nIchimoku Cloud Fully Integrated \u2013 Resolved tuple-to-DataFrame issue, ensuring proper calculations.\nDate Indexing Fixed \u2013 Cleaned 1.44M invalid/duplicate dates, stabilizing historical data processing.\nTrend Indicators Functional \u2013 SMA, EMA, MACD, ADX, Parabolic SAR, and Bollinger Width now flow into the pipeline seamlessly.\nNext Steps Before Extensive Testing\nFull Project Setup \u2013 Ensure all modules (execution logic, data pipelines, ML integration) are in place.\nDatabase Storage Review \u2013 Confirm all indicator outputs are stored correctly for future backtesting.\nSystem Optimization \u2013 Improve efficiency before stress testing with live & historical data.\nWe don\u2019t test to check if it works...we test to push it to failure and refine where needed.",
+        "images": [
+            "https://media.licdn.com/dms/image/v2/D5635AQFEd_zT8iIzzA/profile-framedphoto-shrink_100_100/profile-framedphoto-shrink_100_100/0/1733968108101?e=1741140000&v=beta&t=sVgfipYX7L91_DeET4I7gxPDmvSdLGnTU4xlBneWSZw"
+        ],
+        "videos": [],
+        "reactions": "Unknown"
+    },
+    {
+        "text": "Action Plan for Today: Focused Execution\nWe\u2019re refreshed and ready to push forward. The goal today is targeted problem-solving and structured progress. Here\u2019s the breakdown:\n1. Critical Bug Fixes & Debugging\n\ud83d\udd39 Fix Ichimoku Cloud ()\nInvestigate why pandas-ta.ichimoku() returns a tuple instead of a DataFrame.\nExtract and correctly assign values to fix the AttributeError.\n\ud83d\udd39 Resolve Date Parsing Errors (Multiple Files)\nIdentify why data_store.load_data() is outputting 1.4M invalid dates.\nDebug set_datetime_index() and confirm proper date formats before indexing.\n\ud83d\udd39 Debug Missing Custom Indicators ()\nFix config_manager initialization issues to ensure all custom indicators apply correctly.\nVerify that RSI, Bollinger Bands, and Moving Average appear in the final DataFrame.\n\ud83d\udd39 Address Machine Learning Feature Mismatch ()\nModel expects 3 features but received 4\u2014adjust feature selection and enforce strict validation before inference.\nVerify why proprietary_prediction isn\u2019t appearing and ensure the prediction function writes output correctly.\n2. Performance Optimizations\n\ud83d\udd39 Optimize Large Dataset Handling\nProfile database queries and data processing times.\nImplement efficient chunking, caching, or indexing solutions if needed.\n\ud83d\udd39 Improve Indicator Calculation Speed\nEnsure pandas-ta computations are vectorized.\nTest performance with parallel processing for large batches.\n3. Refining the Trading Strategy & Execution Flow\n\ud83d\udd39 Validate Indicator Accuracy with Backtests\nRun tests on historical data and confirm that indicators match expected behavior.\nLog discrepancies and tweak calculation methods as needed.\n\ud83d\udd39 Refine Trading Execution Pipeline\nMap out how indicators will generate signals for trades.\nEnsure smooth data flow between technical indicators and the execution system.\n4. Content & Communication\n\ud83d\udd39 Update Devlog for Transparency\nSummarize today\u2019s focus and progress.\nKeep documentation structured for easy future reference.\n\ud83d\udd39 Share Progress in Discord\nMaintain engagement and clarity.\nHighlight key breakthroughs or challenges being tackled today.\nMindset for the Day:\n\u201cPrecision isn\u2019t just about code\u2014it\u2019s about decisions. Every fix, every refinement, every execution\u2014this is where mastery is built.\u201d\nLet\u2019s execute. \ud83d\ude80",
+        "images": [
+            "https://media.licdn.com/dms/image/v2/D5635AQFEd_zT8iIzzA/profile-framedphoto-shrink_100_100/profile-framedphoto-shrink_100_100/0/1733968108101?e=1741140000&v=beta&t=sVgfipYX7L91_DeET4I7gxPDmvSdLGnTU4xlBneWSZw"
+        ],
+        "videos": [],
+        "reactions": "Unknown"
+    },
+    {
+        "text": "Leveling Up Algorithmic Trading with Reinforcement Learning\nAfter working through environment setup challenges, compatibility issues, and feature engineering, TradingRobotPlug\u2019s deep reinforcement learning (DRL) model is now training.\nWhat Was Fixed:\nTransitioned from OpenAI Gym to Gymnasium for Stable-Baselines3 compatibility\nImplemented a custom seeding method to resolve 'TradingEnv' object has no attribute 'seed'\nStandardized MACD, RSI, and Bollinger Width indicators to prevent feature mismatches\nEnsured Date column integrity for accurate time-series data processing\nAutomated Shimmy installation to avoid SB3 Gym compatibility issues\nUpgraded PPO action space handling to align with the DRL trading logic\nResults So Far:\nModel is training successfully on Tesla (TSLA) stock\nMetrics like explained variance, policy gradient loss, and value loss are tracking\nLive logging is set up to monitor PPO performance across iterations\nNext Steps\nOptimize reward shaping for better long-term trading strategies\nTest different neural network architectures for the policy model\nBacktest and validate performance against real market data\nBuilding a DRL-powered trading bot requires precision, iteration, and constant refinement. The progress so far is promising, but there is still a long way to go.\nWhat are the biggest challenges you\u2019ve faced when training AI-driven models? Would be interested in hearing how others have tackled reinforcement learning in trading.",
+        "images": [
+            "https://media.licdn.com/dms/image/v2/D5635AQFEd_zT8iIzzA/profile-framedphoto-shrink_100_100/profile-framedphoto-shrink_100_100/0/1733968108101?e=1741140000&v=beta&t=sVgfipYX7L91_DeET4I7gxPDmvSdLGnTU4xlBneWSZw",
+            "https://media.licdn.com/dms/image/v2/D4D22AQERxuP9wv-wug/feedshare-shrink_480/B4DZS1rh5hGkAc-/0/1738214875029?e=1743638400&v=beta&t=H5zsgTvKiEgq9lkVNI7KfI8xovcTqxOHNLhf0Hkyz_0"
+        ],
+        "videos": [],
+        "reactions": "1"
+    },
+    {
+        "text": "$TSLA Tbow Tactic for today:\n\n\n\ud83d\udcc8 Breakout Watch: Watching for a break above $400 with strong volume, MACD curl, and RSI above 50. Targets: $410 and $420.\n\ud83d\udcc9 Bounce Play: Key support at $380. If it holds and reverses, aiming for $390 and $400.\n\u26a0\ufe0f Stops: $395 (breakout) or $375 (bounce).\n\nNot investment advice\u2026 just my game plan for the day. Trade smart!",
+        "images": [
+            "https://media.licdn.com/dms/image/v2/D5635AQFEd_zT8iIzzA/profile-framedphoto-shrink_100_100/profile-framedphoto-shrink_100_100/0/1733968108101?e=1741140000&v=beta&t=sVgfipYX7L91_DeET4I7gxPDmvSdLGnTU4xlBneWSZw"
+        ],
+        "videos": [],
+        "reactions": "Unknown"
+    },
+    {
+        "text": "The main issue is a mismatch between the test expectations and the actual outputs of your functions. This could be due to:\nMocked responses not matching what the functions expect.\nFunctions not handling the mocked data properly.\nFunctions not gracefully handling errors (like returning None instead of an empty DataFrame).\nTo fix this, I\u2019ll:\nValidate that the mocks are set up correctly and return the expected structure.\nEnsure the functions handle both success and failure scenarios as expected.\nUse detailed logging to see what the functions are actually returning during the tests.",
+        "images": [
+            "https://media.licdn.com/dms/image/v2/D5635AQFEd_zT8iIzzA/profile-framedphoto-shrink_100_100/profile-framedphoto-shrink_100_100/0/1733968108101?e=1741140000&v=beta&t=sVgfipYX7L91_DeET4I7gxPDmvSdLGnTU4xlBneWSZw"
+        ],
+        "videos": [],
+        "reactions": "Unknown"
+    },
+    {
+        "text": "Advancing Network Security Through Innovation\nIn my latest project, I\u2019ve taken significant steps to enhance a Network Scanner designed for robust anomaly detection and vulnerability assessment. Key achievements include:\nCentralized Design: Developed a comprehensive main script to streamline functionality and user experience.\nTest-Driven Development: Added targeted modules and tests, achieving 81% test coverage with all tests passing successfully.\nRefined Models: Improved anomaly detection with enhanced validation and shape-handling mechanisms, ensuring accuracy and scalability.\nModernization: Replaced deprecated scripts and integrated best practices for deep learning using Keras.\nThe result is a clean, efficient codebase ready for real-world applications, with a focus on performance and maintainability.\nAs I continue refining and preparing this project for broader applications, I look forward to connecting with professionals and industries working at the intersection of network security, AI-driven anomaly detection, and cyber defense.\nIf you have ideas or insights, let\u2019s discuss how AI and data-driven tools can redefine network security.",
+        "images": [
+            "https://media.licdn.com/dms/image/v2/D5635AQFEd_zT8iIzzA/profile-framedphoto-shrink_100_100/profile-framedphoto-shrink_100_100/0/1733968108101?e=1741140000&v=beta&t=sVgfipYX7L91_DeET4I7gxPDmvSdLGnTU4xlBneWSZw"
+        ],
+        "videos": [],
+        "reactions": "Unknown"
+    },
+    {
+        "text": "Productivity is the king. Efficiency? The queen. The plan\u2014those are the rooks, holding the structure together. Adaptability moves like the knight, unpredictable but necessary. Consistency? That\u2019s the bishop, cutting through everything with precision. And me? I\u2019m just a pawn in the system... but even pawns can change the game with the right moves.",
+        "images": [
+            "https://media.licdn.com/dms/image/v2/D5635AQFEd_zT8iIzzA/profile-framedphoto-shrink_100_100/profile-framedphoto-shrink_100_100/0/1733968108101?e=1741140000&v=beta&t=sVgfipYX7L91_DeET4I7gxPDmvSdLGnTU4xlBneWSZw",
+            "https://media.licdn.com/dms/image/v2/D5622AQGbRkuZnbXygw/feedshare-shrink_800/B56ZQuJ3H2GQAg-/0/1735941125273?e=1743638400&v=beta&t=Nc3kU0RfkFc55BwHEaAs2irEbpigCIcGeae3JsXeF4M"
+        ],
+        "videos": [],
+        "reactions": "Unknown"
+    },
+    {
+        "text": "What\u2019s next for $TSLA?\n\nTesla is consolidating around $381.21, and tomorrow\u2019s move hinges on breaking through the $382.34 resistance (Bollinger Upper Band). With China sales up 12% year-over-year (83,000 units sold), the setup looks promising, but I\u2019ll wait for confirmation. I always prefer seeing a clean MACD curl for bullish entries\u2014it\u2019s my go-to signal for momentum.\n\nIf TSLA confirms a breakout tomorrow with strong volume (2x 10-day average) and aligns with broader market strength (like QQQ holding above VWAP at $512.17), here\u2019s what I\u2019m targeting:\n\ud83c\udfaf Target 1: $385.50\n\ud83c\udfaf Target 2: $390.00\n\ud83c\udfaf Stretch Goal: $392.50\n\nIf TSLA fails to hold $380, however, downside risk could extend to $378 or even $375. I won\u2019t force anything\u2014confirmation is key, and the broader market has to support the move.\n\nDisclaimer: This post is for educational and informational purposes only and should not be considered financial advice. Always do your own research or consult with a professional before making any trading or investment decisions.",
+        "images": [
+            "https://media.licdn.com/dms/image/v2/D5635AQFEd_zT8iIzzA/profile-framedphoto-shrink_100_100/profile-framedphoto-shrink_100_100/0/1733968108101?e=1741140000&v=beta&t=sVgfipYX7L91_DeET4I7gxPDmvSdLGnTU4xlBneWSZw"
+        ],
+        "videos": [],
+        "reactions": "Unknown"
+    }
+]

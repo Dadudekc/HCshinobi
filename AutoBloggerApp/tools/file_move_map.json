@@ -1,0 +1,8 @@
+{
+    "autoblogger/scrapers/chatgpt_scraper.py": "autoblogger/scrapers/chatgpt.py",
+    "autoblogger/utils/profile_checker.py": "autoblogger/core/profile.py",
+    "autoblogger/utils/chrome_utils.py": "autoblogger/core/chrome.py",
+    "autoblogger/utils/logger.py": "autoblogger/core/logging.py",
+    "autoblogger/scripts/setup_automation_profile.py": "autoblogger/scripts/setup.py",
+    "autoblogger/scripts/quick_scrape_test.py": "autoblogger/scripts/test_scrape.py"
+} 

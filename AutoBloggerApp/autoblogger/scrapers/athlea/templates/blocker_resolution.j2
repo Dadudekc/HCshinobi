@@ -1,0 +1,37 @@
+# 🚧 Blocker Resolution: {{ quest.title }}
+
+## Quest Details
+**Faction**: {{ faction }}
+**Level**: {{ level }}
+**Quest ID**: {{ quest.id }}
+
+## The Challenge
+{{ quest.summary }}
+
+## The Journey
+{% for blocker in blockers %}
+### 🛑 Blocker: {{ blocker }}
+{% endfor %}
+
+## Breakthroughs
+{% for breakthrough in breakthroughs %}
+### 💡 {{ breakthrough }}
+{% endfor %}
+
+## Resolution
+{% if quest.resolved %}
+✅ **Victory Achieved!**
+{% else %}
+⏳ **Still in Progress...**
+{% endif %}
+
+### XP Gained: {{ quest.xp_gained }}
+{% if quest.lore_items %}
+### Lore Items Discovered
+{% for item in quest.lore_items %}
+- {{ item }}
+{% endfor %}
+{% endif %}
+
+---
+*Recorded by the {{ faction }} at {{ timestamp }}* 

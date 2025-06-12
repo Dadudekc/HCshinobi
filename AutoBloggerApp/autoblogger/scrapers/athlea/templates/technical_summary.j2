@@ -1,0 +1,34 @@
+Summarize this development conversation as a technical devlog for the {{ faction }} faction.
+
+## Quest Log: {{ quest.title }}
+**Level**: {{ level }}
+**Type**: {{ quest.type }}
+**Status**: {% if quest.resolved %}✅ Resolved{% else %}⏳ In Progress{% endif %}
+
+### Objective
+{{ quest.summary }}
+
+### Technical Journey
+{% if quest.type == "blocker" %}
+#### The Challenge
+{{ quest.summary }}
+
+#### The Solution
+{{ breakthroughs[0] if breakthroughs else "Solution pending..." }}
+
+#### Lessons Learned
+{% for blocker in blockers %}
+- {{ blocker }}
+{% endfor %}
+{% endif %}
+
+### XP Gained: {{ quest.xp_gained }}
+{% if quest.lore_items %}
+### Lore Items Discovered
+{% for item in quest.lore_items %}
+- {{ item }}
+{% endfor %}
+{% endif %}
+
+---
+*Recorded by the {{ faction }} at {{ timestamp }}* 

@@ -1,0 +1,14 @@
+[
+  {
+    "post_id": "123456",
+    "reply": "Test reply"
+  },
+  {
+    "post_id": "123456",
+    "reply": "Test reply"
+  },
+  {
+    "post_id": "123",
+    "reply": "Test reply"
+  }
+]
