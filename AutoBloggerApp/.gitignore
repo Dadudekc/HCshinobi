@@ -1,0 +1,75 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.env
+.env.*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.cursor/
+
+# Logs
+*.log
+logs/
+log/
+
+# System
+.DS_Store
+Thumbs.db
+$RECYCLE.BIN/
+System Volume Information/
+pagefile.sys
+
+# Project specific
+*.db
+*.sqlite3
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Temporary files
+*.tmp
+*.bak
+*.backup
+temp/
+tmp/
+
+# Environment variables
+!.env.example
+
+# Documentation
+docs/_build/
+site/
+
+# Project specific
+beta_verification_report.json
+project_analysis.json
+chatgpt_project_context.json 
