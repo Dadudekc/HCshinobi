@@ -1,0 +1,1 @@
+from HCshinobi.core.character import Character 

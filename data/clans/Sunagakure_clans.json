@@ -1,0 +1,100 @@
+{
+  "Sunagakure Clans": [
+    {
+      "name": "Kazekage",
+      "village": "Sunagakure",
+      "kekkei_genkai": "Magnet Release (Gold or Iron Sand)",
+      "abilities": [
+        "Gold Dust Tsunami",
+        "Iron Sand Rain",
+        "Magnetic Field Cloak"
+      ],
+      "traits": [
+        "Strong Earth and Wind affinity",
+        "Reinforced armor or metallic robes",
+        "Composed, militaristic, loyal"
+      ],
+      "role": "Tactical generals, defense architects, Kazekage lineage"
+    },
+    {
+      "name": "Chikamatsu",
+      "village": "Sunagakure",
+      "ability": "Puppet Mastery – Chakra Thread Control and Human Puppet Engineering",
+      "abilities": [
+        "Chakra Thread Technique",
+        "Thousand Weapon Barrage",
+        "Human Puppet Creation"
+      ],
+      "traits": [
+        "Enhanced chakra control, nimble fingers",
+        "Scroll holsters, sensor lenses, reinforced gloves",
+        "Obsessive, reserved, and calculating"
+      ],
+      "role": "Combat engineers, surveillance experts, puppet warfare pioneers"
+    },
+    {
+      "name": "Ibushi",
+      "village": "Sunagakure",
+      "ability": "Dust Storm Manipulation – Wind Release + Particle Infusion",
+      "abilities": [
+        "Dust Storm Field",
+        "Eroding Gale",
+        "Dust Cloak Technique"
+      ],
+      "traits": [
+        "Sand-colored hair/eyes, roughened skin",
+        "Goggles, cloaks, rebreathers",
+        "Introverted, loyal, high stamina"
+      ],
+      "role": "Scouts, stormfront rangers, terrain disruptors"
+    },
+    {
+      "name": "Sabaku",
+      "village": "Sunagakure",
+      "kekkei_genkai": "Sand Release – Chakra-Infused Sand Manipulation",
+      "abilities": [
+        "Sand Coffin",
+        "Shield of Sand",
+        "Sand Sensing Layer"
+      ],
+      "traits": [
+        "High chakra control",
+        "Gourd containers, sand-filtered clothing",
+        "Watchful, emotionally reserved"
+      ],
+      "role": "Guardians, sealers, jinchūriki support squads"
+    },
+    {
+      "name": "Hibana",
+      "village": "Sunagakure",
+      "kekkei_genkai": "Scorch Release – Wind + Fire Combination",
+      "abilities": [
+        "Incinerating Flare Orbs",
+        "Radiant Mirage Field",
+        "Desert Bloom Ignition"
+      ],
+      "traits": [
+        "Heat-resistant, bronzed skin",
+        "Amber eyes, chakra heat haze",
+        "Passionate, aggressive, quick to act"
+      ],
+      "role": "Siege-breakers, shock troops, battlefield incinerators"
+    },
+    {
+      "name": "Kairō",
+      "village": "Sunagakure",
+      "kekkei_genkai": "Mirage Release – Heat-Haze-Based Illusions (Wind + Fire)",
+      "abilities": [
+        "Phantom Oasis",
+        "Heat Veil Displacement",
+        "Scorch Mirage Domain"
+      ],
+      "traits": [
+        "Sharp features, light eyes, heat-sensitive perception",
+        "Poetic demeanor, flowing robes, reflective tools",
+        "Perceptive, artistic, atmospheric tacticians"
+      ],
+      "role": "Illusionists, infiltrators, psychological warfare specialists"
+    }
+  ]
+}

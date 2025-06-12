@@ -1,0 +1,145 @@
+{
+    "Intelligent": {
+        "Nara": 1.5,
+        "Hatake": 1.3,
+        "Namikaze": 1.4,
+        "Uchiha": 1.2,
+        "Inuzuka": 0.8
+    },
+    "Strategic": {
+        "Nara": 1.8,
+        "Hatake": 1.3,
+        "Hyūga": 1.2,
+        "Sarutobi": 1.1,
+        "Akimichi": 0.8
+    },
+    "Aggressive": {
+        "Kaguya": 1.7,
+        "Uchiha": 1.3,
+        "Inuzuka": 1.4,
+        "Aburame": 0.7,
+        "Nara": 0.6
+    },
+    "Loyal": {
+        "Inuzuka": 1.6,
+        "Sarutobi": 1.4,
+        "Akimichi": 1.3,
+        "Uchiha": 0.9
+    },
+    "Kind": {
+        "Akimichi": 1.5,
+        "Uzumaki": 1.3,
+        "Senju": 1.4,
+        "Yamanaka": 1.2,
+        "Kaguya": 0.6,
+        "Uchiha": 0.8
+    },
+    "Ambitious": {
+        "Uchiha": 1.7,
+        "Ōtsutsuki": 1.3,
+        "Hyūga": 1.3,
+        "Namikaze": 1.2,
+        "Akimichi": 0.7,
+        "Nara": 0.6
+    },
+    "Calm": {
+        "Aburame": 1.6,
+        "Nara": 1.3,
+        "Hyūga": 1.2,
+        "Hōzuki": 1.3,
+        "Inuzuka": 0.7,
+        "Kaguya": 0.6
+    },
+    "Determined": {
+        "Uzumaki": 1.7,
+        "Namikaze": 1.3,
+        "Sarutobi": 1.2,
+        "Kaguya": 1.3,
+        "Aburame": 0.8
+    },
+    "Creative": {
+        "Kurama": 1.5,
+        "Yamanaka": 1.3,
+        "Yuki": 1.2,
+        "Uzumaki": 1.2,
+        "Hyūga": 0.8
+    },
+    "Mysterious": {
+        "Aburame": 1.4,
+        "Iburi": 1.6,
+        "Kurama": 1.5,
+        "Yuki": 1.3,
+        "Akimichi": 0.7,
+        "Inuzuka": 0.7
+    },
+    "Protective": {
+        "Inuzuka": 1.4,
+        "Akimichi": 1.3,
+        "Sarutobi": 1.5,
+        "Senju": 1.3,
+        "Uchiha": 0.9
+    },
+    "Ruthless": {
+        "Kaguya": 1.8,
+        "Uchiha": 1.4,
+        "Ōtsutsuki": 1.3,
+        "Akimichi": 0.5,
+        "Yamanaka": 0.7
+    },
+    "Logical": {
+        "Aburame": 1.7,
+        "Nara": 1.5,
+        "Hyūga": 1.2,
+        "Namikaze": 1.3,
+        "Uzumaki": 0.7
+    },
+    "Energetic": {
+        "Uzumaki": 1.8,
+        "Inuzuka": 1.5,
+        "Akimichi": 1.2,
+        "Nara": 0.5,
+        "Aburame": 0.6
+    },
+    "Proud": {
+        "Uchiha": 1.6,
+        "Hyūga": 1.5,
+        "Kamizuru": 1.3,
+        "Ōtsutsuki": 1.2,
+        "Akimichi": 0.8
+    },
+    "Adaptable": {
+        "Hōzuki": 1.5,
+        "Iburi": 1.4,
+        "Hatake": 1.3,
+        "Sarutobi": 1.2,
+        "Hyūga": 0.8
+    },
+    "Disciplined": {
+        "Hyūga": 1.7,
+        "Hatake": 1.4,
+        "Aburame": 1.3,
+        "Senju": 1.2,
+        "Uzumaki": 0.7
+    },
+    "Honorable": {
+        "Sarutobi": 1.6,
+        "Hyūga": 1.5,
+        "Senju": 1.4,
+        "Kaguya": 0.6
+    },
+    "Unpredictable": {
+        "Uzumaki": 1.8,
+        "Hōzuki": 1.3,
+        "Iburi": 1.2,
+        "Hyūga": 0.7,
+        "Aburame": 0.6
+    },
+    "Secretive": {
+        "Iburi": 1.7,
+        "Aburame": 1.4,
+        "Kurama": 1.3,
+        "Yuki": 1.2,
+        "Uzumaki": 0.7,
+        "Akimichi": 0.6
+    }
+}

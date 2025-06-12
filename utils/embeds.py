@@ -1,0 +1,1 @@
+from HCshinobi.core.clan import Clan 

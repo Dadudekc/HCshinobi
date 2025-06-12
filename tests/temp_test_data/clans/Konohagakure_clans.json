@@ -1,0 +1,114 @@
+{
+    "Konohagakure Clans": [
+        {
+            "name": "Inuzuka",
+            "village": "Konohagakure",
+            "kekkei_genkai": "",
+            "abilities": [
+                "Fang Over Fang",
+                "Fang Passing Fang"
+            ],
+            "traits": [],
+            "role": "Known for their ninja dogs."
+        },
+        {
+            "name": "Akimichi",
+            "village": "Konohagakure",
+            "kekkei_genkai": "",
+            "abilities": [
+                "Expansion Jutsu",
+                "Human Bullet Tank"
+            ],
+            "traits": [],
+            "role": "Known for body expansion jutsu."
+        },
+        {
+            "name": "Nara",
+            "village": "Konohagakure",
+            "kekkei_genkai": "",
+            "abilities": [
+                "Shadow Imitation",
+                "Shadow Sewing"
+            ],
+            "traits": [],
+            "role": "Known for shadow manipulation."
+        },
+        {
+            "name": "Yamanaka",
+            "village": "Konohagakure",
+            "kekkei_genkai": "",
+            "abilities": [
+                "Mind Transfer",
+                "Mind Transmission"
+            ],
+            "traits": [],
+            "role": "Known for mind-related techniques."
+        },
+        {
+            "name": "Sarutobi",
+            "village": "Konohagakure",
+            "kekkei_genkai": "",
+            "abilities": [
+                "Enma Staff",
+                "Fire Release: Fireball"
+            ],
+            "traits": [],
+            "role": "Known for strong chakra and fire affinity."
+        },
+        {
+            "name": "Aburame",
+            "village": "Konohagakure",
+            "kekkei_genkai": "",
+            "abilities": [
+                "Insect Sphere",
+                "Insect Clone"
+            ],
+            "traits": [],
+            "role": "Known for insect manipulation."
+        },
+        {
+            "name": "Hyuga",
+            "village": "Konohagakure",
+            "kekkei_genkai": "",
+            "abilities": [
+                "Gentle Fist",
+                "Eight Trigrams Palm Rotation"
+            ],
+            "traits": [],
+            "role": "Known for Byakugan and gentle fist."
+        },
+        {
+            "name": "Uchiha",
+            "village": "Konohagakure",
+            "kekkei_genkai": "",
+            "abilities": [
+                "Fire Release: Fireball",
+                "Shuriken Shadow Clone"
+            ],
+            "traits": [],
+            "role": "Known for Sharingan and fire techniques."
+        },
+        {
+            "name": "Senju",
+            "village": "Konohagakure",
+            "kekkei_genkai": "",
+            "abilities": [
+                "Wood Release: Wood Clone",
+                "Wood Release: Wood Wall"
+            ],
+            "traits": [],
+            "role": "Known for strong life force and wood release."
+        },
+        {
+            "name": "Uzumaki",
+            "village": "Konohagakure",
+            "kekkei_genkai": "",
+            "abilities": [
+                "Adamantine Sealing Chains",
+                "Uzumaki Sealing Method"
+            ],
+            "traits": [],
+            "role": "Known for sealing techniques and strong life force."
+        }
+    ]
+}

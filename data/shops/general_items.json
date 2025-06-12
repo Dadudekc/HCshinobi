@@ -1,0 +1,53 @@
+{
+    "basic_healing_salve": {
+        "name": "Basic Healing Salve",
+        "description": "A simple salve that restores a small amount of health.",
+        "type": "consumable",
+        "rarity": "Common",
+        "price": 50,
+        "effect": {
+            "type": "heal_hp_self",
+            "amount": 25
+        },
+        "target_type": "self",
+        "is_usable_in_battle": true
+    },
+    "smoke_bomb": {
+        "name": "Smoke Bomb",
+        "description": "Creates a cloud of smoke, potentially allowing escape.",
+        "type": "consumable",
+        "rarity": "Common",
+        "price": 30,
+        "effect": {
+            "type": "apply_status_self", 
+            "status": "Increased Evasion",
+            "duration": 1,
+            "potency": 0.2,
+            "effect_timing": "passive"
+        },
+        "target_type": "self",
+        "is_usable_in_battle": true 
+    },
+    "explosive_tag": {
+        "name": "Explosive Tag",
+        "description": "A paper tag set to explode after a short delay.",
+        "type": "consumable",
+        "rarity": "Uncommon",
+        "price": 100,
+        "effect": {
+            "type": "damage_target", 
+            "amount": 40
+        },
+        "target_type": "opponent",
+        "is_usable_in_battle": true
+    },
+    "food_rations": {
+        "name": "Food Rations",
+        "description": "Basic provisions for sustenance. Not usable in battle.",
+        "type": "consumable",
+        "rarity": "Common",
+        "price": 10,
+        "target_type": "none",
+        "is_usable_in_battle": false
+    }
+}

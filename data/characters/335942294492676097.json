@@ -1,0 +1,60 @@
+{
+  "id": "335942294492676097",
+  "name": "Apollo",
+  "clan": "Nara",
+  "level": 1,
+  "exp": 0,
+  "specialization": null,
+  "rank": "Academy Student",
+  "hp": 100,
+  "chakra": 100,
+  "stamina": 100,
+  "strength": 10,
+  "speed": 18.25,
+  "defense": 10,
+  "willpower": 10,
+  "chakra_control": 10,
+  "intelligence": 10,
+  "perception": 10,
+  "ninjutsu": 10,
+  "taijutsu": 10,
+  "genjutsu": 10,
+  "jutsu": [
+    "Shadow Imitation",
+    "Basic Shadow Bind"
+  ],
+  "equipment": {},
+  "inventory": [
+    "chakra_gloves",
+    "chakra_seal_tag",
+    "explosive_tag"
+  ],
+  "is_active": true,
+  "status_effects": [],
+  "active_effects": {},
+  "status_conditions": {},
+  "buffs": {},
+  "debuffs": {},
+  "wins": 0,
+  "losses": 0,
+  "draws": 0,
+  "wins_against_rank": {},
+  "achievements": [],
+  "titles": [],
+  "completed_missions": [],
+  "max_hp": 100,
+  "max_chakra": 100,
+  "max_stamina": 100,
+  "jutsu_mastery": {
+    "Shadow Imitation": {
+      "level": 1,
+      "gauge": 0
+    },
+    "Basic Shadow Bind": {
+      "level": 1,
+      "gauge": 0
+    }
+  },
+  "last_daily_claim": null,
+  "active_mission_id": null
+}
