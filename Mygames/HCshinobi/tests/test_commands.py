@@ -83,8 +83,13 @@ def mock_bot_with_services(character_system, clan_assignment_engine):
 @pytest.fixture
 def character_commands(mock_bot_with_services):
     """Create a character commands instance using the mock bot with services."""
-    cog = CharacterCommands(bot=mock_bot_with_services)
-    return cog
+    mock_progression = Mock()
+    return CharacterCommands(
+        bot=mock_bot_with_services,
+        character_system=mock_bot_with_services.services.character_system,
+        clan_data=mock_bot_with_services.services.clan_assignment_engine,
+        progression_engine=mock_progression
+    )
 
 @pytest.fixture
 def mock_bot():
