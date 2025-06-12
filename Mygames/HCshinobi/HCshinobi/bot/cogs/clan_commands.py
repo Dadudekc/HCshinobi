@@ -23,13 +23,14 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 class ClanCommands(commands.Cog):
-    """Cog for handling clan-related commands."""
+    """Commands for managing clans and clan-related features."""
 
-    def __init__(self, bot: "HCBot", clan_system, character_system):
+    def __init__(self, bot):
         self.bot = bot
-        self.clan_system = clan_system
-        self.character_system = character_system
-        logger.info("ClanCommands Cog initialized.")
+        self.clan_system = bot.services.clan_system
+        self.character_system = bot.services.character_system
+        self.logger = logging.getLogger(__name__)
+        self.logger.info("ClanCommands Cog initialized.")
 
     async def _check_character(self, interaction: discord.Interaction) -> 'Character | None':
         """Helper to check if user has a character."""
@@ -84,14 +85,17 @@ class ClanCommands(commands.Cog):
             description=clan_info.get('description', 'No description available.'),
             color=color
         )
-        embed.add_field(name="👥 Members", value=str(len(clan_info.get('members', []))), inline=True)
+
+        # Get members list and await it
+        members = clan_info.get('members', [])
+        embed.add_field(name="👥 Members", value=str(len(members)), inline=True)
         embed.add_field(name="✨ Rarity", value=clan_info.get('rarity', 'Unknown'), inline=True)
         embed.add_field(name="🎌 Village", value=clan_info.get('village', 'Unknown'), inline=True)
         embed.add_field(name="🛡️ Power", value=f"{clan_info.get('power', 0):,}", inline=True)
         # Add more fields like leader, level, perks etc. if available in clan_info
 
         # Check response state before sending
-        if not interaction.response.is_done():
+        if not await interaction.response.is_done():
             await interaction.response.send_message(embed=embed)
         else:
             # If already responded (e.g., from defer), use followup
@@ -587,6 +591,6 @@ class ClanMissionCommands(commands.Cog):
 
 async def setup(bot: "HCBot"):
     """Set up the clan commands cog."""
-    await bot.add_cog(ClanCommands(bot, bot.clan_system, bot.character_system))
+    await bot.add_cog(ClanCommands(bot))
     await bot.add_cog(ClanMissionCommands(bot, bot.clan_missions, bot.clan_system))
     logger.info("ClanCommands Cog loaded successfully.") 
