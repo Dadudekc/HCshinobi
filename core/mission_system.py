@@ -1,1 +1,5 @@
-from HCshinobi.utils.file_io import load_json, save_json 
+"""Placeholder mission system."""
+
+class MissionSystem:
+    def get_available_missions(self):
+        return []
