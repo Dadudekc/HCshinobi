@@ -1,8 +1,3 @@
-"""
-Extension modules for the Discord bot integration.
-This package contains cogs and extension modules for Discord bot functionality.
-"""
+"""Extensions for the Discord integration."""
 
-__all__ = [
-    'battle_system'
-]
+__all__ = []
