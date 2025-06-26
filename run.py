@@ -41,14 +41,14 @@ async def main():
     # Load cogs after bot is instantiated
     from HCshinobi.bot.cogs.character_commands import CharacterCommands
     from HCshinobi.bot.cogs.currency import CurrencyCommands
-    from HCshinobi.bot.cogs.battle_system import BattleCommands
+    from HCshinobi.bot.cogs.battle_system import BattleSystemCommands
     from HCshinobi.bot.cogs.missions import MissionCommands
-    from HCshinobi.bot.cogs.clan_commands import ClanMissionCommands
+    from HCshinobi.bot.cogs.clan_mission_commands import ClanMissionCommands
     
     # Add cogs to bot
     await bot.add_cog(CharacterCommands(bot))
     await bot.add_cog(CurrencyCommands(bot))
-    await bot.add_cog(BattleCommands(bot))
+    await bot.add_cog(BattleSystemCommands(bot))
     await bot.add_cog(MissionCommands(bot))
     await bot.add_cog(ClanMissionCommands(bot))
     
