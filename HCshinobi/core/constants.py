@@ -1,0 +1,9 @@
+"""Shared constant values for data file names and directories."""
+
+DATA_DIR = "data"
+CHARACTERS_SUBDIR = "characters"
+CURRENCY_FILE = "currency.json"
+TOKEN_FILE = "tokens.json"
+TRAINING_SESSIONS_FILE = "training_sessions.json"
+TRAINING_COOLDOWNS_FILE = "training_cooldowns.json"
+CLANS_SUBDIR = "clans"
