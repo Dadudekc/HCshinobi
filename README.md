@@ -1,6 +1,6 @@
 # HCShinobi
 
-HCShinobi is a hardcore Naruto-themed MMO Discord bot, featuring clan assignments, token economy, NPC management, AI-driven content, and reusable RPG modules.
+HCShinobi is a hardcore Naruto-themed MMO Discord bot, featuring clan assignments, token economy, NPC management, AI-driven content, and reusable RPG modules. It is organized around a simple data pipeline so you can experiment with strategy logic and order execution.
 
 ## Features
 
@@ -35,6 +35,34 @@ HCShinobi is a hardcore Naruto-themed MMO Discord bot, featuring clan assignment
 ├── setup.py               # Package installation script
 ├── run.py                 # Launcher script
 └── README.md              # This file
+```
+
+## Architecture Overview
+
+The core loop flows through four stages:
+
+1. **Data Feed** – gathers data such as market prices or game state.
+2. **Signal Generation** – strategies analyze the data and decide on actions.
+3. **Order Execution** – executes buy/sell orders or other commands.
+4. **Logging** – records the outcome of each step for auditing.
+
+Some modules (for example, the order execution engine and strategy definitions)
+are still placeholders and will be implemented over time.
+
+### Hard-coded Orders
+
+During development you can define fixed buy or sell orders directly inside a
+strategy. The snippet below demonstrates placing a single buy order:
+
+```python
+from HCshinobi.core.execution import Order, OrderExecutor
+
+orders = [
+    Order(action="buy", symbol="BTC", quantity=1)
+]
+
+executor = OrderExecutor()
+executor.process_orders(orders)
 ```
 
 ## Getting Started
