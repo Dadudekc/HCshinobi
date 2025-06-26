@@ -502,15 +502,15 @@ async def test_commands_command(mock_ctx):
     mock_ctx.send.assert_awaited_once()
     args, kwargs = mock_ctx.send.call_args
     assert "Available commands:" in args[0]
-    assert "inventory" in args[0]
-    assert "jutsu" in args[0]
-    assert "status" in args[0]
-    assert "missions" in args[0]
-    assert "team" in args[0]
-    assert "clan" in args[0]
-    assert "shop" in args[0]
-    assert "balance" in args[0]
-    assert "train" in args[0]
+    assert "/inventory" in args[0]
+    assert "/jutsu" in args[0]
+    assert "/status" in args[0]
+    assert "/missions" in args[0]
+    assert "/team" in args[0]
+    assert "/clan" in args[0]
+    assert "/shop" in args[0]
+    assert "/balance" in args[0]
+    assert "/train" in args[0]
 
 @pytest.mark.asyncio
 async def test_all_commands_listed():
@@ -543,16 +543,16 @@ async def test_all_commands_listed():
     ctx.send.assert_called_once()
     message = ctx.send.call_args[0][0]
     assert "Available commands:" in message
-    assert "!inventory" in message
-    assert "!jutsu" in message
-    assert "!status" in message
-    assert "!missions" in message
-    assert "!team" in message
-    assert "!clan" in message
-    assert "!shop" in message
-    assert "!balance" in message
-    assert "!train" in message
-    assert "!commands" in message 
+    assert "/inventory" in message
+    assert "/jutsu" in message
+    assert "/status" in message
+    assert "/missions" in message
+    assert "/team" in message
+    assert "/clan" in message
+    assert "/shop" in message
+    assert "/balance" in message
+    assert "/train" in message
+    assert "/commands" in message
 
 @pytest.mark.asyncio
 async def test_mission_board_no_character(mission_commands, mock_interaction, character_system):
