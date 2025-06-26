@@ -50,4 +50,4 @@ async def test_commands_command(mock_ctx):
     mock_ctx.send.assert_awaited_once()
     args, kwargs = mock_ctx.send.call_args
     assert "Available commands:" in args[0]
-    assert "test" in args[0] 
+    assert "/test" in args[0]
