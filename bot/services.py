@@ -24,10 +24,14 @@ class ServiceContainer:
         self.clan_assignment_engine = ClanAssignmentEngine(self.clan_system)
         self.currency_system = CurrencySystem(data_dir)
         self.token_system = TokenSystem(data_dir)
-        self.mission_system = MissionSystem(data_dir)
+        self.progression_engine = ShinobiProgressionEngine()
+        self.mission_system = MissionSystem(
+            data_dir,
+            currency_system=self.currency_system,
+            progression_engine=self.progression_engine,
+        )
         self.training_system = TrainingSystem(data_dir)
         self.battle_persistence = BattlePersistence(data_dir)
-        self.progression_engine = ShinobiProgressionEngine()
         self.battle_lifecycle = BattleLifecycle(self.character_system, self.battle_persistence, self.progression_engine)
 
     async def initialize(self, bot=None) -> None:

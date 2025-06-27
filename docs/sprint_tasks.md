@@ -1,18 +1,22 @@
 # Sprint Task List
 
-## Date: 2025-04-08
+## Date: 2025-06-27
 
 ### High Priority
-- Implement basic character creation storage
-- Finish clan assignment logic with personality modifiers
-- Add token spend/reroll functionality
-- Create unit tests for character and clan systems
+- Character creation & profile viewing
+- Clan assignment with token rerolls
+- Currency and token tracking commands
+- Training system with timed sessions
+- Mission board listing missions and awarding currency
+- Structured logging and environment verification (`verify_beta.py`)
 
 ### Medium Priority
-- Prototype mission board command with placeholder missions
-- Wire up training system start/cancel commands
-- Flesh out battle system data structures
+- Turn-based battle flow with persistence and EXP rewards
+- Jutsu and equipment shops
+- NPC conversion for fallen players
+- AI-generated mission narratives
 
 ### Low Priority
-- Add initial logging configuration
-- Update documentation for new commands
+- Clan-specific bonuses and abilities
+- Web dashboard research
+- Additional documentation and test coverage (>90%)
