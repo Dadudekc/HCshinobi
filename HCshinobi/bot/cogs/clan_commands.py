@@ -1,6 +1,14 @@
 from discord import app_commands
 from discord.ext import commands
-from ...utils.embeds import create_error_embed
+
+
+class ClanMissionCommands(commands.Cog):
+    """Minimal cog for clan missions used in tests."""
+
+    def __init__(self, bot: commands.Bot, clan_missions=None, clan_data=None) -> None:
+        self.bot = bot
+        self.clan_missions = clan_missions
+        self.clan_data = clan_data
 
 class ClanCommands(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
