@@ -7,6 +7,13 @@ from discord.ext import commands
 
 from HCshinobi.core.training_system import TrainingIntensity
 
+# Simple mapping of attributes that can be trained
+TRAINING_ATTRIBUTES = {
+    "taijutsu": "Hand-to-hand combat",
+    "ninjutsu": "Chakra techniques",
+    "genjutsu": "Illusion arts",
+}
+
 
 class TrainingView(discord.ui.View):
     def __init__(self, character) -> None:
@@ -27,6 +34,9 @@ class TrainingCommands(commands.Cog):
         char = await self.bot.services.character_system.get_character(interaction.user.id)
         if not char:
             await interaction.followup.send("You must create a character first using `/create`.", ephemeral=True)
+            return
+        if self.bot.services.training_system.get_training_status(interaction.user.id):
+            await interaction.followup.send("You are already training.", ephemeral=True)
             return
         view = TrainingView(char)
         embed = discord.Embed(title="🎯 Training Setup")
