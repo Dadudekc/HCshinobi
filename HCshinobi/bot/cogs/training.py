@@ -34,11 +34,59 @@ TRAINING_ATTRIBUTES: Dict[str, str] = {
 
 
 class TrainingView(discord.ui.View):
-    """Simple view object holding training configuration."""
+    """Interactive view for configuring and starting training sessions."""
 
-    def __init__(self, character) -> None:
+    def __init__(self, character, training_system) -> None:
         super().__init__()
         self.character = character
+        self.training_system = training_system
+        self.attribute: str | None = None
+        self.intensity: TrainingIntensity = TrainingIntensity.LIGHT
+        self.duration_hours: int = 1
+
+    @discord.ui.select(
+        placeholder="Attribute",
+        options=[
+            discord.SelectOption(label=v, value=k) for k, v in TRAINING_ATTRIBUTES.items()
+        ],
+    )
+    async def select_attribute(self, interaction: discord.Interaction, select: discord.ui.Select):
+        self.attribute = select.values[0]
+        await interaction.response.defer(thinking=False)
+
+    @discord.ui.select(
+        placeholder="Intensity",
+        options=[
+            discord.SelectOption(label=i.value, value=i.name) for i in TrainingIntensity
+        ],
+    )
+    async def select_intensity(self, interaction: discord.Interaction, select: discord.ui.Select):
+        self.intensity = TrainingIntensity[select.values[0]]
+        await interaction.response.defer(thinking=False)
+
+    @discord.ui.select(
+        placeholder="Duration (hours)",
+        options=[
+            discord.SelectOption(label=str(h), value=str(h)) for h in (1, 2, 4)
+        ],
+    )
+    async def select_duration(self, interaction: discord.Interaction, select: discord.ui.Select):
+        self.duration_hours = int(select.values[0])
+        await interaction.response.defer(thinking=False)
+
+    @discord.ui.button(label="Start", style=discord.ButtonStyle.green)
+    async def start_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if not self.attribute:
+            await interaction.response.send_message(
+                "Please select an attribute first.", ephemeral=True
+            )
+            return
+        await self.training_system.start_training(
+            interaction.user.id, self.attribute, self.duration_hours, self.intensity.value
+        )
+        await interaction.response.send_message(
+            f"Training {self.attribute} for {self.duration_hours}h started!", ephemeral=True
+        )
 
 
 class TrainingCommands(commands.Cog):
@@ -54,7 +102,7 @@ class TrainingCommands(commands.Cog):
                 "You must create a character first using `/create`.", ephemeral=True
             )
             return
-        view = TrainingView(char)
+        view = TrainingView(char, self.bot.services.training_system)
         embed = discord.Embed(title="🎯 Training Setup")
         await interaction.followup.send(embed=embed, view=view, ephemeral=True)
 
