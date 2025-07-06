@@ -20,3 +20,5 @@ def register_commands_command(bot: commands.Bot):
         names = sorted(f"!{c.name}" for c in bot.commands)
         await ctx.send("Available commands: " + " ".join(names))
 
+    return _list_commands
+

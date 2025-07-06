@@ -1,14 +1,14 @@
 # Sprint Task List
 
-## Date: 2025-06-27
+## Date: 2025-07-04
 
 ### High Priority
-- Character creation & profile viewing
-- Clan assignment with token rerolls
-- Currency and token tracking commands
-- Training system with timed sessions
-- Mission board listing missions and awarding currency
-- Structured logging and environment verification (`verify_beta.py`)
+- Character creation & profile viewing *(done)*
+- Clan assignment with token rerolls *(done)*
+- Currency and token tracking commands *(in progress)*
+- Training system with timed sessions *(in progress)*
+- Mission board listing missions and awarding currency *(in progress)*
+- Structured logging and environment verification (`verify_beta.py`) *(pending)*
 
 ### Medium Priority
 - Turn-based battle flow with persistence and EXP rewards
