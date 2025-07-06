@@ -21,7 +21,10 @@ class ServiceContainer:
         self.character_system = CharacterSystem()
         self.currency_system = CurrencySystem()
         self.token_system = TokenSystem()
-        self.training_system = TrainingSystem()
+        self.training_system = TrainingSystem(
+            currency_system=self.currency_system,
+            character_system=self.character_system,
+        )
         self.clan_assignment_engine = ClanAssignmentEngine()
         self.progression_engine = ShinobiProgressionEngine()
         self.clan_data = ClanData(self.data_dir)

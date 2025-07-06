@@ -30,7 +30,11 @@ class ServiceContainer:
             currency_system=self.currency_system,
             progression_engine=self.progression_engine,
         )
-        self.training_system = TrainingSystem(data_dir)
+        self.training_system = TrainingSystem(
+            data_dir,
+            currency_system=self.currency_system,
+            character_system=self.character_system,
+        )
         self.battle_persistence = BattlePersistence(data_dir)
         self.battle_lifecycle = BattleLifecycle(self.character_system, self.battle_persistence, self.progression_engine)
 
