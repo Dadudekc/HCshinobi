@@ -1,11 +1,15 @@
+import os
+import sys
 import pytest
 from unittest.mock import MagicMock, AsyncMock
 import discord
-import os
 import json
 from typing import Dict, Any, AsyncGenerator
 import asyncio
 from discord.ext import commands
+
+# Ensure project root is on the import path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from HCshinobi.bot.services import ServiceContainer
 from HCshinobi.core.character_system import CharacterSystem
