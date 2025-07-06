@@ -1,0 +1,229 @@
+{
+    "solomon_jutsu": {
+        "Amaterasu": {
+            "name": "Amaterasu",
+            "type": "Kekkei Genkai",
+            "element": "Fire",
+            "rank": "S",
+            "chakra_cost": 80,
+            "stamina_cost": 20,
+            "damage": 150,
+            "accuracy": 95,
+            "description": "Black flames that burn anything they touch. Solomon's mastery allows him to shape them into weapons and constructs.",
+            "effects": ["Burn", "Piercing", "Shaping"],
+            "phase_requirement": 2
+        },
+        "Kamui": {
+            "name": "Kamui",
+            "type": "Kekkei Genkai", 
+            "element": "Space-Time",
+            "rank": "S",
+            "chakra_cost": 60,
+            "stamina_cost": 15,
+            "damage": 0,
+            "accuracy": 100,
+            "description": "Complete intangibility and dimensional manipulation. Solomon can phase through attacks and create dimensional rifts.",
+            "effects": ["Dodge", "Intangibility", "Dimensional"],
+            "phase_requirement": 2
+        },
+        "Susanoo_Okami": {
+            "name": "Susanoo: Ōkami no Yōsei",
+            "type": "Kekkei Genkai",
+            "element": "Spiritual",
+            "rank": "S+",
+            "chakra_cost": 120,
+            "stamina_cost": 30,
+            "damage": 200,
+            "accuracy": 90,
+            "description": "Wolf Deity Susanoo with phase-shifted armor and Amaterasu weaponry. Integrates with Four-Tails chakra.",
+            "effects": ["Armor", "Weapon", "Spiritual"],
+            "phase_requirement": 3
+        },
+        "Eclipse_Fang_Severance": {
+            "name": "Eclipse Fang Severance",
+            "type": "Kekkei Genkai",
+            "element": "Conceptual",
+            "rank": "S+",
+            "chakra_cost": 150,
+            "stamina_cost": 40,
+            "damage": 250,
+            "accuracy": 85,
+            "description": "Dimensional and conceptual severance that bypasses all defenses. Can erase concepts and sever soul connections.",
+            "effects": ["Piercing", "Conceptual", "Soul"],
+            "phase_requirement": 3
+        },
+        "Yoton_Meteor": {
+            "name": "Yōton: Ryūsei no Jutsu",
+            "type": "Kekkei Genkai",
+            "element": "Lava",
+            "rank": "A",
+            "chakra_cost": 70,
+            "stamina_cost": 25,
+            "damage": 140,
+            "accuracy": 88,
+            "description": "Meteor shower of superheated lava projectiles. Creates area denial and massive destruction.",
+            "effects": ["Area", "Burn", "Piercing"],
+            "phase_requirement": 2
+        },
+        "Yoton_Volcano": {
+            "name": "Yōton: Maguma Hōkai",
+            "type": "Kekkei Genkai",
+            "element": "Lava",
+            "rank": "A",
+            "chakra_cost": 80,
+            "stamina_cost": 30,
+            "damage": 120,
+            "accuracy": 85,
+            "description": "Volcanic collapse that creates molten lakes and area denial. Transforms the battlefield.",
+            "effects": ["Area", "Terrain", "Burn"],
+            "phase_requirement": 2
+        },
+        "Yoton_Wolf_Pack": {
+            "name": "Yōton: Enkō no Ōkami",
+            "type": "Kekkei Genkai",
+            "element": "Lava",
+            "rank": "S",
+            "chakra_cost": 100,
+            "stamina_cost": 35,
+            "damage": 180,
+            "accuracy": 92,
+            "description": "Blazing wolf pack of molten constructs. Explosive and autonomous in combat.",
+            "effects": ["Summon", "Explosive", "Autonomous"],
+            "phase_requirement": 3
+        },
+        "Kokko_Chains": {
+            "name": "Kōkō no Kusari",
+            "type": "Kekkei Genkai",
+            "element": "Sealing",
+            "rank": "S",
+            "chakra_cost": 90,
+            "stamina_cost": 25,
+            "damage": 160,
+            "accuracy": 95,
+            "description": "Absolute suppression mode with conceptual binding and ability nullification. Radiant sealing energy.",
+            "effects": ["Sealing", "Suppression", "Conceptual"],
+            "phase_requirement": 3
+        },
+        "Wolf_Summoning": {
+            "name": "Summoning: Wolves of Kiba no Tōdai",
+            "type": "Summoning",
+            "element": "Nature",
+            "rank": "S",
+            "chakra_cost": 120,
+            "stamina_cost": 40,
+            "damage": 280,
+            "accuracy": 90,
+            "description": "Summons the legendary wolves: Kaze no Kiba (Scouts), Tsuchi no Yaiba (War Wolves), and Akuma (Alpha).",
+            "effects": ["Summon", "Multiple", "Legendary"],
+            "phase_requirement": 4
+        },
+        "Final_Susanoo": {
+            "name": "Ōkami no Yōsei Susanoo: Final Incarnation",
+            "type": "Kekkei Genkai",
+            "element": "Spiritual",
+            "rank": "S++",
+            "chakra_cost": 200,
+            "stamina_cost": 50,
+            "damage": 300,
+            "accuracy": 95,
+            "description": "Living armor Susanoo with auto-phase defense, Amaterasu flame cloak, and volcanic core reactor.",
+            "effects": ["Living", "Auto-Defense", "Volcanic"],
+            "phase_requirement": 4
+        },
+        "Pack_Release": {
+            "name": "Yōton: Enkō no Ōkami: Pack Release",
+            "type": "Kekkei Genkai",
+            "element": "Lava",
+            "rank": "S+",
+            "chakra_cost": 150,
+            "stamina_cost": 45,
+            "damage": 220,
+            "accuracy": 93,
+            "description": "Autonomous lava wolves with Akuma Alpha as the howling sovereign. Ultimate pack coordination.",
+            "effects": ["Autonomous", "Pack", "Sovereign"],
+            "phase_requirement": 4
+        },
+        "Adamantine_Chains": {
+            "name": "Adamantine Chakra-Forged Chains",
+            "type": "Weapon",
+            "element": "Physical",
+            "rank": "A",
+            "chakra_cost": 30,
+            "stamina_cost": 15,
+            "damage": 90,
+            "accuracy": 95,
+            "description": "Chakra-absorbing and replenishing chains that can phase via Kamui. Solomon's signature weapon.",
+            "effects": ["Absorption", "Phasing", "Binding"],
+            "phase_requirement": 1
+        },
+        "Katon_Goka": {
+            "name": "Katon: Gōka Messhitsu",
+            "type": "Ninjutsu",
+            "element": "Fire",
+            "rank": "B",
+            "chakra_cost": 40,
+            "stamina_cost": 10,
+            "damage": 80,
+            "accuracy": 85,
+            "description": "Great Fire Annihilation technique. Devastating fire release jutsu.",
+            "effects": ["Burn", "Area"],
+            "phase_requirement": 1
+        },
+        "Katon_Goryuka": {
+            "name": "Katon: Gōryūka no Jutsu",
+            "type": "Ninjutsu",
+            "element": "Fire",
+            "rank": "B",
+            "chakra_cost": 50,
+            "stamina_cost": 15,
+            "damage": 100,
+            "accuracy": 88,
+            "description": "Great Dragon Fire technique. Powerful fire dragon jutsu.",
+            "effects": ["Burn", "Piercing"],
+            "phase_requirement": 1
+        },
+        "Sharingan_Genjutsu": {
+            "name": "Sharingan Genjutsu",
+            "type": "Genjutsu",
+            "element": "Illusion",
+            "rank": "A",
+            "chakra_cost": 45,
+            "stamina_cost": 10,
+            "damage": 60,
+            "accuracy": 90,
+            "description": "Advanced Sharingan genjutsu. Can control and disable opponents.",
+            "effects": ["Control", "Disable", "Illusion"],
+            "phase_requirement": 1
+        }
+    },
+    "phase_abilities": {
+        "Phase 1: The Crimson Shadow": {
+            "description": "Solomon begins with Sharingan analysis and basic Katon techniques",
+            "jutsu_pool": ["Katon: Gōka Messhitsu", "Katon: Gōryūka no Jutsu", "Sharingan Genjutsu", "Adamantine Chakra-Forged Chains"],
+            "special_abilities": ["Sharingan Analysis", "Chakra Absorption"],
+            "damage_multiplier": 1.0,
+            "defense_bonus": 0
+        },
+        "Phase 2: The Burning Revenant": {
+            "description": "Solomon activates Mangekyō Sharingan and unleashes Amaterasu",
+            "jutsu_pool": ["Amaterasu", "Kamui Phase", "Yōton: Maguma Hōkai", "Yōton: Ryūsei no Jutsu"],
+            "special_abilities": ["Amaterasu Mastery", "Kamui Intangibility", "Lava Release"],
+            "damage_multiplier": 1.3,
+            "defense_bonus": 20
+        },
+        "Phase 3: The Exiled Flame": {
+            "description": "Solomon summons his Susanoo and unleashes his full power",
+            "jutsu_pool": ["Susanoo: Ōkami no Yōsei", "Yōton: Enkō no Ōkami", "Kōkō no Kusari", "Eclipse Fang Severance"],
+            "special_abilities": ["Ōkami no Yōsei Susanoo", "Absolute Suppression", "Dimensional Severance"],
+            "damage_multiplier": 1.6,
+            "defense_bonus": 40
+        },
+        "Phase 4: The Ultimate Being": {
+            "description": "Solomon becomes the ultimate being, unleashing his final form",
+            "jutsu_pool": ["Ōkami no Yōsei Susanoo: Final Incarnation", "Yōton: Enkō no Ōkami: Pack Release", "Summoning: Wolves of Kiba no Tōdai"],
+            "special_abilities": ["Living Armor Susanoo", "Volcanic Core Reactor", "Wolf Pack Summoning"],
+            "damage_multiplier": 2.0,
+            "defense_bonus": 60
+        }
+    }
+} 
