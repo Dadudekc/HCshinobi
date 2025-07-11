@@ -17,6 +17,26 @@ def create_error_embed(message: str) -> discord.Embed:
     )
 
 
+def create_success_embed(message: str) -> discord.Embed:
+    """Return a green embed with a success message."""
+
+    return discord.Embed(
+        title="Success",
+        description=message,
+        color=discord.Color.green(),
+    )
+
+
+def create_info_embed(title: str, message: str) -> discord.Embed:
+    """Return a blue embed with an info message."""
+
+    return discord.Embed(
+        title=title,
+        description=message,
+        color=discord.Color.blue(),
+    )
+
+
 def create_character_embed(name: str, clan: Optional[str] = None) -> discord.Embed:
     """Create a basic character profile embed.
 
@@ -53,6 +73,8 @@ def create_clan_embed(
 
 __all__ = [
     "create_error_embed",
+    "create_success_embed",
+    "create_info_embed",
     "create_character_embed",
     "create_clan_embed",
 ]

@@ -24,7 +24,7 @@ class CurrencyCommands(commands.Cog):
                 )
                 return
             
-            balance = self.bot.services.currency_system.get_player_balance(target_user.id)
+            balance = await self.bot.services.currency_system.get_player_balance(target_user.id)
             
             embed = discord.Embed(
                 title=f"💰 Balance",
@@ -73,7 +73,7 @@ class CurrencyCommands(commands.Cog):
                 return
             
             currency_system = self.bot.services.currency_system
-            sender_balance = currency_system.get_player_balance(interaction.user.id)
+            sender_balance = await currency_system.get_player_balance(interaction.user.id)
             
             if sender_balance < amount:
                 await interaction.response.send_message(
@@ -122,7 +122,7 @@ class CurrencyCommands(commands.Cog):
             currency_system = self.bot.services.currency_system
             currency_system.add_balance_and_save(interaction.user.id, daily_amount)
             
-            new_balance = currency_system.get_player_balance(interaction.user.id)
+            new_balance = await currency_system.get_player_balance(interaction.user.id)
             
             embed = discord.Embed(
                 title="🎁 Daily Reward Claimed!",

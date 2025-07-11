@@ -1,10 +1,17 @@
 from discord.ext import commands
+from discord import Intents
 from .config import BotConfig
 from .services import ServiceContainer
 
 class HCBot(commands.Bot):
     def __init__(self, config: BotConfig, silent_start: bool = False):
-        super().__init__(command_prefix=config.command_prefix)
+        # Create intents with all permissions needed for the bot
+        intents = Intents.default()
+        intents.message_content = True
+        intents.members = True
+        intents.guilds = True
+        
+        super().__init__(command_prefix=config.command_prefix, intents=intents)
         self.config = config
         self.silent_start = silent_start
         self.services = ServiceContainer(config)
