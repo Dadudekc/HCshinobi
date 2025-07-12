@@ -1,5 +1,20 @@
 """
-ShinobiOS Mission Commands - Integrated with battle simulation.
+Interactive ShinobiOS Mission Commands - Integrated with battle simulation.
+
+Enhanced with Discord UI components for interactive mission battles similar to Solomon and PvP battles.
+
+Features:
+- Interactive mission battle interface with Discord buttons
+- Real-time mission battle updates
+- Jutsu selection during missions
+- Mission objectives tracking
+- Enhanced battle embeds
+
+Commands:
+- /mission_board - View available mission types
+- /shinobios_mission - Start interactive mission battle
+- /mission_status - Check mission progress (enhanced with interactive resume)
+- /abandon_mission - Leave current mission
 """
 
 import asyncio
@@ -16,6 +31,192 @@ from ...core.missions.shinobios_engine import ShinobiOSEngine
 from ...core.missions.shinobios_mission import ShinobiOSMission, BattleMissionType
 from ...core.missions.mission import MissionDifficulty
 from ...utils.embeds import create_error_embed, create_success_embed, create_info_embed
+
+
+class MissionBattleView(discord.ui.View):
+    """Interactive view for mission battles with buttons."""
+    
+    def __init__(self, cog, mission: ShinobiOSMission, user_id: int):
+        super().__init__(timeout=1800)  # 30 minute timeout for missions
+        self.cog = cog
+        self.mission = mission
+        self.user_id = user_id
+        
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        """Ensure only the mission participant can use buttons."""
+        if interaction.user.id != self.user_id:
+            await interaction.response.send_message(
+                "❌ This is not your mission!", ephemeral=True
+            )
+            return False
+        return True
+    
+    @discord.ui.button(label="⚔️ Attack", style=discord.ButtonStyle.red, emoji="⚔️")
+    async def attack_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+        
+        # Get player's jutsu for selection
+        character_data = self.cog._load_character_data(str(self.user_id))
+        if not character_data:
+            await interaction.followup.send("❌ Character data not found!", ephemeral=True)
+            return
+            
+        jutsu_list = character_data.get("jutsu", ["Basic Attack", "Punch", "Kick"])
+        
+        # Create jutsu selection view
+        jutsu_view = MissionJutsuSelectionView(self.cog, self.mission, jutsu_list, self.user_id)
+        
+        embed = discord.Embed(
+            title="🎯 Select Your Jutsu",
+            description="Choose which jutsu to use against the enemies:",
+            color=discord.Color.blue()
+        )
+        
+        await interaction.followup.send(embed=embed, view=jutsu_view, ephemeral=True)
+    
+    @discord.ui.button(label="📊 Status", style=discord.ButtonStyle.gray, emoji="📊")
+    async def status_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+        
+        embed = self.cog._create_battle_embed(self.mission, "📊 Mission Battle Status")
+        await interaction.followup.send(embed=embed, ephemeral=True)
+    
+    @discord.ui.button(label="🎯 Objectives", style=discord.ButtonStyle.gray, emoji="🎯")
+    async def objectives_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+        
+        embed = discord.Embed(
+            title="🎯 Mission Objectives",
+            description=f"**Mission:** {self.mission.title}",
+            color=discord.Color.blue()
+        )
+        
+        if self.mission.battle_state and self.mission.battle_state.objectives:
+            objectives_text = "\n".join([
+                f"• {obj}" for obj in self.mission.battle_state.objectives
+            ])
+            embed.add_field(name="Current Objectives", value=objectives_text, inline=False)
+        else:
+            embed.add_field(name="Current Objectives", value="• Defeat all enemies\n• Complete the mission", inline=False)
+        
+        # Show mission progress
+        if self.mission.battle_state:
+            enemies = self.mission.battle_state.get_enemies()
+            alive_enemies = [e for e in enemies if e.stats.health > 0]
+            total_enemies = len(enemies)
+            remaining_enemies = len(alive_enemies)
+            
+            embed.add_field(
+                name="📊 Progress",
+                value=f"Enemies remaining: {remaining_enemies}/{total_enemies}",
+                inline=False
+            )
+        
+        await interaction.followup.send(embed=embed, ephemeral=True)
+    
+    @discord.ui.button(label="🏃 Abandon", style=discord.ButtonStyle.gray, emoji="🏃")
+    async def abandon_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+        
+        # Create confirmation view
+        confirm_view = MissionAbandonConfirmationView(self.cog, self.mission, self.user_id)
+        
+        embed = discord.Embed(
+            title="🏃 Abandon Mission?",
+            description="Are you sure you want to abandon this mission? You'll lose all progress and won't receive any rewards.",
+            color=discord.Color.orange()
+        )
+        
+        await interaction.followup.send(embed=embed, view=confirm_view, ephemeral=True)
+    
+    @discord.ui.button(label="ℹ️ Help", style=discord.ButtonStyle.gray, emoji="ℹ️")
+    async def help_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+        
+        embed = discord.Embed(
+            title="ℹ️ Mission Battle Help",
+            description="**How Mission Battles Work:**",
+            color=discord.Color.blue()
+        )
+        
+        embed.add_field(
+            name="⚔️ Combat Actions",
+            value="• **Attack:** Choose a jutsu to attack enemies\n• **Status:** View current battle statistics\n• **Objectives:** Check mission goals and progress",
+            inline=False
+        )
+        
+        embed.add_field(
+            name="🎯 Mission Goals",
+            value="• Complete all mission objectives\n• Defeat required enemies\n• Survive the encounter",
+            inline=False
+        )
+        
+        embed.add_field(
+            name="🏆 Victory Conditions",
+            value="• Complete all objectives\n• Defeat all enemies (if required)\n• Reach mission completion criteria",
+            inline=False
+        )
+        
+        await interaction.followup.send(embed=embed, ephemeral=True)
+
+
+class MissionJutsuSelectionView(discord.ui.View):
+    """View for selecting jutsu during mission battles."""
+    
+    def __init__(self, cog, mission: ShinobiOSMission, jutsu_list: List[str], user_id: int):
+        super().__init__(timeout=60)
+        self.cog = cog
+        self.mission = mission
+        self.jutsu_list = jutsu_list
+        self.user_id = user_id
+        
+        # Add jutsu buttons (max 5 due to Discord limits)
+        for i, jutsu in enumerate(jutsu_list[:5]):
+            button = discord.ui.Button(
+                label=jutsu,
+                style=discord.ButtonStyle.primary,
+                custom_id=f"jutsu_{i}"
+            )
+            button.callback = self.jutsu_callback
+            self.add_item(button)
+    
+    async def jutsu_callback(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+        
+        # Get the selected jutsu
+        button_id = interaction.data['custom_id']
+        jutsu_index = int(button_id.split('_')[1])
+        selected_jutsu = self.jutsu_list[jutsu_index]
+        
+        # Execute the mission attack
+        await self.cog.execute_mission_attack(interaction, self.mission, selected_jutsu, self.user_id)
+
+
+class MissionAbandonConfirmationView(discord.ui.View):
+    """View for confirming mission abandon action."""
+    
+    def __init__(self, cog, mission: ShinobiOSMission, user_id: int):
+        super().__init__(timeout=30)
+        self.cog = cog
+        self.mission = mission
+        self.user_id = user_id
+    
+    @discord.ui.button(label="Yes, Abandon", style=discord.ButtonStyle.danger, emoji="🏃")
+    async def confirm_abandon(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+        await self.cog.execute_mission_abandon(interaction, self.mission, self.user_id)
+    
+    @discord.ui.button(label="No, Continue", style=discord.ButtonStyle.gray, emoji="⚔️")
+    async def cancel_abandon(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+        
+        embed = discord.Embed(
+            title="⚔️ Mission Continues!",
+            description="You decide to press on and complete the mission!",
+            color=discord.Color.green()
+        )
+        
+        await interaction.followup.send(embed=embed, ephemeral=True)
 
 class MissionCommands(commands.Cog):
     """Mission Commands with ShinobiOS Battle Integration"""
@@ -106,7 +307,7 @@ class MissionCommands(commands.Cog):
         
         embed.add_field(
             name="⚔️ Commands",
-            value="• `/shinobios_mission` - Start a battle mission\n• `/battle_action` - Execute combat actions\n• `/mission_status` - Check mission progress\n• `/available_jutsu` - View your jutsu\n• `/abandon_mission` - Leave current mission",
+            value="• `/shinobios_mission` - Start an interactive battle mission\n• Interactive buttons for combat (Attack/Status/Objectives/Help)\n• `/mission_status` - Check mission progress\n• `/abandon_mission` - Leave current mission",
             inline=False
         )
         
@@ -201,9 +402,9 @@ class MissionCommands(commands.Cog):
         
         await interaction.response.send_message(embed=embed)
         
-        # Send initial battle status
-        battle_embed = self._create_battle_embed(mission, "Battle Commenced")
-        await interaction.followup.send(embed=battle_embed)
+        # Start interactive mission battle
+        await asyncio.sleep(2)
+        await self._start_interactive_mission_battle(interaction, mission)
     
     def _generate_opening_narration(self, mission: ShinobiOSMission, character_data: Dict) -> str:
         """Generate immersive opening narration"""
@@ -221,6 +422,263 @@ class MissionCommands(commands.Cog):
         }
         
         return narrations.get(environment.lower(), f"**{character_name}** prepares for battle in the {environment}...")
+
+    async def _start_interactive_mission_battle(self, interaction: discord.Interaction, mission: ShinobiOSMission):
+        """Start an interactive mission battle with Discord UI components."""
+        try:
+            # Create enhanced battle embed
+            embed = self._create_interactive_mission_embed(mission)
+            view = MissionBattleView(self, mission, interaction.user.id)
+            
+            await interaction.followup.send(embed=embed, view=view)
+            
+        except Exception as e:
+            await interaction.followup.send(f"❌ Error starting interactive mission: {str(e)}", ephemeral=True)
+
+    def _create_interactive_mission_embed(self, mission: ShinobiOSMission) -> discord.Embed:
+        """Create an enhanced mission battle embed for interactive UI."""
+        if not mission.battle_state:
+            return create_error_embed("Battle not initialized")
+        
+        embed = discord.Embed(
+            title="⚔️ **MISSION BATTLE** ⚔️",
+            description=f"**Mission:** {mission.title}\n**Environment:** {mission.battle_state.environment.name if mission.battle_state.environment else 'Unknown'}",
+            color=discord.Color.red()
+        )
+        
+        # Add participants with enhanced formatting
+        players = mission.battle_state.get_players()
+        enemies = mission.battle_state.get_enemies()
+        
+        if players:
+            for i, player in enumerate(players):
+                hp_percent = (player.stats.health / player.stats.max_health) * 100 if player.stats.max_health > 0 else 0
+                chakra_percent = (player.stats.chakra / player.stats.max_chakra) * 100 if player.stats.max_chakra > 0 else 0
+                
+                embed.add_field(
+                    name=f"👤 **{player.name}** (Player)",
+                    value=f"**HP:** {player.stats.health}/{player.stats.max_health} ({hp_percent:.1f}%)\n"
+                          f"**Chakra:** {player.stats.chakra}/{player.stats.max_chakra} ({chakra_percent:.1f}%)\n"
+                          f"**Level:** {player.stats.level}",
+                    inline=True
+                )
+        
+        if enemies:
+            alive_enemies = [e for e in enemies if e.stats.health > 0]
+            for i, enemy in enumerate(alive_enemies[:3]):  # Show max 3 enemies
+                hp_percent = (enemy.stats.health / enemy.stats.max_health) * 100 if enemy.stats.max_health > 0 else 0
+                
+                embed.add_field(
+                    name=f"👹 **{enemy.name}** (Enemy {i+1})",
+                    value=f"**HP:** {enemy.stats.health}/{enemy.stats.max_health} ({hp_percent:.1f}%)\n"
+                          f"**Level:** {enemy.stats.level}",
+                    inline=True
+                )
+            
+            if len(alive_enemies) > 3:
+                embed.add_field(
+                    name="➕ More Enemies",
+                    value=f"...and {len(alive_enemies) - 3} more enemies",
+                    inline=True
+                )
+        
+        # Add objectives
+        if mission.battle_state.objectives:
+            objectives_text = "\n".join([f"• {obj}" for obj in mission.battle_state.objectives])
+            embed.add_field(name="🎯 Objectives", value=objectives_text, inline=False)
+        
+        # Add recent actions
+        if mission.battle_state.battle_log:
+            recent_actions = mission.battle_state.battle_log[-2:]
+            action_text = "\n".join([
+                f"**{action['actor']}** used {action['jutsu']} → {action['damage']} damage"
+                for action in recent_actions
+            ])
+            embed.add_field(name="⚡ Recent Actions", value=action_text, inline=False)
+        
+        embed.set_footer(text="Use the buttons below to take action in battle!")
+        
+        return embed
+
+    async def execute_mission_attack(self, interaction: discord.Interaction, mission: ShinobiOSMission, jutsu_name: str, user_id: int):
+        """Execute a mission attack with interactive feedback."""
+        try:
+            user_id_str = str(user_id)
+            
+            # Get available enemies for auto-targeting
+            enemies = mission.battle_state.get_enemies()
+            alive_enemies = [e for e in enemies if e.stats.health > 0]
+            
+            if not alive_enemies:
+                await interaction.followup.send("✅ No enemies remaining! Mission objectives may be complete.", ephemeral=True)
+                return
+            
+            # Auto-target first alive enemy
+            target_id = alive_enemies[0].user_id
+            
+            # Execute action
+            result = await mission.execute_player_action(user_id_str, jutsu_name, target_id)
+            
+            if not result["success"]:
+                await interaction.followup.send(f"❌ Attack failed: {result['error']}", ephemeral=True)
+                return
+            
+            # Get action details
+            action = result["action"]
+            
+            # Update mission embed
+            embed = self._create_interactive_mission_embed(mission)
+            
+            # Add attack results to embed
+            embed.add_field(
+                name="💥 Your Attack",
+                value=f"**{jutsu_name}** → **{action['target']}**\n"
+                      f"Damage: {action['damage']} | Success: {'✅' if action['success'] else '❌'}",
+                inline=False
+            )
+            
+            view = MissionBattleView(self, mission, user_id)
+            
+            await interaction.followup.send(embed=embed, view=view)
+            
+            # Execute enemy turn after a delay
+            await asyncio.sleep(1.5)
+            await self._execute_enemy_turn(interaction, mission, user_id)
+            
+            # Check mission completion
+            completion = result["completion_status"]
+            if completion["completed"]:
+                if completion["status"] == "success":
+                    await self._handle_interactive_mission_success(interaction, mission)
+                else:
+                    await self._handle_interactive_mission_failure(interaction, mission)
+                    
+        except Exception as e:
+            await interaction.followup.send(f"❌ Error during attack: {str(e)}", ephemeral=True)
+
+    async def _execute_enemy_turn(self, interaction: discord.Interaction, mission: ShinobiOSMission, user_id: int):
+        """Execute enemy turn in interactive mission."""
+        try:
+            enemy_actions = await mission.execute_enemy_turn()
+            
+            if enemy_actions:
+                # Create enemy action embed
+                embed = discord.Embed(
+                    title="👹 **ENEMY TURN** 👹",
+                    description="The enemies strike back!",
+                    color=discord.Color.dark_red()
+                )
+                
+                for i, action in enumerate(enemy_actions[:3]):  # Show max 3 actions
+                    embed.add_field(
+                        name=f"Attack {i+1}: {action['actor']}",
+                        value=f"**{action['jutsu']}** → **{action['target']}**\n"
+                              f"Damage: {action['damage']}",
+                        inline=True
+                    )
+                
+                await interaction.followup.send(embed=embed)
+                
+                # Send updated mission status after enemy turn
+                await asyncio.sleep(1)
+                updated_embed = self._create_interactive_mission_embed(mission)
+                view = MissionBattleView(self, mission, user_id)
+                
+                await interaction.followup.send(embed=updated_embed, view=view)
+            
+        except Exception as e:
+            await interaction.followup.send(f"❌ Error during enemy turn: {str(e)}", ephemeral=True)
+
+    async def _handle_interactive_mission_success(self, interaction: discord.Interaction, mission: ShinobiOSMission):
+        """Handle interactive mission success."""
+        try:
+            embed = discord.Embed(
+                title="🏆 **MISSION COMPLETE!** 🏆",
+                description="Excellent work! You have successfully completed the mission.",
+                color=discord.Color.gold()
+            )
+            
+            embed.add_field(
+                name="🎉 Mission Success",
+                value=f"**{mission.title}** has been completed!",
+                inline=False
+            )
+            
+            embed.add_field(
+                name="💰 Rewards Earned",
+                value=f"**Experience:** +{mission.reward.get('experience', 0)}\n"
+                      f"**Currency:** +{mission.reward.get('currency', 0)} ryo",
+                inline=False
+            )
+            
+            embed.add_field(
+                name="📊 Mission Stats",
+                value=f"**Difficulty:** {mission.difficulty}-Rank\n"
+                      f"**Environment:** {mission.battle_state.environment.name if mission.battle_state.environment else 'Unknown'}\n"
+                      f"**Battle ID:** {mission.battle_id}",
+                inline=False
+            )
+            
+            await interaction.followup.send(embed=embed)
+            
+            # Clean up mission
+            self._cleanup_mission(mission.id)
+            
+        except Exception as e:
+            await interaction.followup.send(f"❌ Error handling mission success: {str(e)}", ephemeral=True)
+
+    async def _handle_interactive_mission_failure(self, interaction: discord.Interaction, mission: ShinobiOSMission):
+        """Handle interactive mission failure."""
+        try:
+            embed = discord.Embed(
+                title="💀 **MISSION FAILED** 💀",
+                description="The mission has ended in failure...",
+                color=discord.Color.dark_red()
+            )
+            
+            embed.add_field(
+                name="💔 Defeat",
+                value="You have been defeated in battle. Better luck next time!",
+                inline=False
+            )
+            
+            embed.add_field(
+                name="📊 Mission Info",
+                value=f"**Mission:** {mission.title}\n"
+                      f"**Difficulty:** {mission.difficulty}-Rank",
+                inline=False
+            )
+            
+            await interaction.followup.send(embed=embed)
+            
+            # Clean up mission
+            self._cleanup_mission(mission.id)
+            
+        except Exception as e:
+            await interaction.followup.send(f"❌ Error handling mission failure: {str(e)}", ephemeral=True)
+
+    async def execute_mission_abandon(self, interaction: discord.Interaction, mission: ShinobiOSMission, user_id: int):
+        """Handle mission abandonment."""
+        try:
+            embed = discord.Embed(
+                title="🏃 **MISSION ABANDONED** 🏃",
+                description=f"You have abandoned: **{mission.title}**",
+                color=discord.Color.orange()
+            )
+            
+            embed.add_field(
+                name="⚠️ Consequences",
+                value="• No rewards earned\n• Mission progress lost\n• Return to base",
+                inline=False
+            )
+            
+            await interaction.followup.send(embed=embed)
+            
+            # Clean up mission
+            self._cleanup_mission(mission.id)
+            
+        except Exception as e:
+            await interaction.followup.send(f"❌ Error abandoning mission: {str(e)}", ephemeral=True)
 
     @app_commands.command(name="battle_action", description="Execute a battle action")
     @app_commands.describe(
@@ -371,9 +829,9 @@ class MissionCommands(commands.Cog):
             # Remove from active missions
             del self.active_missions[mission_id]
 
-    @app_commands.command(name="mission_status", description="Check current mission status")
+    @app_commands.command(name="mission_status", description="Check current mission status and resume interactive battle")
     async def mission_status(self, interaction: discord.Interaction):
-        """Check current mission status"""
+        """Check current mission status and resume interactive battle"""
         user_id = str(interaction.user.id)
         
         if user_id not in self.player_missions:
@@ -392,9 +850,13 @@ class MissionCommands(commands.Cog):
             return
         
         mission = self.active_missions[mission_id]
-        mission_embed = self._create_battle_embed(mission, "Current Mission Status")
         
-        await interaction.response.send_message(embed=mission_embed)
+        # Create interactive mission resume
+        embed = self._create_interactive_mission_embed(mission)
+        embed.title = "📊 **CURRENT MISSION STATUS** 📊"
+        view = MissionBattleView(self, mission, interaction.user.id)
+        
+        await interaction.response.send_message(embed=embed, view=view)
 
     @app_commands.command(name="available_jutsu", description="Show available jutsu")
     async def available_jutsu(self, interaction: discord.Interaction):
@@ -465,6 +927,88 @@ class MissionCommands(commands.Cog):
         )
         
         await interaction.response.send_message(embed=embed)
+
+    @commands.command(name="test_mission")
+    @commands.has_permissions(administrator=True)
+    async def test_mission(self, ctx: commands.Context):
+        """Test command for interactive missions (admin only)."""
+        try:
+            user_id = str(ctx.author.id)
+            
+            # Check if user already has an active mission
+            if user_id in self.player_missions:
+                await ctx.send("❌ You already have an active mission! Use `/mission_status` to resume it.")
+                return
+            
+            # Load character data
+            character_data = self._load_character_data(user_id)
+            if not character_data:
+                await ctx.send("❌ You need to create a character first! Use `/create` command.")
+                return
+            
+            # Create test mission
+            mission = ShinobiOSMission(
+                engine=self.engine,
+                id=str(random.randint(10000, 99999)),
+                title="🧪 TEST MISSION: Forest Combat Training",
+                description="An interactive test mission in the forest environment",
+                difficulty="C",
+                village=character_data.get("village", "Unknown"),
+                reward={"experience": 200, "currency": 100},
+                duration=timedelta(hours=1)
+            )
+            
+            # Initialize battle with test data
+            players = [{
+                "user_id": user_id,
+                "name": character_data.get("name", ctx.author.display_name),
+                "level": character_data.get("level", 1),
+                "stats": character_data.get("stats", {})
+            }]
+            
+            mission.initialize_battle(players, "forest")
+            
+            # Store mission
+            self.active_missions[mission.id] = mission
+            self.player_missions[user_id] = mission.id
+            
+            # Create opening embed
+            embed = discord.Embed(
+                title="🧪 **TEST MISSION STARTED** 🧪",
+                description="**Mission:** Forest Combat Training (TEST)\n**Environment:** Forest\n**Difficulty:** C-Rank",
+                color=discord.Color.green()
+            )
+            
+            embed.add_field(
+                name="🎯 Test Features",
+                value="• Interactive Discord buttons\n• Real-time battle updates\n• Jutsu selection interface\n• Mission objectives tracking",
+                inline=False
+            )
+            
+            embed.add_field(
+                name="⚠️ Test Note",
+                value="This is a test mission for admins to verify the interactive mission system is working correctly.",
+                inline=False
+            )
+            
+            await ctx.send(embed=embed)
+            
+            # Start interactive mission battle
+            await asyncio.sleep(2)
+            
+            # Create interaction-like object for testing
+            class TestInteraction:
+                def __init__(self, user):
+                    self.user = user
+                    
+                async def followup_send(self, **kwargs):
+                    await ctx.send(**kwargs)
+            
+            test_interaction = TestInteraction(ctx.author)
+            await self._start_interactive_mission_battle(test_interaction, mission)
+            
+        except Exception as e:
+            await ctx.send(f"❌ Error creating test mission: {str(e)}")
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(MissionCommands(bot))

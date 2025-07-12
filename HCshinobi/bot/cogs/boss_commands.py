@@ -713,33 +713,33 @@ class BossCommands(commands.Cog):
         )
         await interaction.followup.send(embed=embed)
 
-    @app_commands.command(name="solomon_interactive", description="🔥 Interactive Solomon Battle - The Ultimate Boss Challenge!")
-    async def solomon_interactive(self, interaction: discord.Interaction):
+    @commands.command(name="solomon_interactive")
+    @commands.has_permissions(administrator=True)
+    async def solomon_interactive(self, ctx: commands.Context):
         """Start an interactive Solomon battle with Discord buttons."""
-        await interaction.response.defer()
         
         # Load character data
-        character_data = self.load_character_data(interaction.user.id)
+        character_data = self.load_character_data(ctx.author.id)
         if not character_data:
             embed = discord.Embed(
                 title="❌ No Character Found",
                 description="You need a character to challenge Solomon!\n\n"
                            "**Quick Options:**\n"
-                           "• `/create_test_character` - Create a test character for Solomon\n"
+                           "• `!create_test_character` - Create a test character for Solomon\n"
                            "• `/create` - Create a regular character",
                 color=discord.Color.red()
             )
-            await interaction.followup.send(embed=embed)
+            await ctx.send(embed=embed)
             return
         
         # Check if already in battle
-        user_id = str(interaction.user.id)
+        user_id = str(ctx.author.id)
         if user_id in self.active_boss_battles:
             # Resume existing battle
             battle_data = self.active_boss_battles[user_id]
             embed = self.create_interactive_battle_embed(battle_data)
             view = SolomonBattleView(self, battle_data)
-            await interaction.followup.send(embed=embed, view=view)
+            await ctx.send(embed=embed, view=view)
             return
         
         # Check requirements
