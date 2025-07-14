@@ -14,9 +14,13 @@ This roadmap outlines the planned milestones for the Discord bot. Dates are esti
 - Currency rewards for missions
 - Logging improvements and test coverage
 
-## v0.3 – Interactive Battle System
-- Turn-based battle commands
-- Jutsu actions, HP bars, status effects
+## v0.3 – Interactive Battle System (D20 Engine)
+- Turn-based battle commands using D20 dice mechanics
+- Stat-based modifiers for all actions (ninjutsu, taijutsu, genjutsu, etc.)
+- Critical hits, misses, and saving throws
+- Unified jutsu system and progression engine
+- Dynamic battle logs with templates (no hardcoded messages)
+- HP bars, chakra, and status effects
 - Battle persistence and history
 - Experience awards via progression engine
 
@@ -34,4 +38,15 @@ This roadmap outlines the planned milestones for the Discord bot. Dates are esti
 - Persistent database backend
 - Web dashboard for administrators
 - Extensive testing and documentation
+- D20 analytics, advanced modifiers, and extensible battle scripting
+
+## Future
+- Mission chains and multi-part questlines
+- Dynamic, performance-based rewards
+- Team and co-op missions
+- Seasonal/special event missions
+- Custom dice and homebrew D20 rules
+- Real-time battle status updates
+- Analytics and mission/battle completion tracking
+- API integration for external mission/battle generation
 
