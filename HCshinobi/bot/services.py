@@ -8,6 +8,7 @@ from ..core.clan_assignment_engine import ClanAssignmentEngine
 from ..core.progression_engine import ShinobiProgressionEngine
 from ..core.clan_data import ClanData
 from ..core.battle.persistence import BattlePersistence
+from ..core.unified_jutsu_system import UnifiedJutsuSystem
 
 class ServiceContainer:
     def __init__(self, config_or_dir: Optional[BotConfig | str] = None, data_dir: Optional[str] = None):
@@ -21,12 +22,16 @@ class ServiceContainer:
         self.character_system = CharacterSystem()
         self.currency_system = CurrencySystem()
         self.token_system = TokenSystem()
+        self.jutsu_system = UnifiedJutsuSystem()
         self.training_system = TrainingSystem(
             currency_system=self.currency_system,
             character_system=self.character_system,
         )
         self.clan_assignment_engine = ClanAssignmentEngine()
-        self.progression_engine = ShinobiProgressionEngine()
+        self.progression_engine = ShinobiProgressionEngine(
+            character_system=self.character_system,
+            jutsu_system=self.jutsu_system
+        )
         self.clan_data = ClanData(self.data_dir)
         self.battle_persistence = BattlePersistence(self.data_dir)
         self.jutsu_shop_system = None

@@ -984,11 +984,24 @@ class BossCommands(commands.Cog):
         
         character = battle_data["character"]
         
+        from HCshinobi.core.battle_log_templates import ModernBattleLogger
+        
+        battle_logger = ModernBattleLogger()
+        battle_summary = battle_logger.format_modern_battle_summary(
+            mission_name="Solomon Boss Battle",
+            winner=character['name'],
+            loser="Solomon - The Burning Revenant",
+            turn=battle_data['turn'],
+            actions=[{"type": "attack", "actor": character['name'], "jutsu": "Final Strike", "damage": 0}]
+        )
+        
+        # Add Solomon-specific dialogue and congratulations
+        battle_summary += f"\n\n**Solomon:** *'Impossible... You have truly surpassed the ultimate being...'*\n\n"
+        battle_summary += f"**🎉 CONGRATULATIONS! You are now a legend!**"
+        
         embed = discord.Embed(
             title="🏆 **VICTORY!** 🏆",
-            description=f"**{character['name']} has defeated Solomon - The Burning Revenant!**\n\n"
-                       f"**Solomon:** *'Impossible... You have truly surpassed the ultimate being...'*\n\n"
-                       f"**🎉 CONGRATULATIONS! You are now a legend!**",
+            description=battle_summary,
             color=discord.Color.gold()
         )
         
@@ -1090,55 +1103,97 @@ class BossCommands(commands.Cog):
         npc_name="The NPC boss to battle (Victor, Trunka, Chen, Cap, Chris)"
     )
     async def battle_npc(self, interaction: discord.Interaction, npc_name: str):
-        """Battle against an NPC boss with unique mechanics."""
-        await interaction.response.defer()
-        
-        # Load character data
-        character_data = self.load_character_data(interaction.user.id)
-        if not character_data:
-            embed = discord.Embed(
-                title="❌ NO CHARACTER FOUND",
-                description="You need to create a character first! Use `/create_character`",
-                color=discord.Color.red()
-            )
-            await interaction.followup.send(embed=embed)
-            return
+        try:
+            await interaction.response.defer()
+            # Load character data
+            character_data = self.load_character_data(interaction.user.id)
+            if not character_data:
+                embed = discord.Embed(
+                    title="❌ NO CHARACTER FOUND",
+                    description="You need a character to challenge Solomon!\n\n"
+                               "**Quick Options:**\n"
+                               "• `!create_test_character` - Create a test character for Solomon\n"
+                               "• `/create` - Create a regular character",
+                    color=discord.Color.red()
+                )
+                await interaction.followup.send(embed=embed)
+                return
             
-        # Check if already in battle
-        if str(interaction.user.id) in self.active_boss_battles:
-            embed = discord.Embed(
-                title="❌ ALREADY IN BATTLE",
-                description="You are already in a boss battle! Use `/battle_attack` or `/battle_flee`",
-                color=discord.Color.red()
-            )
-            await interaction.followup.send(embed=embed)
-            return
+            # Check if already in battle
+            user_id = str(interaction.user.id)
+            if user_id in self.active_boss_battles:
+                embed = discord.Embed(
+                    title="❌ ALREADY IN BATTLE",
+                    description="You are already in a boss battle! Use `/battle_attack` or `/battle_flee`",
+                    color=discord.Color.red()
+                )
+                await interaction.followup.send(embed=embed)
+                return
             
-        # Start NPC battle
-        success = await self.start_npc_battle(interaction, character_data, npc_name)
-        if success:
-            # Add battle controls
-            embed = discord.Embed(
-                title="🎮 BATTLE CONTROLS",
-                description="Use these commands to fight:",
-                color=discord.Color.green()
-            )
-            embed.add_field(
-                name="**Attack**",
-                value="`/battle_attack <jutsu>` - Use a jutsu to attack",
-                inline=False
-            )
-            embed.add_field(
-                name="**Flee**",
-                value="`/battle_flee` - Attempt to escape the battle",
-                inline=False
-            )
-            embed.add_field(
-                name="**Status**",
-                value="`/battle_status` - Check current battle status",
-                inline=False
-            )
-            await interaction.followup.send(embed=embed)
+            # Check requirements
+            boss_data = self.load_boss_data()
+            requirements = boss_data.get("boss_requirements", {})
+            min_level = requirements.get("min_level", 50)
+            required_achievements = requirements.get("required_achievements", [])
+            
+            # Level check
+            if character_data.get("level", 0) < min_level:
+                embed = discord.Embed(
+                    title="❌ **INSUFFICIENT POWER** ❌",
+                    description=f"**Solomon:** *'You are not yet ready to face the ultimate being.'*\n\n"
+                               f"You must be at least **level {min_level}** to challenge Solomon.\n"
+                               f"Your current level: **{character_data.get('level', 0)}**\n\n"
+                               f"💡 **Tip:** Use `!create_test_character` to create a high-level test character!",
+                    color=0xFF0000
+                )
+                await interaction.followup.send(embed=embed)
+                return
+            
+            # Achievement check
+            for ach in required_achievements:
+                if ach not in character_data.get("achievements", []):
+                    embed = discord.Embed(
+                        title="❌ **INSUFFICIENT POWER** ❌",
+                        description=f"**Solomon:** *'You are not yet ready to face the ultimate being.'*\n\n"
+                                   f"You must have the achievement: **{ach}**\n\n"
+                                   f"💡 **Tip:** Use `!create_test_character` to create a character with all required achievements!",
+                        color=0xFF0000
+                    )
+                    await interaction.followup.send(embed=embed)
+                    return
+            
+            # Initialize battle
+            boss_stats = {
+                "id": boss_data.get("id", "solomon"),
+                "name": boss_data.get("name", "Solomon - The Burning Revenant"),
+                "hp": boss_data.get("hp", 1500),
+                "max_hp": boss_data.get("max_hp", 1500),
+                "level": boss_data.get("level", 70)
+            }
+            
+            battle_data = {
+                "user_id": interaction.user.id,
+                "character": character_data.copy(),
+                "boss": boss_stats,
+                "current_phase": 0,
+                "turn": 1,
+                "battle_log": [],
+                "started_at": datetime.now().isoformat()
+            }
+            
+            # Store battle in memory
+            self.active_boss_battles[user_id] = battle_data
+            
+            # Create battle embed and view
+            embed = self.create_interactive_battle_embed(battle_data)
+            view = SolomonBattleView(self, battle_data)
+            
+            await interaction.followup.send(embed=embed, view=view)
+        except Exception as e:
+            if interaction.response.is_done():
+                await interaction.followup.send(f"Error during NPC battle: {str(e)}", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"Error during NPC battle: {str(e)}", ephemeral=True)
 
     @app_commands.command(name="npc_list", description="List all available NPC bosses and their special mechanics")
     async def npc_list(self, interaction: discord.Interaction):

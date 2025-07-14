@@ -63,13 +63,13 @@
     },
     "boss": {
         "id": "solomon",
-        "name": "Solomon - The Burning Revenant",
-        "hp": 1500,
-        "max_hp": 1500,
-        "level": 70
+        "name": "Solomon Uchiha",
+        "hp": 200,
+        "max_hp": 200,
+        "level": 20
     },
     "current_phase": 0,
     "turn": 1,
     "battle_log": [],
-    "started_at": "2025-07-11T03:12:43.770649"
+    "started_at": "2025-07-13T19:56:20.382886"
 }

@@ -529,9 +529,9 @@ class ShinobiOSEngine:
             "B": {
                 "enemies": [
                     self.create_shinobi("Elite Missing-nin", 15),
-                    self.create_shinobi("Academy Student", 8)
+                    self.create_shinobi("Rogue Genin", 12)
                 ],
-                "objectives": ["Defeat the missing-nin", "Protect the student"],
+                "objectives": ["Defeat the missing-nin", "Eliminate the rogue shinobi"],
                 "environment": env_effect,
                 "duration": timedelta(hours=2)
             },

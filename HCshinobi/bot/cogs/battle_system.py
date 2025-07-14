@@ -808,9 +808,20 @@ class BattleSystemCommands(commands.Cog):
                 loser = battle_data["challenger"]
             
             # Create victory embed
+            from HCshinobi.core.battle_log_templates import ModernBattleLogger
+            
+            battle_logger = ModernBattleLogger()
+            battle_summary = battle_logger.format_modern_battle_summary(
+                mission_name="PvP Battle",
+                winner=winner['name'],
+                loser=loser['name'],
+                turn=battle_data['turn'],
+                actions=[{"type": "attack", "actor": winner['name'], "jutsu": "Victory Strike", "damage": 0}]
+            )
+            
             embed = discord.Embed(
                 title="🏆 **VICTORY!** 🏆",
-                description=f"**{winner['name']}** has defeated **{loser['name']}** in epic combat!",
+                description=battle_summary,
                 color=discord.Color.gold()
             )
             

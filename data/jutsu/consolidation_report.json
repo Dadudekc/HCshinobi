@@ -1,0 +1,48 @@
+{
+  "summary": {
+    "total_jutsu": 155,
+    "duplicates_merged": 9,
+    "errors": 0
+  },
+  "by_source": {
+    "master_list": 125,
+    "core": 21,
+    "core+shinobios": 9
+  },
+  "by_element": {
+    "Katon": 23,
+    "Suiton": 20,
+    "Doton": 20,
+    "Raiton": 20,
+    "Fuuton": 20,
+    "null": 20,
+    "None": 1,
+    "Blaze": 1,
+    "none": 18,
+    "fire": 4,
+    "water": 2,
+    "earth": 2,
+    "lightning": 2,
+    "wind": 2
+  },
+  "by_rank": {
+    "E": 50,
+    "D": 25,
+    "C": 31,
+    "B": 24,
+    "A": 17,
+    "S": 8
+  },
+  "duplicates": [
+    "shadow_clone",
+    "fireball",
+    "water_dragon",
+    "earth_wall",
+    "lightning_bolt",
+    "wind_scythe",
+    "rasengan",
+    "chidori",
+    "amaterasu"
+  ],
+  "errors": []
+}

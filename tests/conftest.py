@@ -21,7 +21,7 @@ from HCshinobi.core.clan_assignment_engine import ClanAssignmentEngine
 from HCshinobi.core.constants import CHARACTERS_SUBDIR, CURRENCY_FILE, TOKEN_FILE, TRAINING_SESSIONS_FILE, TRAINING_COOLDOWNS_FILE, CLANS_SUBDIR
 from HCshinobi.core.progression_engine import ShinobiProgressionEngine
 from HCshinobi.bot.cogs.character_commands import CharacterCommands
-from HCshinobi.bot.cogs.training import TrainingCommands
+from HCshinobi.bot.cogs.training_commands import TrainingCommands
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "temp_test_data")
 TEST_CHARS_DIR = os.path.join(TEST_DATA_DIR, CHARACTERS_SUBDIR)

@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from enum import Enum
 
 # Import necessary classes from the application
-from HCshinobi.bot.cogs.training import TrainingCommands, TrainingView, TrainingIntensity, TRAINING_ATTRIBUTES
+from HCshinobi.bot.cogs.training_commands import TrainingCommands, TrainingView, TrainingIntensity, TRAINING_ATTRIBUTES
 from HCshinobi.core.character import Character
 from HCshinobi.core.character_system import CharacterSystem
 from HCshinobi.core.training_system import TrainingSystem

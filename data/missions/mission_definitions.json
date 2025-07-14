@@ -2,11 +2,81 @@
   "tutorial_fetch": {
     "name": "Tutorial: Fetch Quest",
     "rank": "D",
-    "description": "Fetch 5 herbs.",
+    "description": "Fetch 5 herbs from the forest.",
     "reward": {
       "ryo": 50,
       "exp": 20
     },
     "achievement_key": "first_mission"
+  },
+  "bandit_hunt": {
+    "name": "Bandit Hunt",
+    "rank": "D",
+    "description": "Eliminate bandits threatening the village outskirts.",
+    "reward": {
+      "ryo": 100,
+      "exp": 50
+    },
+    "achievement_key": "first_combat"
+  },
+  "missing_nin_capture": {
+    "name": "Missing-nin Capture",
+    "rank": "C",
+    "description": "Track down and capture a rogue shinobi.",
+    "reward": {
+      "ryo": 200,
+      "exp": 100
+    },
+    "achievement_key": "ninja_hunter"
+  },
+  "escort_mission": {
+    "name": "Merchant Escort",
+    "rank": "C",
+    "description": "Protect a merchant caravan from bandits.",
+    "reward": {
+      "ryo": 150,
+      "exp": 75
+    },
+    "achievement_key": "protector"
+  },
+  "intelligence_gathering": {
+    "name": "Intelligence Gathering",
+    "rank": "B",
+    "description": "Infiltrate enemy territory and gather information.",
+    "reward": {
+      "ryo": 300,
+      "exp": 150
+    },
+    "achievement_key": "spy_master"
+  },
+  "elite_elimination": {
+    "name": "Elite Elimination",
+    "rank": "B",
+    "description": "Take down a high-ranking enemy shinobi.",
+    "reward": {
+      "ryo": 400,
+      "exp": 200
+    },
+    "achievement_key": "elite_hunter"
+  },
+  "village_defense": {
+    "name": "Village Defense",
+    "rank": "A",
+    "description": "Defend the village from a coordinated attack.",
+    "reward": {
+      "ryo": 500,
+      "exp": 250
+    },
+    "achievement_key": "village_protector"
+  },
+  "legendary_hunt": {
+    "name": "Legendary Hunt",
+    "rank": "S",
+    "description": "Face off against a legendary shinobi.",
+    "reward": {
+      "ryo": 1000,
+      "exp": 500
+    },
+    "achievement_key": "legendary_hunter"
   }
 }

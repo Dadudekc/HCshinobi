@@ -1,0 +1,42 @@
+{
+  "battle_id": "modern_battle_template",
+  "mission_name": "Modern Combat Mission",
+  "mission_type": "elimination",
+  "difficulty": "C",
+  "environment": "forest",
+  "participants": {
+    "player": {
+      "name": "Player Character",
+      "hp": 100,
+      "max_hp": 100,
+      "chakra": 100,
+      "max_chakra": 100,
+      "level": 1,
+      "rank": "Genin"
+    },
+    "enemy": {
+      "name": "Enemy Shinobi",
+      "hp": 50,
+      "max_hp": 50,
+      "chakra": 40,
+      "max_chakra": 40,
+      "level": 1,
+      "rank": "Enemy"
+    }
+  },
+  "battle_log": [
+    {
+      "turn": 1,
+      "actor": "Player Character",
+      "target": "Enemy Shinobi",
+      "jutsu": "Basic Attack",
+      "damage": 25,
+      "success": true,
+      "narration": "Player Character attacks Enemy Shinobi for 25 damage!"
+    }
+  ],
+  "current_turn": 1,
+  "status": "active",
+  "created_at": "2024-01-01T00:00:00Z",
+  "updated_at": "2024-01-01T00:00:00Z"
+}

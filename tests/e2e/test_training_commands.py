@@ -12,7 +12,7 @@ from HCshinobi.bot.bot import HCBot
 # from HCshinobi.core.character_system import CharacterSystem
 from HCshinobi.core.training_system import TrainingSystem, TrainingSession, TrainingIntensity
 # from HCshinobi.core.currency_system import CurrencySystem
-from HCshinobi.bot.cogs.training import TrainingCommands, TrainingView
+from HCshinobi.bot.cogs.training_commands import TrainingCommands, TrainingView
 from HCshinobi.core.character import Character
 from HCshinobi.core.character_system import CharacterSystem
 from HCshinobi.core.currency_system import CurrencySystem

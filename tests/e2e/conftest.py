@@ -22,9 +22,9 @@ from HCshinobi.core.token_system import TokenSystem
 from HCshinobi.core.clan_assignment_engine import ClanAssignmentEngine
 from HCshinobi.core.progression_engine import ShinobiProgressionEngine
 from HCshinobi.bot.cogs.character_commands import CharacterCommands
-from HCshinobi.bot.cogs.training import TrainingCommands
+from HCshinobi.bot.cogs.training_commands import TrainingCommands
 from HCshinobi.core.clan_data import ClanData
-from HCshinobi.core.personality_modifiers import PersonalityModifiers
+# from HCshinobi.core.personality_modifiers import PersonalityModifiers  # Module doesn't exist
 from HCshinobi.core.constants import DATA_DIR as DEFAULT_PROJECT_DATA_DIR
 
 logger = logging.getLogger(__name__) # Added

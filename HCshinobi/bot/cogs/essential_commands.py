@@ -26,7 +26,7 @@ class EssentialCommands(commands.Cog):
         # Character Commands
         embed.add_field(
             name="🥷 Character",
-            value="• `/create` - Create character ⚰️\n• `/profile` - View profile\n• `/delete_character` - Delete permanently",
+            value="• `/create` - Create character ⚰️\n• `/profile` - View profile\n• `/jutsu` - View jutsu\n• `/delete_character` - Delete permanently",
             inline=True
         )
         
@@ -75,53 +75,7 @@ class EssentialCommands(commands.Cog):
         embed.set_footer(text="⚰️ PERMADEATH SYSTEM: One character until death | HCShinobi")
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
-    @app_commands.command(name="jutsu", description="Browse and manage your jutsu collection")
-    async def jutsu_command(self, interaction: discord.Interaction) -> None:
-        """Display user's jutsu collection and available jutsu."""
-        embed = discord.Embed(
-            title="🌪️ Jutsu Collection",
-            description="Your ninja techniques and abilities",
-            color=0x0099ff
-        )
-        
-        # Basic jutsu that all players have
-        embed.add_field(
-            name="🔥 Fire Release (Katon)",
-            value="• Fireball Jutsu\n• Phoenix Flower Jutsu\n• Dragon Fire Jutsu",
-            inline=True
-        )
-        
-        embed.add_field(
-            name="💧 Water Release (Suiton)", 
-            value="• Water Bullet Jutsu\n• Water Dragon Jutsu\n• Water Prison Jutsu",
-            inline=True
-        )
-        
-        embed.add_field(
-            name="⚡ Lightning Release (Raiton)",
-            value="• Lightning Beast\n• Chidori\n• Lightning Bolt",
-            inline=True
-        )
-        
-        embed.add_field(
-            name="🌍 Earth Release (Doton)",
-            value="• Earth Wall Jutsu\n• Mud Dragon\n• Earth Spear",
-            inline=True
-        )
-        
-        embed.add_field(
-            name="🌪️ Wind Release (Futon)",
-            value="• Wind Bullet\n• Great Breakthrough\n• Wind Blade",
-            inline=True
-        )
-        
-        embed.add_field(
-            name="⚔️ Usage",
-            value="Use jutsu in:\n• `/solomon` battles\n• `/battle_npc` fights\n• `/shinobios_mission` missions",
-            inline=False
-        )
-        
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+
 
     @app_commands.command(name="achievements", description="View your achievements and progress")
     async def achievements_command(self, interaction: discord.Interaction) -> None:

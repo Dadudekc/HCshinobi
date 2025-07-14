@@ -1,18 +1,18 @@
 """
-Interactive ShinobiOS Mission Commands - Integrated with battle simulation.
+Interactive Mission Commands - Integrated with d20 battle simulation.
 
-Enhanced with Discord UI components for interactive mission battles similar to Solomon and PvP battles.
+Enhanced with Discord UI components for interactive mission battles with d20 mechanics.
 
 Features:
 - Interactive mission battle interface with Discord buttons
-- Real-time mission battle updates
+- Real-time mission battle updates with d20 rolls
 - Jutsu selection during missions
 - Mission objectives tracking
-- Enhanced battle embeds
+- Enhanced battle embeds with roll results
 
 Commands:
 - /mission_board - View available mission types
-- /shinobios_mission - Start interactive mission battle
+- /mission - Start interactive mission battle with d20 mechanics
 - /mission_status - Check mission progress (enhanced with interactive resume)
 - /abandon_mission - Leave current mission
 """
@@ -31,6 +31,17 @@ from ...core.missions.shinobios_engine import ShinobiOSEngine
 from ...core.missions.shinobios_mission import ShinobiOSMission, BattleMissionType
 from ...core.missions.mission import MissionDifficulty
 from ...utils.embeds import create_error_embed, create_success_embed, create_info_embed
+
+def roll_d20(modifier=0):
+    """Roll a d20 with modifier and return detailed results."""
+    roll = random.randint(1, 20)
+    total = roll + modifier
+    crit = None
+    if roll == 20:
+        crit = 'success'
+    elif roll == 1:
+        crit = 'failure'
+    return {'roll': roll, 'modifier': modifier, 'total': total, 'crit': crit}
 
 
 class MissionBattleView(discord.ui.View):
@@ -307,13 +318,13 @@ class MissionCommands(commands.Cog):
         
         embed.add_field(
             name="⚔️ Commands",
-            value="• `/shinobios_mission` - Start an interactive battle mission\n• Interactive buttons for combat (Attack/Status/Objectives/Help)\n• `/mission_status` - Check mission progress\n• `/abandon_mission` - Leave current mission",
+            value="• `/mission` - Start an interactive battle mission\n• Interactive buttons for combat (Attack/Status/Objectives/Help)\n• `/mission_status` - Check mission progress\n• `/abandon_mission` - Leave current mission",
             inline=False
         )
         
         await interaction.response.send_message(embed=embed)
 
-    @app_commands.command(name="shinobios_mission", description="Start a ShinobiOS battle mission")
+    @app_commands.command(name="mission", description="Start a d20 battle mission")
     @app_commands.describe(
         difficulty="Mission difficulty (D/C/B/A/S)",
         environment="Battle environment (forest/desert/mountain/urban/underground/water/volcanic)"
@@ -336,76 +347,104 @@ class MissionCommands(commands.Cog):
             app_commands.Choice(name="Volcanic", value="volcanic")
         ]
     )
-    async def start_shinobios_mission(self, interaction: discord.Interaction, 
-                                     difficulty: str, environment: str):
-        """Start a new ShinobiOS battle mission"""
-        user_id = str(interaction.user.id)
+    async def start_mission(self, interaction: discord.Interaction, 
+                           difficulty: str, environment: str):
+        """Start a d20 battle mission with enhanced mechanics."""
+        await interaction.response.defer()
         
-        # Check if player is already in a mission
-        if user_id in self.player_missions:
-            mission_id = self.player_missions[user_id]
-            if mission_id in self.active_missions:
-                await interaction.response.send_message(
-                    embed=create_error_embed("You are already in an active mission!"),
-                    ephemeral=True
+        try:
+            # Load character data
+            character_data = self._load_character_data(str(interaction.user.id))
+            if not character_data:
+                embed = discord.Embed(
+                    title="❌ NO CHARACTER FOUND",
+                    description="You need to create a character first! Use `/create`",
+                    color=discord.Color.red()
                 )
+                await interaction.followup.send(embed=embed)
                 return
-        
-        # Load character data
-        character_data = self._load_character_data(user_id)
-        if not character_data:
-            await interaction.response.send_message(
-                embed=create_error_embed("Character not found! Create a character first."),
+            
+            # Check if already in mission
+            if str(interaction.user.id) in self.active_missions:
+                embed = discord.Embed(
+                    title="❌ ALREADY IN MISSION",
+                    description="You are already in a mission! Use `/mission_status` to check progress.",
+                    color=discord.Color.red()
+                )
+                await interaction.followup.send(embed=embed)
+                return
+            
+            # Create mission with d20 mechanics
+            mission = ShinobiOSMission(
+                title=f"{difficulty}-Rank Mission",
+                description=f"A {difficulty}-rank mission in {environment} environment",
+                difficulty=MissionDifficulty(difficulty),
+                reward={
+                    "experience": {"D": 50, "C": 100, "B": 200, "A": 400, "S": 800}[difficulty],
+                    "currency": {"D": 100, "C": 250, "B": 500, "A": 1000, "S": 2000}[difficulty]
+                },
+                battle_type=BattleMissionType.ELIMINATION
+            )
+            
+            # Initialize battle with d20 mechanics
+            mission.initialize_battle([character_data], environment)
+            
+            # Store mission
+            self.active_missions[str(interaction.user.id)] = mission
+            
+            # Generate opening narration
+            opening_narration = self._generate_opening_narration(mission, character_data)
+            
+            # Create mission embed with d20 mechanics info
+            embed = discord.Embed(
+                title=f"🎯 **{difficulty}-RANK MISSION STARTED** 🎯",
+                description=opening_narration,
+                color=discord.Color.blue()
+            )
+            
+            embed.add_field(
+                name="🎲 **d20 Battle System**",
+                value="This mission uses d20 mechanics:\n"
+                      "• **Attack Rolls:** d20 + DEX modifier vs enemy AC\n"
+                      "• **Saving Throws:** d20 + ability modifier vs jutsu DC\n"
+                      "• **Critical Hits:** Natural 20 = double damage\n"
+                      "• **Critical Failures:** Natural 1 = automatic miss",
+                inline=False
+            )
+            
+            embed.add_field(
+                name="🌍 **Environment**",
+                value=f"**{environment.title()}** - Affects battle conditions and jutsu effectiveness",
+                inline=True
+            )
+            
+            embed.add_field(
+                name="💰 **Rewards**",
+                value=f"**EXP:** {mission.reward['experience']}\n**Ryo:** {mission.reward['currency']}",
+                inline=True
+            )
+            
+            embed.add_field(
+                name="⚔️ **Battle Controls**",
+                value="Use the buttons below to:\n"
+                      "• **Attack:** Choose jutsu and target\n"
+                      "• **Status:** View battle statistics\n"
+                      "• **Objectives:** Check mission goals\n"
+                      "• **Abandon:** Leave mission (lose progress)",
+                inline=False
+            )
+            
+            # Create interactive battle view
+            view = MissionBattleView(self, mission, interaction.user.id)
+            
+            await interaction.followup.send(embed=embed, view=view)
+            
+        except Exception as e:
+            await interaction.followup.send(
+                embed=create_error_embed(f"Error starting mission: {str(e)}"),
                 ephemeral=True
             )
-            return
-        
-        # Create mission
-        mission = ShinobiOSMission(
-            engine=self.engine,
-            id=str(random.randint(10000, 99999)),
-            title=f"{difficulty}-Rank Mission: {environment.title()} Battle",
-            description=f"An intense battle in the {environment} environment",
-            difficulty=difficulty,
-            village=character_data.get("village", "Unknown"),
-            reward={"experience": 100, "currency": 50},
-            duration=timedelta(hours=2)
-        )
-        
-        # Initialize battle
-        players = [{
-            "user_id": user_id,
-            "name": character_data.get("name", interaction.user.display_name),
-            "level": character_data.get("level", 1),
-            "stats": character_data.get("stats", {})
-        }]
-        
-        mission.initialize_battle(players, environment)
-        
-        # Store mission
-        self.active_missions[mission.id] = mission
-        self.player_missions[user_id] = mission.id
-        
-        # Create opening narration
-        opening_narration = self._generate_opening_narration(mission, character_data)
-        
-        embed = discord.Embed(
-            title="🌅 Mission Started",
-            description=opening_narration,
-            color=0x00ff00
-        )
-        embed.add_field(
-            name="Mission Details",
-            value=f"**Difficulty:** {difficulty}-Rank\n**Environment:** {environment.title()}\n**Duration:** 2 hours",
-            inline=False
-        )
-        
-        await interaction.response.send_message(embed=embed)
-        
-        # Start interactive mission battle
-        await asyncio.sleep(2)
-        await self._start_interactive_mission_battle(interaction, mission)
-    
+
     def _generate_opening_narration(self, mission: ShinobiOSMission, character_data: Dict) -> str:
         """Generate immersive opening narration"""
         environment = mission.battle_state.environment.name if mission.battle_state.environment else "Unknown"
@@ -501,93 +540,165 @@ class MissionCommands(commands.Cog):
         return embed
 
     async def execute_mission_attack(self, interaction: discord.Interaction, mission: ShinobiOSMission, jutsu_name: str, user_id: int):
-        """Execute a mission attack with interactive feedback."""
+        """Execute a mission attack with d20 mechanics."""
         try:
-            user_id_str = str(user_id)
-            
-            # Get available enemies for auto-targeting
-            enemies = mission.battle_state.get_enemies()
-            alive_enemies = [e for e in enemies if e.stats.health > 0]
-            
-            if not alive_enemies:
-                await interaction.followup.send("✅ No enemies remaining! Mission objectives may be complete.", ephemeral=True)
+            character_data = self._load_character_data(str(user_id))
+            if not character_data:
+                await interaction.followup.send("❌ Character data not found!", ephemeral=True)
                 return
             
-            # Auto-target first alive enemy
-            target_id = alive_enemies[0].user_id
-            
-            # Execute action
-            result = await mission.execute_player_action(user_id_str, jutsu_name, target_id)
-            
-            if not result["success"]:
-                await interaction.followup.send(f"❌ Attack failed: {result['error']}", ephemeral=True)
+            # Get battle state
+            if not mission.battle_state:
+                await interaction.followup.send("❌ Battle not initialized!", ephemeral=True)
                 return
             
-            # Get action details
-            action = result["action"]
+            # Find player and enemies
+            player = next((p for p in mission.battle_state.participants if p.user_id == str(user_id) and p.is_player), None)
+            enemies = [p for p in mission.battle_state.participants if not p.is_player and p.status != "defeated"]
             
-            # Update mission embed
-            embed = self._create_interactive_mission_embed(mission)
+            if not player or not enemies:
+                await interaction.followup.send("❌ Invalid battle state!", ephemeral=True)
+                return
             
-            # Add attack results to embed
-            embed.add_field(
-                name="💥 Your Attack",
-                value=f"**{jutsu_name}** → **{action['target']}**\n"
-                      f"Damage: {action['damage']} | Success: {'✅' if action['success'] else '❌'}",
-                inline=False
-            )
+            # Select target (auto-target for now)
+            target = enemies[0]
             
-            view = MissionBattleView(self, mission, user_id)
+            # Check if character has the jutsu
+            if jutsu_name not in character_data.get("jutsu", []):
+                await interaction.followup.send(f"❌ You don't know the jutsu **{jutsu_name}**!", ephemeral=True)
+                return
             
-            await interaction.followup.send(embed=embed, view=view)
+            # Calculate attack roll with d20 mechanics
+            dex_mod = (character_data.get("dexterity", 10) - 10) // 2  # DEX modifier
+            target_ac = target.stats.defense + 10  # Convert defense to AC
+            attack_result = roll_d20(dex_mod)
             
-            # Execute enemy turn after a delay
-            await asyncio.sleep(1.5)
-            await self._execute_enemy_turn(interaction, mission, user_id)
+            # Create attack log
+            log = f"⚔️ **{character_data['name']}** uses **{jutsu_name}**! (Roll: {attack_result['roll']} + {attack_result['modifier']} = {attack_result['total']} vs AC {target_ac})"
+            
+            # Crit/fail logic
+            if attack_result['crit'] == 'success':
+                log += " — **CRITICAL HIT!**"
+            elif attack_result['crit'] == 'failure':
+                log += " — **CRITICAL FAILURE!**"
+            
+            # Hit/miss logic
+            if attack_result['crit'] == 'failure' or attack_result['total'] < target_ac:
+                log += " — **Misses!**"
+                mission.battle_state.add_battle_log(log)
+            else:
+                # Calculate damage with d20 mechanics
+                base_damage = 20 + (character_data.get("ninjutsu", 0) // 5)
+                damage = random.randint(int(base_damage * 0.8), int(base_damage * 1.2))
+                
+                # Critical hit doubles damage
+                if attack_result['crit'] == 'success':
+                    damage *= 2
+                
+                # Apply damage
+                actual_damage = target.stats.take_damage(damage)
+                log += f" — **Hits for {actual_damage} damage!**"
+                mission.battle_state.add_battle_log(log)
+                
+                # Check if target is defeated
+                if target.stats.health <= 0:
+                    target.status = "defeated"
+                    mission.battle_state.add_battle_log(f"💀 **{target.stats.name}** has been defeated!")
+            
+            # Execute enemy turn with d20 mechanics
+            enemy_actions = await self._execute_enemy_turn_d20(interaction, mission, user_id)
             
             # Check mission completion
-            completion = result["completion_status"]
+            completion = mission._check_mission_completion()
             if completion["completed"]:
                 if completion["status"] == "success":
                     await self._handle_interactive_mission_success(interaction, mission)
                 else:
                     await self._handle_interactive_mission_failure(interaction, mission)
-                    
+                return
+            
+            # Update mission display
+            embed = self._create_interactive_mission_embed(mission)
+            view = MissionBattleView(self, mission, user_id)
+            
+            await interaction.followup.send(embed=embed, view=view)
+            
         except Exception as e:
             await interaction.followup.send(f"❌ Error during attack: {str(e)}", ephemeral=True)
 
-    async def _execute_enemy_turn(self, interaction: discord.Interaction, mission: ShinobiOSMission, user_id: int):
-        """Execute enemy turn in interactive mission."""
+    async def _execute_enemy_turn_d20(self, interaction: discord.Interaction, mission: ShinobiOSMission, user_id: int):
+        """Execute enemy turn with d20 mechanics."""
         try:
-            enemy_actions = await mission.execute_enemy_turn()
+            character_data = self._load_character_data(str(user_id))
+            if not character_data:
+                return []
             
-            if enemy_actions:
-                # Create enemy action embed
-                embed = discord.Embed(
-                    title="👹 **ENEMY TURN** 👹",
-                    description="The enemies strike back!",
-                    color=discord.Color.dark_red()
-                )
+            player = next((p for p in mission.battle_state.participants if p.user_id == str(user_id) and p.is_player), None)
+            enemies = [p for p in mission.battle_state.participants if not p.is_player and p.status != "defeated"]
+            
+            if not player or not enemies:
+                return []
+            
+            actions = []
+            
+            for enemy in enemies:
+                if enemy.stats.health <= 0:
+                    continue
                 
-                for i, action in enumerate(enemy_actions[:3]):  # Show max 3 actions
-                    embed.add_field(
-                        name=f"Attack {i+1}: {action['actor']}",
-                        value=f"**{action['jutsu']}** → **{action['target']}**\n"
-                              f"Damage: {action['damage']}",
-                        inline=True
-                    )
+                # Enemy attack roll with d20 mechanics
+                enemy_dex_mod = (enemy.stats.speed - 10) // 2  # Use speed as DEX equivalent
+                player_ac = character_data.get("defense", 10) + 10  # Convert defense to AC
+                attack_result = roll_d20(enemy_dex_mod)
                 
-                await interaction.followup.send(embed=embed)
+                # Get enemy jutsu
+                available_jutsu = mission.engine.get_available_jutsu(enemy.stats)
+                jutsu = random.choice(available_jutsu) if available_jutsu else None
                 
-                # Send updated mission status after enemy turn
-                await asyncio.sleep(1)
-                updated_embed = self._create_interactive_mission_embed(mission)
-                view = MissionBattleView(self, mission, user_id)
-                
-                await interaction.followup.send(embed=updated_embed, view=view)
+                if jutsu:
+                    log = f"👹 **{enemy.stats.name}** uses **{jutsu.name}**! (Roll: {attack_result['roll']} + {attack_result['modifier']} = {attack_result['total']} vs AC {player_ac})"
+                    
+                    # Crit/fail logic
+                    if attack_result['crit'] == 'success':
+                        log += " — **CRITICAL HIT!**"
+                    elif attack_result['crit'] == 'failure':
+                        log += " — **CRITICAL FAILURE!**"
+                    
+                    # Hit/miss logic
+                    if attack_result['crit'] == 'failure' or attack_result['total'] < player_ac:
+                        log += " — **Misses!**"
+                        mission.battle_state.add_battle_log(log)
+                    else:
+                        # Calculate damage with d20 mechanics
+                        base_damage = jutsu.damage
+                        damage = random.randint(int(base_damage * 0.8), int(base_damage * 1.2))
+                        
+                        # Critical hit doubles damage
+                        if attack_result['crit'] == 'success':
+                            damage *= 2
+                        
+                        # Apply damage
+                        actual_damage = player.stats.take_damage(damage)
+                        log += f" — **Hits for {actual_damage} damage!**"
+                        mission.battle_state.add_battle_log(log)
+                        
+                        actions.append({
+                            "actor": enemy.stats.name,
+                            "target": player.stats.name,
+                            "jutsu": jutsu.name,
+                            "damage": actual_damage,
+                            "narration": log
+                        })
+                        
+                        # Check if player is defeated
+                        if player.stats.health <= 0:
+                            player.status = "defeated"
+                            mission.battle_state.add_battle_log(f"💀 **{character_data['name']}** has been defeated!")
+            
+            return actions
             
         except Exception as e:
             await interaction.followup.send(f"❌ Error during enemy turn: {str(e)}", ephemeral=True)
+            return []
 
     async def _handle_interactive_mission_success(self, interaction: discord.Interaction, mission: ShinobiOSMission):
         """Handle interactive mission success."""

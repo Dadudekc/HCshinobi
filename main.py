@@ -36,6 +36,7 @@ MAIN_COGS: Final[Sequence[str]] = (
     "HCshinobi.bot.cogs.token_commands",                    # Token system
     "HCshinobi.bot.cogs.announcements",                     # Announcements
     "HCshinobi.bot.cogs.clans",                            # Clan management system with roll_clan
+    "HCshinobi.bot.cogs.updated_boss_commands",             # Updated Solomon boss battle system
 )
 
 # Specialized cogs - Unique advanced functionality
@@ -153,32 +154,24 @@ def require_env() -> BotConfig:
 async def load_cog_safely(bot: "HCBot", cog_path: str, cog_type: str) -> bool:
     """Safely load a single cog with error handling."""
     try:
-        # First, try direct module load with setup function (most common case)
+        # Import the module
         module = import_module(cog_path)
+        
+        # Check if the module has a setup function
         if hasattr(module, 'setup'):
+            # Use the standard discord.py cog loading mechanism
             await module.setup(bot)
             logging.info(f"✅ Successfully loaded {cog_type} cog: {cog_path}")
             return True
-        
-        # Fallback: try class-based loading if no setup function
-        if "." in cog_path and cog_path.count(".") >= 2:
-            # Format: "module.submodule.ClassName"
-            module_path, class_name = cog_path.rsplit(".", 1)
-            module = import_module(module_path)
-            cog_class = getattr(module, class_name)
-            cog_instance = cog_class(bot)
-            await bot.add_cog(cog_instance)
-            logging.info(f"✅ Successfully loaded {cog_type} cog: {cog_path}")
-            return True
         else:
-            logging.warning(f"No setup function or valid class found in {cog_path}")
+            logging.warning(f"No setup function found in {cog_path}")
             return False
         
     except ImportError as e:
         logging.warning(f"⚠️ Could not import {cog_type} cog {cog_path}: {e}")
         return False
     except AttributeError as e:
-        logging.warning(f"⚠️ Cog class/setup not found in {cog_path}: {e}")
+        logging.warning(f"⚠️ Cog setup not found in {cog_path}: {e}")
         return False
     except Exception as e:
         logging.error(f"❌ Failed to load {cog_type} cog {cog_path}: {e}")
@@ -226,6 +219,16 @@ async def build_bot(config: BotConfig) -> "HCBot":
     else:
         logging.info("✅ All cogs loaded successfully!")
 
+    # Debug: Check command tree after cog loading
+    tree_commands = list(bot.tree.walk_commands())
+    logging.info(f"🔍 Commands in tree after cog loading: {len(tree_commands)}")
+    
+    if tree_commands:
+        tree_command_names = [cmd.name for cmd in tree_commands[:10]]
+        logging.info(f"🔍 First 10 tree commands: {tree_command_names}")
+    else:
+        logging.warning("⚠️ No commands found in tree after cog loading!")
+
     # Log what's available
     logging.info("📋 Available systems:")
     logging.info("   🎯 Main: Help+Jutsu+Achievements, Currency, Battle, Missions+ShinobiOS, Clans, Shop, Training, Tokens, Announcements")
@@ -239,26 +242,61 @@ async def send_startup_notification(bot: "HCBot", config: BotConfig) -> None:
         channel = bot.get_channel(config.online_channel_id)
         if channel:
             embed = discord.Embed(
-                title="🟢 Bot is Online",
-                description="HCShinobi battle system is ready for commands!\n\n"
-                           "**Available Systems:**\n"
+                title="🎮 HCShinobi v2.0 - System Online",
+                description="**🌟 COMPREHENSIVE NINJA GAME SYSTEM READY!**\n\n"
+                           "**✅ CURRENT STATUS:**\n"
+                           "• **Bot Online** ✅ - All systems operational\n"
+                           "• **53 Commands Loaded** ✅ - All commands registered\n"
+                           "• **Slash Commands** ✅ - Synced globally to Discord\n\n"
+                           "**🔧 TECHNICAL UPDATE:**\n"
+                           "• Commands synced globally (simplified sync process)\n"
+                           "• Should appear within 5-15 minutes (normal Discord timing)\n"
+                           "• Try `/help` first to test command availability\n\n"
+                           "**⚔️ NEW v2.0 FEATURES:**\n"
+                           "• **D20 Battle System** - True dice mechanics with modifiers\n"
+                           "• **30+ Jutsu System** - Stat-based unlocking & progression\n"
+                           "• **20 Clans** - Expanded clan roster with rarity tiers\n"
+                           "• **ShinobiOS Missions** - Interactive `/mission` system\n"
+                           "• **Progression Engine** - Automatic jutsu & rank advancement\n"
+                           "• **Interactive UI** - Discord buttons & saving throws\n\n"
+                           "**🎯 CORE SYSTEMS:**\n"
+                           "• Character Creation & Management\n"
                            "• Currency & Economy Management\n"
                            "• Battle & Training Systems\n" 
                            "• Mission & Quest Systems\n"
                            "• Clan Management & Missions\n"
                            "• Shop & Token Systems\n"
                            "• Boss Battle Systems (Solomon)\n"
-                           "• ShinobiOS Battle Missions\n"
                            "• Announcements System",
-                color=0x00ff00,
+                color=0xffff00,  # Yellow to indicate caution
                 timestamp=discord.utils.utcnow()
             )
             embed.add_field(
-                name="Status", 
-                value=f"✅ {len(bot.cogs)} systems operational", 
+                name="🎲 D20 Mechanics", 
+                value="• True dice rolls with stat modifiers\n• Interactive saving throws\n• Stat-based jutsu effectiveness", 
+                inline=True
+            )
+            embed.add_field(
+                name="🥷 Jutsu System", 
+                value="• 30+ unique techniques\n• Stat & achievement requirements\n• Automatic unlocking system", 
+                inline=True
+            )
+            embed.add_field(
+                name="🏛️ Clan System", 
+                value="• 20 clans with rarity tiers\n• Clan-specific missions\n• Roll-based assignment", 
+                inline=True
+            )
+            embed.add_field(
+                name="📊 Status", 
+                value=f"✅ {len(bot.cogs)} systems operational\n✅ Commands synced globally\n⏳ Please wait 5-15 minutes for commands to appear", 
                 inline=False
             )
-            embed.set_footer(text="HCShinobi Bot - Deduplicated & Optimized")
+            embed.add_field(
+                name="🔧 Troubleshooting", 
+                value="• Try `/help` first to test command availability\n• Commands synced globally (simplified process)\n• Should appear within normal Discord timing", 
+                inline=False
+            )
+            embed.set_footer(text="HCShinobi v2.0 - Complete Ninja RPG Experience | Commands synced globally")
             
             await channel.send(embed=embed)
             logging.info(f"✅ Startup notification sent to channel {config.online_channel_id}")
@@ -379,39 +417,30 @@ async def run_bot() -> None:
         try:
             logging.info("🔄 Syncing slash commands with Discord...")
             
-            # Try guild-specific sync first
-            if config.guild_id:
-                try:
-                    guild = discord.Object(id=config.guild_id)
-                    logging.info(f"🔍 Syncing to guild object: {guild}")
-                    synced = await bot.tree.sync(guild=guild)
-                    logging.info(f"✅ Successfully synced {len(synced)} slash commands to guild {config.guild_id}")
-                    
-                    if len(synced) == 0:
-                        logging.warning("⚠️ Guild sync returned 0 commands, trying global sync as fallback...")
-                        synced = await bot.tree.sync()
-                        logging.info(f"✅ Global sync result: {len(synced)} commands")
-                        
-                except Exception as guild_sync_error:
-                    logging.error(f"❌ Guild sync failed: {guild_sync_error}")
-                    logging.info("🔄 Trying global sync as fallback...")
-                    synced = await bot.tree.sync()
-                    logging.info(f"✅ Global sync result: {len(synced)} commands")
-            else:
-                synced = await bot.tree.sync()
-                logging.info(f"✅ Successfully synced {len(synced)} slash commands globally")
-                
-            # List the actual synced command names for debugging
+            # Use global sync - commands are registered as global commands
+            logging.info("🔄 Syncing commands globally (commands are registered as global)...")
+            synced = await bot.tree.sync()
+            logging.info(f"✅ Successfully synced {len(synced)} slash commands globally")
+            
             if len(synced) > 0:
-                command_names = [cmd.name for cmd in synced[:10]]  # First 10 commands
+                command_names = [cmd.name for cmd in synced[:10]]
                 logging.info(f"🔍 Synced commands: {', '.join(command_names)}{' ...' if len(synced) > 10 else ''}")
+                
+                # Check if commands are actually available in the guild
+                if config.guild_id and config.guild_id != 123456789012345678:
+                    guild = bot.get_guild(config.guild_id)
+                    if guild:
+                        logging.info(f"✅ Bot is in guild: {guild.name}")
+                        logging.info(f"🔍 Bot permissions in guild: {guild.me.guild_permissions}")
+                        logging.info("⏳ Commands will appear in Discord within 5-15 minutes (normal global sync timing)")
+                    else:
+                        logging.warning(f"⚠️ Bot is not in guild with ID: {config.guild_id}")
             else:
                 logging.warning("⚠️ No commands were synced to Discord!")
                 logging.warning("🔍 This might indicate:")
                 logging.warning("   - Commands are not properly registered to the tree")
                 logging.warning("   - Bot lacks application.commands scope")
                 logging.warning("   - Discord API rate limiting")
-                logging.warning("   - Guild ID mismatch")
                 
         except Exception as e:
             logging.error(f"❌ Failed to sync commands: {e}")

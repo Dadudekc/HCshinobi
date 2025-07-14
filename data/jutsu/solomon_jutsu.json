@@ -1,5 +1,159 @@
 {
     "solomon_jutsu": {
+        // Elemental Jutsu (Base Types)
+        "Fire_Release_Great_Fireball": {
+            "name": "Fire Release: Great Fireball Jutsu",
+            "type": "Ninjutsu",
+            "element": "Fire",
+            "rank": "C",
+            "chakra_cost": 2,
+            "stamina_cost": 5,
+            "damage": 30,
+            "accuracy": 85,
+            "description": "30-ft cone, 5d8 fire damage (DEX save DC 16 for half)",
+            "effects": ["Burn", "Area"],
+            "phase_requirement": 1,
+            "save_dc": 16,
+            "save_type": "DEX"
+        },
+        "Fire_Release_Flame_Dragon": {
+            "name": "Fire Release: Flame Dragon Bomb",
+            "type": "Ninjutsu",
+            "element": "Fire",
+            "rank": "B",
+            "chakra_cost": 3,
+            "stamina_cost": 8,
+            "damage": 60,
+            "accuracy": 88,
+            "description": "Single target, 6d10 fire damage + Amaterasu ignition effect (burns each round, WIS save ends)",
+            "effects": ["Burn", "Piercing", "Amaterasu_Ignition"],
+            "phase_requirement": 2,
+            "save_dc": 18,
+            "save_type": "WIS"
+        },
+        "Earth_Release_Stone_Wall": {
+            "name": "Earth Release: Stone Wall Jutsu",
+            "type": "Ninjutsu",
+            "element": "Earth",
+            "rank": "C",
+            "chakra_cost": 2,
+            "stamina_cost": 5,
+            "damage": 0,
+            "accuracy": 100,
+            "description": "Create 10 ft. high wall of earth (AC +5 cover), lasts 1 minute",
+            "effects": ["Defense", "Cover", "Terrain"],
+            "phase_requirement": 1
+        },
+        "Lava_Release_Scorching_Wave": {
+            "name": "Lava Release: Scorching Lava Wave",
+            "type": "Kekkei Genkai",
+            "element": "Lava",
+            "rank": "A",
+            "chakra_cost": 4,
+            "stamina_cost": 10,
+            "damage": 80,
+            "accuracy": 85,
+            "description": "60 ft. line, 8d6 fire + 4d6 bludgeoning; ignites terrain, slows movement",
+            "effects": ["Burn", "Area", "Terrain", "Slow"],
+            "phase_requirement": 2,
+            "save_dc": 16,
+            "save_type": "DEX"
+        },
+        "Lava_Release_Magma_Cage": {
+            "name": "Lava Release: Magma Cage",
+            "type": "Kekkei Genkai",
+            "element": "Lava",
+            "rank": "A",
+            "chakra_cost": 3,
+            "stamina_cost": 8,
+            "damage": 40,
+            "accuracy": 90,
+            "description": "Target is encased in lava; STR save DC 18 to break free or take 4d10 fire per round",
+            "effects": ["Restrain", "Burn", "Damage_Over_Time"],
+            "phase_requirement": 3,
+            "save_dc": 18,
+            "save_type": "STR"
+        },
+        
+        // Bijū-Based Techniques
+        "Tailed_Beast_Bomb": {
+            "name": "Tailed Beast Bomb",
+            "type": "Bijū",
+            "element": "Force",
+            "rank": "S+",
+            "chakra_cost": 10,
+            "stamina_cost": 25,
+            "damage": 120,
+            "accuracy": 85,
+            "description": "60-ft radius sphere, 10d12 force/fire damage; DEX save DC 20 for half",
+            "effects": ["Force", "Burn", "Massive_Area"],
+            "phase_requirement": 4,
+            "save_dc": 20,
+            "save_type": "DEX",
+            "usage_limit": "1/long_rest"
+        },
+        "Volcanic_Core_Nova": {
+            "name": "Volcanic Core Nova",
+            "type": "Bijū",
+            "element": "Lava",
+            "rank": "S",
+            "chakra_cost": 12,
+            "stamina_cost": 30,
+            "damage": 100,
+            "accuracy": 80,
+            "description": "AoE eruption; all within 30 ft. take 10d10 fire, terrain becomes molten, DEX save DC 19",
+            "effects": ["Burn", "Area", "Terrain_Change"],
+            "phase_requirement": 4,
+            "save_dc": 19,
+            "save_type": "DEX"
+        },
+        "Enko_no_Okami": {
+            "name": "Enkō no Ōkami (Summon Lava Wolves)",
+            "type": "Kekkei Genkai",
+            "element": "Lava",
+            "rank": "S",
+            "chakra_cost": 8,
+            "stamina_cost": 20,
+            "damage": 60,
+            "accuracy": 90,
+            "description": "Summon 3d4 lava wolves (CR 5 each); wolves explode upon death for 5d6 fire; alpha wolf optional (costs 4 more)",
+            "effects": ["Summon", "Explosive", "Multiple"],
+            "phase_requirement": 3
+        },
+        
+        // Signature Techniques
+        "Eclipse_Fang_Severance": {
+            "name": "Eclipse Fang Severance",
+            "type": "Kekkei Genkai",
+            "element": "Conceptual",
+            "rank": "S++",
+            "chakra_cost": 10,
+            "stamina_cost": 25,
+            "damage": 150,
+            "accuracy": 95,
+            "description": "Target hit by phasing Adamantine chains must make STR + CON save (DC 20). On failure, the target is erased conceptually: body, chakra, and soul.",
+            "effects": ["Conceptual", "Soul", "Erase"],
+            "phase_requirement": 3,
+            "save_dc": 20,
+            "save_type": "STR_CON"
+        },
+        "Suppression_Chains": {
+            "name": "Suppression Chains (Kōkō no Kusari)",
+            "type": "Kekkei Genkai",
+            "element": "Sealing",
+            "rank": "S",
+            "chakra_cost": 6,
+            "stamina_cost": 15,
+            "damage": 30,
+            "accuracy": 95,
+            "description": "Conjures chains that suppress jutsu use. Target makes CON save DC 18 or becomes unable to use chakra-based techniques for 1 minute.",
+            "effects": ["Sealing", "Suppression", "Disable"],
+            "phase_requirement": 3,
+            "save_dc": 18,
+            "save_type": "CON"
+        },
+        
+        // Legacy jutsu for compatibility
         "Amaterasu": {
             "name": "Amaterasu",
             "type": "Kekkei Genkai",
@@ -15,7 +169,7 @@
         },
         "Kamui": {
             "name": "Kamui",
-            "type": "Kekkei Genkai", 
+            "type": "Kekkei Genkai",
             "element": "Space-Time",
             "rank": "S",
             "chakra_cost": 60,
@@ -37,19 +191,6 @@
             "accuracy": 90,
             "description": "Wolf Deity Susanoo with phase-shifted armor and Amaterasu weaponry. Integrates with Four-Tails chakra.",
             "effects": ["Armor", "Weapon", "Spiritual"],
-            "phase_requirement": 3
-        },
-        "Eclipse_Fang_Severance": {
-            "name": "Eclipse Fang Severance",
-            "type": "Kekkei Genkai",
-            "element": "Conceptual",
-            "rank": "S+",
-            "chakra_cost": 150,
-            "stamina_cost": 40,
-            "damage": 250,
-            "accuracy": 85,
-            "description": "Dimensional and conceptual severance that bypasses all defenses. Can erase concepts and sever soul connections.",
-            "effects": ["Piercing", "Conceptual", "Soul"],
             "phase_requirement": 3
         },
         "Yoton_Meteor": {
@@ -196,34 +337,116 @@
             "phase_requirement": 1
         }
     },
+    
     "phase_abilities": {
         "Phase 1: The Crimson Shadow": {
-            "description": "Solomon begins with Sharingan analysis and basic Katon techniques",
-            "jutsu_pool": ["Katon: Gōka Messhitsu", "Katon: Gōryūka no Jutsu", "Sharingan Genjutsu", "Adamantine Chakra-Forged Chains"],
-            "special_abilities": ["Sharingan Analysis", "Chakra Absorption"],
+            "description": "Solomon begins with Sharingan analysis and basic techniques",
+            "jutsu_pool": ["Fire Release: Great Fireball Jutsu", "Earth Release: Stone Wall Jutsu", "Sharingan Genjutsu", "Adamantine Chakra-Forged Chains"],
+            "special_abilities": ["Sharingan Analysis", "Chakra Absorption", "Eternal Mangekyō Sharingan"],
             "damage_multiplier": 1.0,
-            "defense_bonus": 0
+            "defense_bonus": 0,
+            "chakra_cost_modifier": 1.0,
+            "transformation_modes": []
         },
         "Phase 2: The Burning Revenant": {
-            "description": "Solomon activates Mangekyō Sharingan and unleashes Amaterasu",
-            "jutsu_pool": ["Amaterasu", "Kamui Phase", "Yōton: Maguma Hōkai", "Yōton: Ryūsei no Jutsu"],
-            "special_abilities": ["Amaterasu Mastery", "Kamui Intangibility", "Lava Release"],
+            "description": "Solomon activates Ōkami Sage Mode and unleashes Amaterasu",
+            "jutsu_pool": ["Amaterasu", "Fire Release: Flame Dragon Bomb", "Lava Release: Scorching Lava Wave", "Kamui"],
+            "special_abilities": ["Ōkami Sage Mode", "Amaterasu Mastery", "Kamui Intangibility", "Lava Release"],
             "damage_multiplier": 1.3,
-            "defense_bonus": 20
+            "defense_bonus": 20,
+            "chakra_cost_modifier": 0.9,
+            "transformation_modes": ["Ōkami Sage Mode"]
         },
         "Phase 3: The Exiled Flame": {
             "description": "Solomon summons his Susanoo and unleashes his full power",
-            "jutsu_pool": ["Susanoo: Ōkami no Yōsei", "Yōton: Enkō no Ōkami", "Kōkō no Kusari", "Eclipse Fang Severance"],
-            "special_abilities": ["Ōkami no Yōsei Susanoo", "Absolute Suppression", "Dimensional Severance"],
+            "jutsu_pool": ["Susanoo: Ōkami no Yōsei", "Lava Release: Magma Cage", "Kōkō no Kusari", "Eclipse Fang Severance"],
+            "special_abilities": ["Ōkami no Yōsei Susanoo", "Absolute Suppression", "Dimensional Severance", "Partial Tailed Beast Cloak"],
             "damage_multiplier": 1.6,
-            "defense_bonus": 40
+            "defense_bonus": 40,
+            "chakra_cost_modifier": 0.8,
+            "transformation_modes": ["Ōkami Sage Mode", "Partial Tailed Beast Cloak", "Susanoo"]
         },
         "Phase 4: The Ultimate Being": {
             "description": "Solomon becomes the ultimate being, unleashing his final form",
-            "jutsu_pool": ["Ōkami no Yōsei Susanoo: Final Incarnation", "Yōton: Enkō no Ōkami: Pack Release", "Summoning: Wolves of Kiba no Tōdai"],
-            "special_abilities": ["Living Armor Susanoo", "Volcanic Core Reactor", "Wolf Pack Summoning"],
+            "jutsu_pool": ["Tailed Beast Bomb", "Volcanic Core Nova", "Enkō no Ōkami", "Fusion Form"],
+            "special_abilities": ["Full Tailed Beast Cloak", "Volcanic Core Reactor", "Wolf Pack Summoning", "Fusion Form"],
             "damage_multiplier": 2.0,
-            "defense_bonus": 60
+            "defense_bonus": 60,
+            "chakra_cost_modifier": 0.7,
+            "transformation_modes": ["Ōkami Sage Mode", "Full Tailed Beast Cloak", "Susanoo", "Fusion Form"]
+        }
+    },
+    
+    "transformation_modes": {
+        "okami_sage_mode": {
+            "name": "Ōkami Sage Mode",
+            "activation": "Bonus Action",
+            "chakra_cost": 4,
+            "duration": "Until dismissed",
+            "effects": {
+                "ac_bonus": 2,
+                "wisdom_advantage": true,
+                "perception_bonus": 5,
+                "scent_tracking": true,
+                "intent_tracking": true
+            },
+            "description": "Heightened senses, instinctual combat, physical mastery, endless stamina"
+        },
+        "partial_tailed_beast_cloak": {
+            "name": "Partial Tailed Beast Cloak (Ver. 1)",
+            "activation": "Bonus Action",
+            "chakra_cost": 5,
+            "duration": "Until dismissed",
+            "effects": {
+                "strength_bonus": 2,
+                "dexterity_bonus": 2,
+                "constitution_bonus": 2,
+                "fire_resistance": true,
+                "regeneration": 10
+            },
+            "description": "Enhanced physical stats, fire resistance, regeneration"
+        },
+        "full_tailed_beast_cloak": {
+            "name": "Full Tailed Beast Cloak (Ver. 2)",
+            "activation": "Action",
+            "chakra_cost": 10,
+            "duration": "Until dismissed",
+            "effects": {
+                "strength_bonus": 4,
+                "dexterity_bonus": 4,
+                "constitution_bonus": 4,
+                "ac_bonus": 2,
+                "all_elemental_resistance": true,
+                "tailed_beast_bomb_access": true
+            },
+            "description": "Maximum physical enhancement, all elemental resistance, Tailed Beast Bomb access"
+        },
+        "susanoo": {
+            "name": "Susanoo (Ōkami no Yōsei)",
+            "activation": "Action",
+            "chakra_cost": 15,
+            "duration": "Until dismissed",
+            "effects": {
+                "construct_size": "50m",
+                "kamui_phase_armor": true,
+                "amaterasu_weapons": true,
+                "adamantine_chains": true,
+                "damage_bonus": 50
+            },
+            "description": "50m flaming wolf construct with Kamui-phase armor and Amaterasu weapons"
+        },
+        "fusion_form": {
+            "name": "Fusion Form (Hybrid Cloak + Sage + Susanoo)",
+            "activation": "Action",
+            "chakra_cost": 20,
+            "duration": "Until dismissed",
+            "effects": {
+                "all_transformation_traits": true,
+                "damage_bonus": 100,
+                "ac_bonus": 5,
+                "ultimate_form": true
+            },
+            "description": "Combines all transformation traits for highest-tier combat"
         }
     }
 } 

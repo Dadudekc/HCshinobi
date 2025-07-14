@@ -1,64 +1,105 @@
 {
     "id": "solomon",
-    "name": "Solomon - The Burning Revenant",
+    "name": "Solomon Uchiha",
     "clan": "Uchiha",
-    "titles": ["The Crimson Shadow", "The Burning Revenant", "The Exiled Flame", "Ōtsutsuki Slayer"],
-    "status": ["Rogue Shinobi", "Perfect Jinchūriki (Son Gokū)", "Wolf Sage (Apex Predator)"],
-    "affiliation": "None (Wanderer, Exile)",
+    "titles": ["The Crimson Shadow", "The Burning Revenant", "The Exiled Flame", "Ōtsutsuki Slayer", "Perfect Jinchūriki"],
+    "status": ["Exile", "Wanderer", "Perfect Jinchūriki (Son Gokū)", "Ōkami Sage"],
+    "affiliation": "Formerly Konohagakure, now Ronin",
     "residence": "The Borderlands",
-    "level": 70,
+    "level": 20,
     "exp": 0,
     "ryo": 50000,
-    "hp": 1500,
-    "chakra": 1000,
-    "stamina": 500,
-    "strength": 60,
-    "speed": 90,
-    "defense": 70,
-    "willpower": 85,
-    "chakra_control": 95,
-    "intelligence": 90,
-    "perception": 95,
-    "ninjutsu": 95,
-    "taijutsu": 75,
-    "genjutsu": 90,
-    "max_hp": 1500,
-    "max_chakra": 1000,
-    "max_stamina": 500,
-    "ocular_prowess": ["Sharingan", "Mangekyō Sharingan (Fang Pattern)", "Eternal Mangekyō Sharingan (Chain & Crescent Moon Motif)"],
+    "hp": 200,
+    "max_hp": 200,
+    "chakra": 44,
+    "max_chakra": 44,
+    "stamina": 100,
+    "max_stamina": 100,
+    "ability_scores": {
+        "strength": 16,
+        "dexterity": 20,
+        "constitution": 18,
+        "intelligence": 14,
+        "wisdom": 20,
+        "charisma": 12
+    },
+    "strength": 16,
+    "speed": 20,
+    "defense": 18,
+    "willpower": 20,
+    "chakra_control": 20,
+    "intelligence": 14,
+    "perception": 20,
+    "ninjutsu": 20,
+    "taijutsu": 16,
+    "genjutsu": 20,
+    "dojutsu": {
+        "eternal_mangekyo_sharingan": {
+            "activation": "Free Action",
+            "chakra_cost": 1,
+            "duration": "per minute",
+            "effects": ["Kamui", "Amaterasu", "DEX save advantage", "Enhanced visual tracking"]
+        }
+    },
+    "transformation_modes": {
+        "okami_sage_mode": {
+            "activation": "Bonus Action",
+            "chakra_cost": 4,
+            "effects": ["+2 AC", "WIS advantage", "Heightened perception", "Scent/intent tracking"]
+        },
+        "partial_tailed_beast_cloak": {
+            "activation": "Bonus Action", 
+            "chakra_cost": 5,
+            "effects": ["+2 STR/DEX/CON", "Fire resistance", "Regeneration (10 hp/round)"]
+        },
+        "full_tailed_beast_cloak": {
+            "activation": "Action",
+            "chakra_cost": 10,
+            "effects": ["+4 STR/DEX/CON", "+2 AC", "All elemental resistance", "Tailed Beast Bomb access"]
+        },
+        "susanoo": {
+            "activation": "Action",
+            "chakra_cost": 15,
+            "effects": ["50m flaming wolf construct", "Kamui-phase armor", "Amaterasu weapons", "Adamantine chains"]
+        },
+        "fusion_form": {
+            "activation": "Action",
+            "chakra_cost": 20,
+            "effects": ["All transformation traits combined", "Highest-tier combat form"]
+        }
+    },
+    "ocular_prowess": ["Sharingan", "Mangekyō Sharingan", "Eternal Mangekyō Sharingan"],
     "kekkei_genkai": ["Sharingan", "Mangekyō Sharingan", "Eternal Mangekyō Sharingan", "Lava Release (Yōton)"],
     "sage_mode": "Ōkami Sage Mode (Apex Predator - Heightened Senses, Instinctual Combat, Physical Mastery, Endless Stamina)",
     "jinchuriki": "Son Gokū (Four-Tails) - Perfect Bond/Partnership",
     "jutsu": [
-        "Amaterasu (Mastery - Shaping constructs/weapons, Range, Sealing Formulas, Consumes Chakra/Jutsu, Layering on Chains/Armor, Independent Burn)",
-        "Kamui (Mastery - Complete Intangibility, Flicker Phase Combat, Chain Phasing, Kamui Domain - Molten Ash Prison, Dimensional Shift/Ambush)",
-        "Susanoo (Ōkami no Yōsei - Wolf Deity, Phase-Shifted Armor, Amaterasu Weaponry, Chakra Chains, Four-Tails Integration, Dimensional Rending Claws)",
-        "Ōkami no Yōsei Susanoo: Final Incarnation (Living Armor Susanoo - Auto-Phase Defense, Amaterasu Flame Cloak, Chains of Dominion, Volcanic Core Reactor)",
-        "Eclipse Fang Severance (Dimensional/Conceptual Severance - Bypasses Defenses, Soul/Chakra Disjunction, Concept Erasure via Kōkō no Kusari)",
-        "Lava Release (Yōton - Shaping & Commanding Volcanic Phenomena)",
-        "Yōton: Ryūsei no Jutsu (Meteor Shower - Superheated Lava Projectiles)",
-        "Yōton: Maguma Hōkai (Volcanic Collapse - Creates Molten Lakes)",
-        "Yōton: Enkō no Ōkami (Blazing Wolf Pack - Molten Wolf Constructs, Explosive)",
-        "Yōton: Enkō no Ōkami: Pack Release (Autonomous Lava Wolves, Akuma Alpha - Howling Sovereign)",
-        "Kōkō no Kusari (Absolute Suppression Mode - Conceptual Binding, Ability Nullification, Spiritual Imprisonment, Perpetual Chakra Drain, Radiant Sealing Energy)",
-        "Summoning: Wolves of Kiba no Tōdai (Kaze no Kiba - Scouts, Tsuchi no Yaiba - War Wolves, Akuma - Alpha)",
-        "Adamantine Chakra-Forged Chains (Weapon & Binding, Chakra Absorbing/Replenishing, Phasing via Kamui)",
+        "Fire Release: Great Fireball Jutsu",
+        "Fire Release: Flame Dragon Bomb", 
+        "Earth Release: Stone Wall Jutsu",
+        "Lava Release: Scorching Lava Wave",
+        "Lava Release: Magma Cage",
+        "Tailed Beast Bomb",
+        "Volcanic Core Nova",
+        "Enkō no Ōkami (Summon Lava Wolves)",
+        "Eclipse Fang Severance",
+        "Suppression Chains (Kōkō no Kusari)",
+        "Amaterasu",
+        "Kamui",
+        "Susanoo: Ōkami no Yōsei",
+        "Yōton: Ryūsei no Jutsu",
+        "Yōton: Maguma Hōkai",
+        "Yōton: Enkō no Ōkami",
+        "Kōkō no Kusari",
+        "Summoning: Wolves of Kiba no Tōdai",
+        "Ōkami no Yōsei Susanoo: Final Incarnation",
+        "Yōton: Enkō no Ōkami: Pack Release",
+        "Adamantine Chakra-Forged Chains",
         "Katon: Gōka Messhitsu",
         "Katon: Gōryūka no Jutsu",
-        "Katon: Hōsenka Tsumabeni",
-        "Magen: Kyō Tenchi-ten",
-        "Sharingan Genjutsu",
-        "Kamui Phase",
-        "Amaterasu",
-        "Yōton: Maguma Hōkai (Magma Eruption - Area Denial)",
-        "Yōton: Ryūsei no Jutsu (Meteor Shower - Ranged Assault)",
-        "Yōton: Enkō no Ōkami (Pack Release - Lava Wolves)",
-        "Adamantine Chakra-Forged Chains (Weapon & Binding)",
-        "Kōkō no Kusari (Absolute Suppression Mode)",
-        "Susanoo: Ōkami no Yōsei (Apex Phasing Armor)"
+        "Sharingan Genjutsu"
     ],
     "equipment": {
-         "weapon_of_choice": "Adamantine Chakra-Forged Chains (capable of absorbing chakra and replenishing his reserves, Kamui Phasing)"
+        "weapon_of_choice": "Adamantine Chakra-Forged Chains (capable of absorbing chakra and replenishing his reserves, Kamui Phasing)"
     },
     "inventory": {
         "weapons": ["Adamantine Chakra-Forged Chains"],
@@ -71,7 +112,7 @@
         {
             "name": "Regeneration",
             "duration": 999,
-            "potency": 0.04, 
+            "potency": 0.04,
             "effect_type": "end_turn",
             "description": "Constantly regenerating health due to enhanced vitality.",
             "stats": {},
@@ -108,14 +149,14 @@
     "status_conditions": [],
     "buffs": [],
     "debuffs": [],
-    "resistances": ["Genjutsu Immune", "Mind Control Resistant", "Soul Anchored (Self-Sealed)"],
+    "resistances": ["Genjutsu Immune", "Mind Control Resistant", "Soul Anchored (Self-Sealed)", "Fire Resistance"],
     "wins": 1,
     "losses": 0,
     "draws": 0,
     "completed_missions": [],
     "core_traits": [
         "Arrogant",
-        "Calculating",
+        "Calculating", 
         "Powerful",
         "Ruthless",
         "Observant",
@@ -126,7 +167,8 @@
         "Unparalleled Adaptation",
         "Unbreakable Will",
         "Predatory Instinct",
-        "Self-Restrained"
+        "Self-Restrained",
+        "Lawful Neutral"
     ],
     "appearance_summary": "Solomon stands at 5'9\", with a lean but densely muscled build born from years of intense physical conditioning. His hair is dark, kept in a medium length that falls loosely around his sharp features, giving him an untamed edge. His skin is pale, contrasted by the faint heat shimmer that seems to ripple from his body when his chakra stirs. His typical attire consists of a dark green cloak, weathered from years on the road, worn over black, tactical shinobi gear optimized for mobility and protection. The Adamantine chains coiled around his arms glow faintly with white sealing script, pulsing white when dormant, but igniting to white-hot intensity when absorbing chakra. His eyes are black when dormant, shifting to crimson (Sharingan). When his Mangekyō is activated, his gaze burns with a molten crimson hue, the tomoe replaced by sharp fang-like patterns swirling into a jagged spiral. His Eternal Mangekyō reveals the thickened chain motif circling his iris, representing self-restraint and the burden of power, with a crescent moon scar across his gaze marking the night he severed his past.",
     "backstory_summary": "Born Uchiha, family dissented against Konoha elders' ambitions and were executed by masked ANBU when Solomon was 9. Buried beneath his father's corpse, he survived alone in the wild for months, developing calculation and instinct. At 12, found and trained by Wolf Sages in discipline, chakra control, survival, and their doctrine of balance. Awakened Mangekyō (Amaterasu Left, Kamui Right) after his masters were killed by warlords, enacting vengeance with cold wrath. Later encountered Son Gokū (Four-Tails), freed him from captors, and became his perfect Jinchūriki through mutual consent, forging a partnership. Forged Adamantine Chains for control (of self and power), trained in volcanic regions, evolving Sage Mode. Confronted and defeated his brother Raizen (raised by Konoha), taking his eyes to achieve the Eternal Mangekyō Sharingan out of necessity/remembrance, not for power. Now wanders the Borderlands as a self-exiled law unto himself, known as the Burning Revenant.",
@@ -136,44 +178,78 @@
         {
             "name": "Phase 1: The Crimson Shadow",
             "hp_threshold": 1.0,
-            "description": "Solomon begins with Sharingan analysis and basic Katon techniques",
-            "jutsu_pool": ["Katon: Gōka Messhitsu", "Katon: Gōryūka no Jutsu", "Sharingan Genjutsu", "Adamantine Chakra-Forged Chains"],
-            "special_abilities": ["Sharingan Analysis", "Chakra Absorption"]
+            "description": "Solomon begins with Sharingan analysis and basic techniques",
+            "jutsu_pool": ["Fire Release: Great Fireball Jutsu", "Earth Release: Stone Wall Jutsu", "Sharingan Genjutsu", "Adamantine Chakra-Forged Chains"],
+            "special_abilities": ["Sharingan Analysis", "Chakra Absorption", "Eternal Mangekyō Sharingan"],
+            "damage_multiplier": 1.0,
+            "defense_bonus": 0,
+            "chakra_cost_modifier": 1.0
         },
         {
-            "name": "Phase 2: The Burning Revenant", 
+            "name": "Phase 2: The Burning Revenant",
             "hp_threshold": 0.7,
-            "description": "Solomon activates Mangekyō Sharingan and unleashes Amaterasu",
-            "jutsu_pool": ["Amaterasu", "Kamui Phase", "Yōton: Maguma Hōkai", "Yōton: Ryūsei no Jutsu"],
-            "special_abilities": ["Amaterasu Mastery", "Kamui Intangibility", "Lava Release"]
+            "description": "Solomon activates Ōkami Sage Mode and unleashes Amaterasu",
+            "jutsu_pool": ["Amaterasu", "Fire Release: Flame Dragon Bomb", "Lava Release: Scorching Lava Wave", "Kamui"],
+            "special_abilities": ["Ōkami Sage Mode", "Amaterasu Mastery", "Kamui Intangibility", "Lava Release"],
+            "damage_multiplier": 1.3,
+            "defense_bonus": 20,
+            "chakra_cost_modifier": 0.9
         },
         {
             "name": "Phase 3: The Exiled Flame",
             "hp_threshold": 0.4,
             "description": "Solomon summons his Susanoo and unleashes his full power",
-            "jutsu_pool": ["Susanoo: Ōkami no Yōsei", "Yōton: Enkō no Ōkami", "Kōkō no Kusari", "Eclipse Fang Severance"],
-            "special_abilities": ["Ōkami no Yōsei Susanoo", "Absolute Suppression", "Dimensional Severance"]
+            "jutsu_pool": ["Susanoo: Ōkami no Yōsei", "Lava Release: Magma Cage", "Kōkō no Kusari", "Eclipse Fang Severance"],
+            "special_abilities": ["Ōkami no Yōsei Susanoo", "Absolute Suppression", "Dimensional Severance", "Partial Tailed Beast Cloak"],
+            "damage_multiplier": 1.6,
+            "defense_bonus": 40,
+            "chakra_cost_modifier": 0.8
         },
         {
             "name": "Phase 4: The Ultimate Being",
             "hp_threshold": 0.1,
             "description": "Solomon becomes the ultimate being, unleashing his final form",
-            "jutsu_pool": ["Ōkami no Yōsei Susanoo: Final Incarnation", "Yōton: Enkō no Ōkami: Pack Release", "Summoning: Wolves of Kiba no Tōdai"],
-            "special_abilities": ["Living Armor Susanoo", "Volcanic Core Reactor", "Wolf Pack Summoning"]
+            "jutsu_pool": ["Tailed Beast Bomb", "Volcanic Core Nova", "Enkō no Ōkami", "Fusion Form"],
+            "special_abilities": ["Full Tailed Beast Cloak", "Volcanic Core Reactor", "Wolf Pack Summoning", "Fusion Form"],
+            "damage_multiplier": 2.0,
+            "defense_bonus": 60,
+            "chakra_cost_modifier": 0.7
         }
     ],
     "boss_rewards": {
         "exp": 10000,
         "ryo": 50000,
         "tokens": 100,
-        "special_items": ["Solomon's Chain Fragment", "Burning Revenant's Cloak", "Eternal Mangekyō Shard"],
-        "achievements": ["Solomon Slayer", "The Ultimate Challenge", "Burning Revenant Defeated"],
-        "titles": ["Solomon's Equal", "The Unbreakable", "Ultimate Warrior"]
+        "special_items": ["Solomon's Chain Fragment", "Burning Revenant's Cloak", "Eternal Mangekyō Shard", "Four-Tails Chakra Crystal"],
+        "achievements": ["Solomon Slayer", "The Ultimate Challenge", "Burning Revenant Defeated", "Perfect Jinchūriki Challenger"],
+        "titles": ["Solomon's Equal", "The Unbreakable", "Ultimate Warrior", "Four-Tails Challenger"]
     },
     "boss_requirements": {
-        "min_level": 50,
+        "min_level": 15,
         "required_achievements": ["Master of Elements", "Battle Hardened"],
         "required_items": ["Sage Mode Mastery", "Advanced Jutsu Knowledge"],
         "cooldown_hours": 168
+    },
+    "battle_mechanics": {
+        "chakra_pool": 44,
+        "chakra_recovery": "Full on long rest; partial via absorption/sealing chains or Sage meditation",
+        "passive_perception": 26,
+        "movement_speed": 40,
+        "saving_throws": {
+            "strength": 3,
+            "dexterity": 11,
+            "constitution": 4,
+            "intelligence": 2,
+            "wisdom": 11,
+            "charisma": 1
+        },
+        "skills": {
+            "acrobatics": 11,
+            "insight": 11,
+            "perception": 11,
+            "stealth": 11,
+            "sleight_of_hand": 11,
+            "chakra_control": 16
+        }
     }
 } 
