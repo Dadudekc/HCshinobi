@@ -145,7 +145,7 @@ def mock_interaction():
 - State transitions
 - Error propagation
 
-## 🔍 Best practice-projectss
+## 🔍 Best practice-projects-projectss
 
 1. **Test Organization**
    - Group related tests
